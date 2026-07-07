@@ -1,0 +1,62 @@
+/**
+ * ============================================================
+ * Strip Map Ruas Jalan — Custom Styles
+ * ============================================================
+ * TailwindCSS handles most styling via CDN.
+ * This file is for custom additions only.
+ */
+
+/* Smooth transitions for strip map bars */
+[class*="bg-gradient-to-r"] {
+    transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hide elements with x-cloak until Alpine.js initializes */
+[x-cloak] {
+    display: none !important;
+}
+
+/* Custom scrollbar for tables */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Animate strip map segments on load */
+@keyframes stripGrow {
+    from {
+        width: 0%;
+    }
+}
+
+.strip-animate {
+    animation: stripGrow 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Print styles */
+@media print {
+    nav, footer, button, a[href*="create"], a[href*="edit"], a[href*="delete"] {
+        display: none !important;
+    }
+
+    .shadow-sm, .shadow-md {
+        box-shadow: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+}
