@@ -494,7 +494,7 @@ function ruasDanStripmapForm() {
 
             if (!this.isReadyToSubmit) {
                 event.preventDefault();
-                alert('Terdapat data yang tidak valid. Periksa form.');
+                showAlert('Terdapat data yang tidak valid. Periksa form.', 'warning', 'Validasi Gagal');
                 return false;
             }
             return true;

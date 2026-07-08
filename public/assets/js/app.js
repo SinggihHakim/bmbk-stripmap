@@ -45,12 +45,46 @@ function formatNumber(num, decimals = 0) {
 }
 
 /**
- * Konfirmasi hapus dengan dialog
- * @param {string} message
- * @returns {boolean}
+ * Konfirmasi hapus dengan SweetAlert2
+ * Menggunakan async karena SweetAlert2 berbasis Promise
+ * @param {Event} event - Click event
+ * @param {string} url - URL tujuan jika dikonfirmasi
+ * @param {string} message - Pesan konfirmasi
  */
-function confirmDelete(message) {
-    return confirm(message || 'Yakin ingin menghapus data ini?');
+function confirmDelete(event, url, message) {
+    event.preventDefault();
+    Swal.fire({
+        title: 'Konfirmasi Hapus',
+        text: message || 'Yakin ingin menghapus data ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+        reverseButtons: true
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}
+
+/**
+ * Tampilkan alert dengan SweetAlert2
+ * Digunakan untuk validasi form dan notifikasi umum
+ * @param {string} message - Pesan yang ditampilkan
+ * @param {string} icon - Tipe icon: 'success', 'error', 'warning', 'info', 'question'
+ * @param {string} title - Judul alert
+ */
+function showAlert(message, icon, title) {
+    Swal.fire({
+        title: title || 'Perhatian',
+        text: message,
+        icon: icon || 'warning',
+        confirmButtonColor: '#3b82f6',
+        confirmButtonText: 'OK'
+    });
 }
 
 /**

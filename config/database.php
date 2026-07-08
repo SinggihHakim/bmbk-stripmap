@@ -12,6 +12,6 @@ return [
     'port'    => 3306,
     'dbname'  => 'stripmap_db',
     'user'    => 'root',
-    'pass'    => '',
+    'pass'    => '210505',
     'charset' => 'utf8mb4',
 ];

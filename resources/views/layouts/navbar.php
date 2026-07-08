@@ -7,16 +7,15 @@
 
             <!-- Logo / Brand -->
             <a href="<?= base_url() ?>" class="flex items-center gap-3 group">
-                <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                    </svg>
+                <img src="<?= base_url('assets/img/logo.png') ?>" alt="Logo" class="h-10 w-auto object-contain">
+                <div class="flex flex-col justify-center hidden sm:flex">
+                    <span class="text-base font-bold text-gray-900 leading-tight tracking-tight">Stripmap</span>
+                    <span class="text-xs font-medium text-gray-500 leading-tight">Bina Marga dan Bina Kontruksi Provinsi Lampung</span>
                 </div>
-                <span class="text-lg font-bold text-gray-800">Strip Map</span>
             </a>
 
             <!-- Navigation Links -->
-            <div class="flex items-center gap-1">
+            <div class="flex items-center gap-6">
                 <?php
                 $currentUrl = trim($_GET['url'] ?? '', '/');
                 $navItems = [
@@ -35,10 +34,11 @@
                     }
                     ?>
                     <a href="<?= base_url($nav['url']) ?>"
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                       class="relative py-2 px-1 text-sm font-medium transition-colors group
                               <?= $isActive
-                                  ? 'bg-blue-50 text-blue-700'
-                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' ?>">
+                                  ? 'text-blue-700 after:scale-x-100'
+                                  : 'text-gray-500 hover:text-blue-900 after:scale-x-0 hover:after:scale-x-100' ?>
+                              after:content-[''] after:absolute after:left-0 after:-bottom-1 after:w-full after:h-0.5 after:bg-blue-600 after:transition-transform after:duration-300 after:origin-left">
                         <?= $nav['label'] ?>
                     </a>
                 <?php endforeach; ?>
