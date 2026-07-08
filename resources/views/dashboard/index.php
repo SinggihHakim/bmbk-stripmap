@@ -11,48 +11,68 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-        <!-- Total Ruas -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- Card 1: Total Ruas Jalan -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                </div>
+                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-bold tracking-wide">
+                    +3 bulan ini
+                </span>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900"><?= $totalRuas ?? 24 ?></h3>
+            <p class="text-[13px] font-medium text-gray-500 mt-1">Total Ruas Jalan</p>
+        </div>
+
+        <!-- Card 2: Total Panjang Jalan -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            <div class="mb-4">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
                     </svg>
                 </div>
-                <div>
-                    <p class="text-sm font-medium text-gray-500">Total Ruas Jalan</p>
-                    <p class="text-3xl font-bold text-gray-900"><?= $totalRuas ?? 0 ?></p>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900"><?= $totalPanjang ?? '156.8' ?> <span class="text-sm font-semibold text-gray-400">km</span></h3>
+            <p class="text-[13px] font-medium text-gray-500 mt-1">Total Panjang Jalan</p>
+        </div>
+
+        <!-- Card 3: Kondisi Baik -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            <div class="mb-4">
+                <div class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                 </div>
+            </div>
+            <h3 class="text-3xl font-bold text-gray-900"><?= $kondisiBaik ?? 68 ?>%</h3>
+            <p class="text-[13px] font-medium text-gray-500 mt-1">Kondisi Baik</p>
+            <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5">
+                <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $kondisiBaik ?? 68 ?>%"></div>
             </div>
         </div>
 
-        <!-- Quick Action: Tambah Ruas -->
-        <a href="<?= base_url('ruas/create') ?>" class="bg-white rounded-xl shadow-sm border border-gray-200 border-dashed p-6 hover:shadow-md hover:border-blue-300 transition-all group flex items-center gap-4">
-            <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-xl flex items-center justify-center transition-colors">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                </svg>
+        <!-- Card 4: Rusak Berat -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+            <div class="mb-4">
+                <div class="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
             </div>
-            <div>
-                <p class="text-sm font-medium text-gray-900 group-hover:text-blue-700 transition-colors">Tambah Ruas Baru</p>
-                <p class="text-xs text-gray-500">Klik untuk menambahkan</p>
+            <h3 class="text-3xl font-bold text-gray-900"><?= $rusakBerat ?? 12 ?>%</h3>
+            <p class="text-[13px] font-medium text-gray-500 mt-1">Rusak Berat</p>
+            <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5">
+                <div class="bg-red-500 h-1.5 rounded-full" style="width: <?= $rusakBerat ?? 12 ?>%"></div>
             </div>
-        </a>
-
-        <!-- Quick Action: Lihat Semua -->
-        <a href="<?= base_url('ruas') ?>" class="bg-white rounded-xl shadow-sm border border-gray-200 border-dashed p-6 hover:shadow-md hover:border-blue-300 transition-all group flex items-center gap-4">
-            <div class="w-12 h-12 bg-gray-100 group-hover:bg-blue-100 rounded-xl flex items-center justify-center transition-colors">
-                <svg class="w-6 h-6 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                </svg>
-            </div>
-            <div>
-                <p class="text-sm font-medium text-gray-900 group-hover:text-blue-700 transition-colors">Lihat Semua Ruas</p>
-                <p class="text-xs text-gray-500">Kelola data ruas jalan</p>
-            </div>
-        </a>
+        </div>
 
     </div>
 
@@ -105,7 +125,7 @@
                                     Edit
                                 </a>
                                 <a href="<?= base_url('ruas/delete/' . $ruas['id']) ?>"
-                                   onclick="return confirm('Yakin ingin menghapus ruas ini? Semua data strip map terkait juga akan dihapus.')"
+                                   onclick="confirmDelete(event, this.href, 'Yakin ingin menghapus ruas ini? Semua data strip map terkait juga akan dihapus.')"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
                                    title="Hapus Ruas">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

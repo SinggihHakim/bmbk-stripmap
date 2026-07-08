@@ -455,7 +455,7 @@ function stripmapForm() {
 
             if (!this.isFormValid) {
                 event.preventDefault();
-                alert('Terdapat data yang tidak valid. Periksa pesan error!');
+                showAlert('Terdapat data yang tidak valid. Periksa pesan error!', 'warning', 'Validasi Gagal');
                 return false;
             }
             return true;
