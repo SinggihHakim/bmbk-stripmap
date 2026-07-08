@@ -60,10 +60,10 @@
                             <template x-for="(row, index) in rows" :key="row.id">
                                 <tr class="border-b hover:bg-gray-50">
                                     <td class="p-2">
-                                        <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @input="calculateRow(row)" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                        <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow(row)" @input="onStaInput($event, row, 'awal')" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                                     </td>
                                     <td class="p-2">
-                                        <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @input="calculateRow(row)" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                                        <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow(row)" @input="onStaInput($event, row, 'akhir')" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                                     </td>
                                     <td class="p-2">
                                         <div class="font-mono font-semibold px-2" :class="row.error ? 'text-red-600' : 'text-gray-700'" x-text="row.panjang > 0 ? formatNumber(row.panjang) : '-'"></div>
@@ -363,6 +363,64 @@ function stripmapForm() {
             return active.length > 0 && active.every(row => row.isValid);
         },
 
+        formatStaValue(val) {
+            if (!val) return '';
+            val = val.toString().trim().replace(',', '.');
+            
+            let totalMeters = 0;
+            if (val.includes('+')) {
+                const parts = val.split('+');
+                const km = parseFloat(parts[0]) || 0;
+                const m = parseFloat(parts[1]) || 0;
+                totalMeters = km * 1000 + m;
+            } else {
+                const num = parseFloat(val);
+                if (isNaN(num)) return val;
+                
+                if (val.includes('.')) {
+                    totalMeters = num * 1000;
+                } else {
+                    if (num < 10) {
+                        totalMeters = num * 1000;
+                    } else {
+                        totalMeters = num;
+                    }
+                }
+            }
+            
+            const km = Math.floor(totalMeters / 1000);
+            const m = Math.round(totalMeters % 1000);
+            const mStr = String(m).padStart(3, '0');
+            return `${km}+${mStr}`;
+        },
+
+        onStaInput(event, row, field) {
+            let val = event.target.value;
+            
+            if (event.inputType && event.inputType.startsWith('delete')) {
+                if (field === 'awal') {
+                    row.staAwal = val;
+                } else {
+                    row.staAkhir = val;
+                }
+                this.calculateRow(row);
+                return;
+            }
+            
+            val = val.replace(/[^0-9+]/g, '');
+            
+            if (val.length === 1 && /^\d$/.test(val)) {
+                val = val + '+';
+            }
+            
+            if (field === 'awal') {
+                row.staAwal = val;
+            } else {
+                row.staAkhir = val;
+            }
+            this.calculateRow(row);
+        },
+
         formatNumber(num) {
             return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num);
         },
@@ -384,8 +442,7 @@ function stripmapForm() {
             const active = conditions.filter(c => c.value > 0);
 
             return active.map((c, idx) => {
-                const nextColor = idx < active.length - 1 ? active[idx + 1].color : c.color;
-                c.bgStyle = `background: linear-gradient(to right, ${c.color} 60%, ${nextColor} 100%)`;
+                c.bgStyle = `background-color: ${c.color}`;
                 return c;
             });
         },

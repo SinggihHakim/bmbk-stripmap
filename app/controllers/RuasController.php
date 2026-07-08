@@ -98,9 +98,14 @@ class RuasController
             return;
         }
 
+        require_once BASE_PATH . '/app/services/StripmapService.php';
+        $stripmapService = new StripmapService();
+        $stripmaps = $stripmapService->getByRuasId($id);
+
         $data = [
-            'title' => 'Edit Ruas Jalan',
-            'ruas'  => $ruas,
+            'title'     => 'Edit Ruas Jalan',
+            'ruas'      => $ruas,
+            'stripmaps' => $stripmaps,
         ];
         view('layouts.app', array_merge($data, ['content' => 'ruas.form']));
     }
@@ -113,11 +118,42 @@ class RuasController
         $result = $this->service->update($id, $_POST);
 
         if ($result['success']) {
-            flash('success', $result['message']);
+            require_once BASE_PATH . '/app/services/StripmapService.php';
+            $stripmapService = new StripmapService();
+
+            // Hapus segmen lama terlebih dahulu untuk digantikan dengan baris yang baru disubmit
+            $stripmapService->deleteByRuasId($id);
+
+            if (isset($_POST['rows']) && is_array($_POST['rows'])) {
+                // Filter baris kosong
+                $rows = array_filter($_POST['rows'], function($row) {
+                    return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
+                });
+
+                if (!empty($rows)) {
+                    $stripmapResult = $stripmapService->batchCreate($id, array_values($rows));
+
+                    if (!$stripmapResult['success']) {
+                        flash('error', "Ruas berhasil diperbarui, tetapi gagal menyimpan strip map: " . $stripmapResult['message']);
+                        $_SESSION['old_rows'] = $_POST['rows'];
+                        redirect(base_url('ruas/edit/' . $id));
+                        return;
+                    }
+                }
+            }
+
+            // Sinkronisasi STA & panjang ruas dari data stripmap
+            $this->service->syncStaFromStripmap($id);
+
+            flash('success', 'Data ruas jalan dan strip map berhasil diperbarui.');
+            redirect(base_url('ruas'));
         } else {
             flash('error', $result['message']);
+            if (isset($_POST['rows'])) {
+                $_SESSION['old_rows'] = $_POST['rows'];
+            }
+            redirect(base_url('ruas/edit/' . $id));
         }
-        redirect(base_url('ruas'));
     }
 
     /**

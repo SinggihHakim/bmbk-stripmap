@@ -64,8 +64,7 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: DATA STRIP MAP (Hanya untuk mode Create) -->
-            <?php if (!$isEdit): ?>
+            <!-- SECTION 2: DATA STRIP MAP (Kondisi Jalan) -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
                     <div>
@@ -94,10 +93,10 @@
                                 <template x-for="(row, index) in rows" :key="row.id">
                                     <tr class="border-b hover:bg-gray-50">
                                         <td class="p-2">
-                                            <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @input="calculateRow(row)" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow(row)" @input="onStaInput($event, row, 'awal')" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         </td>
                                         <td class="p-2">
-                                            <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @input="calculateRow(row)" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                            <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow(row)" @input="onStaInput($event, row, 'akhir')" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                         </td>
                                         <td class="p-2">
                                             <div class="font-mono font-semibold px-2" :class="row.error ? 'text-red-600' : 'text-gray-700'" x-text="row.panjang > 0 ? formatNumber(row.panjang) : '-'"></div>
@@ -185,7 +184,6 @@
                     </div>
                 </div>
             </div>
-            <?php endif; ?>
 
             <!-- Submit Button -->
             <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-end gap-3 sticky bottom-4 z-10">
@@ -215,40 +213,64 @@ function ruasDanStripmapForm() {
     const isEdit = <?= $isEdit ? 'true' : 'false' ?>;
     let initialRows = [];
 
-    // Jika mode create
-    <?php if (!$isEdit): ?>
-        <?php if ($oldRows): ?>
-            // Bila sebelumnya ada input gagal validasi
-            initialRows = <?= json_encode(array_values($oldRows)) ?>;
-            initialRows = initialRows.map((r, idx) => ({
-                id: Date.now() + idx,
-                staAwal: r.sta_awal,
-                staAkhir: r.sta_akhir,
+    <?php if ($oldRows): ?>
+        // Bila sebelumnya ada input gagal validasi
+        initialRows = <?= json_encode(array_values($oldRows)) ?>;
+        initialRows = initialRows.map((r, idx) => ({
+            id: Date.now() + idx,
+            staAwal: r.sta_awal || '',
+            staAkhir: r.sta_akhir || '',
+            panjang: 0,
+            baik: r.baik !== '' ? parseFloat(r.baik) : '',
+            sedang: r.sedang !== '' ? parseFloat(r.sedang) : '',
+            rusakRingan: r.rusak_ringan !== '' ? parseFloat(r.rusak_ringan) : '',
+            rusakBerat: r.rusak_berat !== '' ? parseFloat(r.rusak_berat) : '',
+            error: '',
+            isValid: false
+        }));
+    <?php elseif ($isEdit && !empty($stripmaps)): ?>
+        // Bila mode edit dan data strip map ada di database
+        <?php
+            $formattedStripmaps = array_map(function($sm) {
+                return [
+                    'sta_awal'     => meter_to_sta($sm['sta_awal']),
+                    'sta_akhir'    => meter_to_sta($sm['sta_akhir']),
+                    'baik'         => (float)$sm['baik'],
+                    'sedang'       => (float)$sm['sedang'],
+                    'rusak_ringan' => (float)$sm['rusak_ringan'],
+                    'rusak_berat'  => (float)$sm['rusak_berat'],
+                ];
+            }, $stripmaps);
+        ?>
+        initialRows = <?= json_encode($formattedStripmaps) ?>;
+        initialRows = initialRows.map((r, idx) => ({
+            id: Date.now() + idx,
+            staAwal: r.sta_awal,
+            staAkhir: r.sta_akhir,
+            panjang: 0,
+            baik: r.baik,
+            sedang: r.sedang,
+            rusakRingan: r.rusak_ringan,
+            rusakBerat: r.rusak_berat,
+            error: '',
+            isValid: false
+        }));
+    <?php else: ?>
+        // Default 3 baris kosong jika create baru
+        for(let i=0; i<3; i++) {
+            initialRows.push({
+                id: Date.now() + i,
+                staAwal: '',
+                staAkhir: '',
                 panjang: 0,
-                baik: parseFloat(r.baik) || 0,
-                sedang: parseFloat(r.sedang) || 0,
-                rusakRingan: parseFloat(r.rusak_ringan) || 0,
-                rusakBerat: parseFloat(r.rusak_berat) || 0,
+                baik: '',
+                sedang: '',
+                rusakRingan: '',
+                rusakBerat: '',
                 error: '',
                 isValid: false
-            }));
-        <?php else: ?>
-            // Default 3 baris
-            for(let i=0; i<3; i++) {
-                initialRows.push({
-                    id: Date.now() + i,
-                    staAwal: '',
-                    staAkhir: '',
-                    panjang: 0,
-                    baik: '',
-                    sedang: '',
-                    rusakRingan: '',
-                    rusakBerat: '',
-                    error: '',
-                    isValid: false
-                });
-            }
-        <?php endif; ?>
+            });
+        }
     <?php endif; ?>
 
     return {
@@ -257,9 +279,7 @@ function ruasDanStripmapForm() {
         rows: initialRows,
 
         init() {
-            if(!isEdit) {
-                this.rows.forEach(row => this.calculateRow(row));
-            }
+            this.rows.forEach(row => this.calculateRow(row));
         },
 
         // --- RUAS LOGIC ---
@@ -368,13 +388,69 @@ function ruasDanStripmapForm() {
 
         // Button submit disabled/enabled rules
         get isReadyToSubmit() {
-            if (isEdit) return true; // kalau edit, nggak ngurusin stripmap form bawah
-
             // Cek stripmap, kalau ada yg nanggung error gak boleh disubmit
             if (this.formErrors.length > 0) return false;
 
             // Boleh submit meskipun activeRows 0, tapi kalau ada activeRow dia harus valid semua
             return true;
+        },
+
+        formatStaValue(val) {
+            if (!val) return '';
+            val = val.toString().trim().replace(',', '.');
+            
+            let totalMeters = 0;
+            if (val.includes('+')) {
+                const parts = val.split('+');
+                const km = parseFloat(parts[0]) || 0;
+                const m = parseFloat(parts[1]) || 0;
+                totalMeters = km * 1000 + m;
+            } else {
+                const num = parseFloat(val);
+                if (isNaN(num)) return val;
+                
+                if (val.includes('.')) {
+                    totalMeters = num * 1000;
+                } else {
+                    if (num < 10) {
+                        totalMeters = num * 1000;
+                    } else {
+                        totalMeters = num;
+                    }
+                }
+            }
+            
+            const km = Math.floor(totalMeters / 1000);
+            const m = Math.round(totalMeters % 1000);
+            const mStr = String(m).padStart(3, '0');
+            return `${km}+${mStr}`;
+        },
+
+        onStaInput(event, row, field) {
+            let val = event.target.value;
+            
+            if (event.inputType && event.inputType.startsWith('delete')) {
+                if (field === 'awal') {
+                    row.staAwal = val;
+                } else {
+                    row.staAkhir = val;
+                }
+                this.calculateRow(row);
+                return;
+            }
+            
+            val = val.replace(/[^0-9+]/g, '');
+            
+            if (val.length === 1 && /^\d$/.test(val)) {
+                val = val + '+';
+            }
+            
+            if (field === 'awal') {
+                row.staAwal = val;
+            } else {
+                row.staAkhir = val;
+            }
+            this.calculateRow(row);
         },
 
         formatNumber(num) {
@@ -398,27 +474,23 @@ function ruasDanStripmapForm() {
             const active = conditions.filter(c => c.value > 0);
 
             return active.map((c, idx) => {
-                const nextColor = idx < active.length - 1 ? active[idx + 1].color : c.color;
-                c.bgStyle = `background: linear-gradient(to right, ${c.color} 60%, ${nextColor} 100%)`;
+                c.bgStyle = `background-color: ${c.color}`;
                 return c;
             });
         },
 
         validateForm(event) {
-            // hapus baris yang kosong sebelum submit beneran
-            if (!isEdit) {
-                // hapus input yg benar2 kosong agar tidak ikut dikirim jadi $_POST
-                const inputs = event.target.querySelectorAll('input');
-                inputs.forEach(input => {
-                    const rowNameMatch = input.name.match(/rows\[(\d+)\]/);
-                    if (rowNameMatch) {
-                        const index = parseInt(rowNameMatch[1]);
-                        if (this.isRowEmpty(this.rows[index])) {
-                            input.disabled = true; // prevent submit
-                        }
+            // hapus input yg benar2 kosong agar tidak ikut dikirim jadi $_POST
+            const inputs = event.target.querySelectorAll('input');
+            inputs.forEach(input => {
+                const rowNameMatch = input.name.match(/rows\[(\d+)\]/);
+                if (rowNameMatch) {
+                    const index = parseInt(rowNameMatch[1]);
+                    if (this.isRowEmpty(this.rows[index])) {
+                        input.disabled = true; // prevent submit
                     }
-                });
-            }
+                }
+            });
 
             if (!this.isReadyToSubmit) {
                 event.preventDefault();

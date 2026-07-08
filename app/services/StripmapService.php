@@ -161,6 +161,14 @@ class StripmapService
     }
 
     /**
+     * Hapus semua stripmap berdasarkan ruas_id
+     */
+    public function deleteByRuasId(int $ruasId): bool
+    {
+        return $this->model->deleteByRuasId($ruasId);
+    }
+
+    /**
      * Validasi input stripmap
      */
     private function validate(array $input, int $ruasId): array

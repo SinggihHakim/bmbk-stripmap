@@ -99,6 +99,15 @@ class Stripmap
     }
 
     /**
+     * Hapus semua stripmap berdasarkan ruas_id
+     */
+    public function deleteByRuasId(int $ruasId): bool
+    {
+        $stmt = $this->db->prepare('DELETE FROM stripmap WHERE ruas_id = :ruas_id');
+        return $stmt->execute(['ruas_id' => $ruasId]);
+    }
+
+    /**
      * Hitung total segmen stripmap untuk sebuah ruas
      */
     public function countByRuasId(int $ruasId): int
