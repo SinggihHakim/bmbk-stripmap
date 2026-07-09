@@ -42,8 +42,8 @@ class RuasJalan
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO ruas_jalan (kode_ruas, nama_ruas, sta_awal, sta_akhir, panjang)
-             VALUES (:kode_ruas, :nama_ruas, :sta_awal, :sta_akhir, :panjang)'
+            'INSERT INTO ruas_jalan (kode_ruas, nama_ruas, sta_awal, sta_akhir, panjang, koridor, kabupaten_kota)
+             VALUES (:kode_ruas, :nama_ruas, :sta_awal, :sta_akhir, :panjang, :koridor, :kabupaten_kota)'
         );
         $stmt->execute([
             'kode_ruas' => $data['kode_ruas'],
@@ -51,9 +51,12 @@ class RuasJalan
             'sta_awal'  => $data['sta_awal'],
             'sta_akhir' => $data['sta_akhir'],
             'panjang'   => $data['panjang'],
+            'koridor'   => $data['koridor'] ?? null,
+            'kabupaten_kota' => $data['kabupaten_kota'] ?? null,
         ]);
         return (int) $this->db->lastInsertId();
     }
+
 
     /**
      * Update ruas berdasarkan ID (field dinamis)

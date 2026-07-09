@@ -115,7 +115,11 @@ class StripmapController
      */
     public function update(int $id): void
     {
-        $result = $this->service->update($id, $_POST);
+        $input = $_POST;
+        if (isset($_POST['rows']) && is_array($_POST['rows']) && isset($_POST['rows'][0])) {
+            $input = $_POST['rows'][0];
+        }
+        $result = $this->service->update($id, $input);
 
         if ($result['success']) {
             // Sinkronisasi STA ruas dari data stripmap

@@ -1,0 +1,11 @@
+# Ignore database configuration file
+config/app.php
+config/database.php
+task.md
+
+# Ignore other environment/temporary files
+.env
+*.log
+.vscode/
+.idea/
+

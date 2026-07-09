@@ -34,7 +34,7 @@
 
     <!-- Form Card -->
     <div x-data="ruasDanStripmapForm()">
-        <form action="<?= $action ?>" method="POST" class="space-y-6" @submit="return validateForm($event)">
+        <form action="<?= $action ?>" method="POST" class="space-y-6" @submit="validateForm($event)">
 
             <!-- SECTION 1: DATA RUAS JALAN -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -60,6 +60,24 @@
                                placeholder="Contoh: Jl. Ahmad Yani"
                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                                required>
+                    </div>
+
+                    <!-- Koridor -->
+                    <div>
+                        <label for="koridor" class="block text-sm font-medium text-gray-700 mb-1.5">Koridor</label>
+                        <input type="text" id="koridor" name="koridor"
+                               value="<?= e($isEdit ? $ruas['koridor'] : old('koridor')) ?>"
+                               placeholder="Contoh: Koridor I"
+                               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                    </div>
+
+                    <!-- Kabupaten / Kota -->
+                    <div>
+                        <label for="kabupaten_kota" class="block text-sm font-medium text-gray-700 mb-1.5">Kabupaten / Kota</label>
+                        <input type="text" id="kabupaten_kota" name="kabupaten_kota"
+                               value="<?= e($isEdit ? $ruas['kabupaten_kota'] : old('kabupaten_kota')) ?>"
+                               placeholder="Contoh: Lampung Selatan"
+                               class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                     </div>
                 </div>
             </div>
@@ -163,19 +181,39 @@
 
                 <!-- Preview Visual Baris Aktif -->
                 <div x-show="validRows.length > 0" x-cloak class="px-6 py-4 border-t border-gray-100 bg-gray-50/30">
-                    <h3 class="text-sm font-semibold text-gray-900 mb-4">Preview Visual</h3>
-                    <div class="space-y-4">
+                    <h3 class="text-sm font-semibold text-gray-900 mb-1">Preview Visual</h3>
+                    <p class="text-[11px] text-gray-500 mb-4">Hover atau klik segmen warna untuk lihat detail kondisi.</p>
+                    <div class="space-y-5">
                         <template x-for="(row, index) in validRows" :key="row.id">
-                            <div>
+                            <div x-data="{ activeLabel: null, activePct: 0 }">
                                 <div class="flex justify-between items-center mb-1 text-xs">
                                     <span class="font-medium text-gray-700">STA <span x-text="row.staAwal"></span> - <span x-text="row.staAkhir"></span></span>
                                     <span class="text-gray-500" x-text="formatNumber(row.panjang) + ' m'"></span>
                                 </div>
-                                <div class="flex h-5 rounded-md overflow-hidden shadow-sm">
+                                <!-- Strip Bar -->
+                                <div class="flex h-7 rounded-md overflow-hidden shadow-sm">
                                     <template x-for="(segment, idx) in getSegments(row)" :key="segment.key">
-                                        <div class="relative group transition-all duration-300 ease-out"
+                                        <div class="relative transition-all duration-300 ease-out cursor-pointer"
                                              :style="'width:' + segment.percent + '%; ' + segment.bgStyle"
-                                             x-show="segment.value > 0">
+                                             x-show="segment.value > 0"
+                                             @mouseenter="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct"
+                                             @mouseleave="activeLabel = null"
+                                             @click="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct">
+                                            <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 hover:opacity-100 transition-opacity"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                                <!-- Label di Bawah Bar -->
+                                <div class="relative w-full h-0 z-20">
+                                    <template x-if="activeLabel">
+                                        <div class="absolute top-1 flex flex-col items-center -translate-x-1/2 transition-all duration-150 ease-out"
+                                             :style="'left:' + activePct + '%'">
+                                            <div class="w-px h-2" :style="'background-color:' + activeLabel.color"></div>
+                                            <div class="mt-0.5 px-2 py-1 rounded-md border shadow-sm text-center whitespace-nowrap backdrop-blur-sm"
+                                                 :style="'border-color:' + activeLabel.color + '40; background-color:' + activeLabel.color + '15'">
+                                                <p class="text-[11px] font-bold" :style="'color:' + activeLabel.color" x-text="activeLabel.panjang + ' m'"></p>
+                                                <p class="text-[10px] font-semibold text-gray-600" x-text="activeLabel.kondisi"></p>
+                                            </div>
                                         </div>
                                     </template>
                                 </div>
@@ -367,14 +405,34 @@ function ruasDanStripmapForm() {
 
         get formErrors() {
             let errors = [];
+            let validSegments = [];
+
             this.rows.forEach((row, idx) => {
-                if (!this.isRowEmpty(row) && row.error) {
-                    errors.push(`Baris ${idx + 1}: ${row.error}`);
-                }
-                if (!this.isRowEmpty(row) && !row.error && !row.isValid) {
-                    errors.push(`Baris ${idx + 1}: Data belum lengkap/valid.`);
+                if (!this.isRowEmpty(row)) {
+                    if (row.error) {
+                        errors.push(`Baris ${idx + 1}: ${row.error}`);
+                    } else if (!row.isValid) {
+                        errors.push(`Baris ${idx + 1}: Data belum lengkap/valid.`);
+                    } else {
+                        validSegments.push({
+                            index: idx + 1,
+                            awal: this.staToMeter(row.staAwal),
+                            akhir: this.staToMeter(row.staAkhir),
+                            staAwalStr: row.staAwal,
+                            staAkhirStr: row.staAkhir
+                        });
+                    }
                 }
             });
+
+            // Deteksi Tumpang Tindih (Overlapping) Segmen
+            validSegments.sort((a, b) => a.awal - b.awal);
+            for (let i = 1; i < validSegments.length; i++) {
+                if (validSegments[i].awal < validSegments[i-1].akhir) {
+                    errors.push(`Tumpang tindih terdeteksi antara Baris ${validSegments[i-1].index} (${validSegments[i-1].staAwalStr} s/d ${validSegments[i-1].staAkhirStr}) dan Baris ${validSegments[i].index} (${validSegments[i].staAwalStr} s/d ${validSegments[i].staAkhirStr}).`);
+                }
+            }
+
             return errors;
         },
 
@@ -465,16 +523,21 @@ function ruasDanStripmapForm() {
             const total = baik + sedang + rRingan + rBerat || 1;
 
             const conditions = [
-                { key: 'baik', value: baik, percent: (baik / total) * 100, color: '#22c55e' },
-                { key: 'sedang', value: sedang, percent: (sedang / total) * 100, color: '#eab308' },
-                { key: 'rusak_ringan', value: rRingan, percent: (rRingan / total) * 100, color: '#f97316' },
-                { key: 'rusak_berat', value: rBerat, percent: (rBerat / total) * 100, color: '#ef4444' }
+                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#22c55e' },
+                { key: 'sedang', label: 'Sedang', value: sedang, percent: (sedang / total) * 100, color: '#facc15' },
+                { key: 'rusak_ringan', label: 'Rusak Ringan', value: rRingan, percent: (rRingan / total) * 100, color: '#f97316' },
+                { key: 'rusak_berat', label: 'Rusak Berat', value: rBerat, percent: (rBerat / total) * 100, color: '#ef4444' }
             ];
 
             const active = conditions.filter(c => c.value > 0);
 
+            // Hitung posisi tengah kumulatif untuk label pointer
+            let cumulative = 0;
             return active.map((c, idx) => {
-                c.bgStyle = `background-color: ${c.color}`;
+                const nextColor = idx < active.length - 1 ? active[idx + 1].color : c.color;
+                c.bgStyle = `background: linear-gradient(to right, ${c.color} 60%, ${nextColor} 100%)`;
+                c.midPct = cumulative + (c.percent / 2);
+                cumulative += c.percent;
                 return c;
             });
         },

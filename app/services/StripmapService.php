@@ -82,7 +82,7 @@ class StripmapService
         $clean  = [];
 
         foreach ($rows as $i => $row) {
-            $rowErrors = $this->validate($row, $ruasId);
+            $rowErrors = $this->validate($row, $ruasId, null, false);
             if (!empty($rowErrors)) {
                 foreach ($rowErrors as $e) {
                     $errors[] = "Baris " . ($i + 1) . ": $e";
@@ -91,6 +91,9 @@ class StripmapService
                 $staAwal  = sta_to_meter($row['sta_awal']);
                 $staAkhir = sta_to_meter($row['sta_akhir']);
                 $clean[]  = [
+                    'original_index' => $i + 1,
+                    'sta_awal_str'  => $row['sta_awal'],
+                    'sta_akhir_str' => $row['sta_akhir'],
                     'ruas_id'      => $ruasId,
                     'sta_awal'     => $staAwal,
                     'sta_akhir'    => $staAkhir,
@@ -107,7 +110,23 @@ class StripmapService
             return ['success' => false, 'message' => implode('<br>', $errors)];
         }
 
+        // Validasi Overlap & Duplikasi Segmen
+        usort($clean, fn($a, $b) => $a['sta_awal'] <=> $b['sta_awal']);
+        for ($i = 1; $i < count($clean); $i++) {
+            if ($clean[$i]['sta_awal'] < $clean[$i-1]['sta_akhir']) {
+                $errors[] = "Tumpang tindih terdeteksi antara Baris " . $clean[$i-1]['original_index'] . " (" . $clean[$i-1]['sta_awal_str'] . " s/d " . $clean[$i-1]['sta_akhir_str'] . ") dan Baris " . $clean[$i]['original_index'] . " (" . $clean[$i]['sta_awal_str'] . " s/d " . $clean[$i]['sta_akhir_str'] . ").";
+            }
+        }
+
+        if (!empty($errors)) {
+            return ['success' => false, 'message' => implode('<br>', $errors)];
+        }
+
         foreach ($clean as $data) {
+            // Hapus index bantu original_index dkk sebelum insert ke model
+            unset($data['original_index']);
+            unset($data['sta_awal_str']);
+            unset($data['sta_akhir_str']);
             $this->model->create($data);
         }
 
@@ -124,7 +143,7 @@ class StripmapService
             return ['success' => false, 'message' => 'Data strip map tidak ditemukan.'];
         }
 
-        $errors = $this->validate($input, $existing['ruas_id']);
+        $errors = $this->validate($input, $existing['ruas_id'], $id, true);
         if (!empty($errors)) {
             return ['success' => false, 'message' => implode('<br>', $errors)];
         }
@@ -171,7 +190,7 @@ class StripmapService
     /**
      * Validasi input stripmap
      */
-    private function validate(array $input, int $ruasId): array
+    private function validate(array $input, int $ruasId, ?int $excludeId = null, bool $checkDbOverlap = true): array
     {
         $errors = [];
 
@@ -212,6 +231,22 @@ class StripmapService
 
             if ($panjang > 0 && abs($totalKondisi - $panjang) > 0.01) {
                 $errors[] = "Jumlah kondisi ({$totalKondisi} m) harus sama dengan panjang segmen ({$panjang} m).";
+            }
+
+            // Deteksi tumpang tindih dengan segmen yang sudah ada di database
+            if ($checkDbOverlap) {
+                $existingSegments = $this->model->getByRuasId($ruasId);
+                foreach ($existingSegments as $es) {
+                    if ($excludeId && (int)$es['id'] === $excludeId) {
+                        continue;
+                    }
+                    $esAwal = (float)$es['sta_awal'];
+                    $esAkhir = (float)$es['sta_akhir'];
+                    if (max($staAwal, $esAwal) < min($staAkhir, $esAkhir)) {
+                        $errors[] = "Segmen ini tumpang tindih dengan segmen yang sudah ada: STA " . meter_to_sta($esAwal) . " s/d " . meter_to_sta($esAkhir) . ".";
+                        break;
+                    }
+                }
             }
         }
 

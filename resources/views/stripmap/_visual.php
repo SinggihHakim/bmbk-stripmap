@@ -14,236 +14,467 @@
     $pctSedang = $totalPanjang > 0 ? ($totalSedang / $totalPanjang) * 100 : 0;
     $pctRR     = $totalPanjang > 0 ? ($totalRR / $totalPanjang) * 100 : 0;
     $pctRB     = $totalPanjang > 0 ? ($totalRB / $totalPanjang) * 100 : 0;
+
+    $totalMantap      = $totalBaik + $totalSedang;
+    $totalTidakMantap = $totalRR + $totalRB;
+
+    $pctMantap      = $totalPanjang > 0 ? ($totalMantap / $totalPanjang) * 100 : 0;
+    $pctTidakMantap = $totalPanjang > 0 ? ($totalTidakMantap / $totalPanjang) * 100 : 0;
+
+    // -----------------------------------------------------------------
+    // LOGIKA SLICING STRIPMAP MENJADI CHUNKS MAKSIMAL 5KM (TASK 7)
+    // -----------------------------------------------------------------
+    $staBase = (float)$ruas['sta_awal'];
+    $staEnd  = (float)$ruas['sta_akhir'];
+    
+    // 1. Ekstrak data segmen database menjadi condition runs kontinu
+    $runs = [];
+    foreach ($stripmaps as $sm) {
+        $currentMeter = (float)$sm['sta_awal'];
+        
+        $conditions = [
+            'baik'         => (float)$sm['baik'],
+            'sedang'       => (float)$sm['sedang'],
+            'rusak_ringan' => (float)$sm['rusak_ringan'],
+            'rusak_berat'  => (float)$sm['rusak_berat']
+        ];
+        
+        foreach ($conditions as $condKey => $value) {
+            if ($value > 0) {
+                $runs[] = [
+                    'sta_awal'  => $currentMeter,
+                    'sta_akhir' => $currentMeter + $value,
+                    'panjang'   => $value,
+                    'baik'         => $condKey === 'baik' ? $value : 0.0,
+                    'sedang'       => $condKey === 'sedang' ? $value : 0.0,
+                    'rusak_ringan' => $condKey === 'rusak_ringan' ? $value : 0.0,
+                    'rusak_berat'  => $condKey === 'rusak_berat' ? $value : 0.0,
+                ];
+                $currentMeter += $value;
+            }
+        }
+    }
+
+    // 2. Bagi range total ruas menjadi beberapa chunk berukuran max 5km (5000 meter)
+    $chunkSize = 5000.0;
+    $chunks = [];
+    $current = $staBase;
+    
+    while ($current < $staEnd) {
+        $chunkEnd = min($current + $chunkSize, $staEnd);
+        
+        // Distribusikan runs ke dalam chunk ini
+        $overlappingRuns = [];
+        foreach ($runs as $run) {
+            $overlapStart = max($run['sta_awal'], $current);
+            $overlapEnd   = min($run['sta_akhir'], $chunkEnd);
+            
+            if ($overlapStart < $overlapEnd) {
+                $overlapLen = $overlapEnd - $overlapStart;
+                $overlappingRuns[] = [
+                    'sta_awal'     => $overlapStart,
+                    'sta_akhir'    => $overlapEnd,
+                    'panjang'      => $overlapLen,
+                    'baik'         => $run['baik'] > 0 ? $overlapLen : 0.0,
+                    'sedang'       => $run['sedang'] > 0 ? $overlapLen : 0.0,
+                    'rusak_ringan' => $run['rusak_ringan'] > 0 ? $overlapLen : 0.0,
+                    'rusak_berat'  => $run['rusak_berat'] > 0 ? $overlapLen : 0.0,
+                ];
+            }
+        }
+        
+        // Urutkan overlapping runs berdasarkan sta_awal
+        usort($overlappingRuns, fn($a, $b) => $a['sta_awal'] <=> $b['sta_awal']);
+        
+        // Gabungkan dan isi gap (celah tanpa data) agar rentang dari $current sampai $chunkEnd terisi penuh secara kontinu
+        $chunkStripmaps = [];
+        $currentPos = $current;
+        
+        foreach ($overlappingRuns as $run) {
+            if ($run['sta_awal'] > $currentPos) {
+                // Ada celah (gap) sebelum run ini
+                $gapLen = $run['sta_awal'] - $currentPos;
+                $chunkStripmaps[] = [
+                    'sta_awal'     => $currentPos,
+                    'sta_akhir'    => $run['sta_awal'],
+                    'panjang'      => $gapLen,
+                    'baik'         => 0.0,
+                    'sedang'       => 0.0,
+                    'rusak_ringan' => 0.0,
+                    'rusak_berat'  => 0.0,
+                    'is_gap'       => true
+                ];
+            }
+            $chunkStripmaps[] = $run;
+            $currentPos = $run['sta_akhir'];
+        }
+        
+        if ($currentPos < $chunkEnd) {
+            // Ada celah (gap) di akhir chunk
+            $gapLen = $chunkEnd - $currentPos;
+            $chunkStripmaps[] = [
+                'sta_awal'     => $currentPos,
+                'sta_akhir'    => $chunkEnd,
+                'panjang'      => $gapLen,
+                'baik'         => 0.0,
+                'sedang'       => 0.0,
+                'rusak_ringan' => 0.0,
+                'rusak_berat'  => 0.0,
+                'is_gap'       => true
+            ];
+        }
+        
+        $chunks[] = [
+            'start'      => $current,
+            'end'        => $chunkEnd,
+            'stripmaps'  => $chunkStripmaps
+        ];
+        
+        $current = $chunkEnd;
+    }
 ?>
 
 <!-- Load Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <?php if ($totalPanjang > 0): ?>
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+     x-data="{ activeLabel: null, activePct: 0, activeChunk: null }"
+     @click.outside="activeLabel = null; activeChunk = null">
     <div class="px-6 py-4 border-b border-gray-200">
         <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Representasi urutan segmen kondisi konkrit jalan.</p>
+        <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
     </div>
-    
+
     <div class="p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Layout Grid: Kiri Pie Charts, Kanan Line Chart & Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             
-            <!-- Kolom Kiri & Tengah: Linear Strip Map + Stats -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Linear Strip Map Bar (Berdasarkan Urutan Segmen Nyata) -->
-                <div class="space-y-1">
-                    <!-- Container Bar Jalur Linear -->
-                    <div class="flex h-14 rounded-xl overflow-hidden shadow-md bg-gray-100 border border-gray-200">
-                        <?php foreach ($stripmaps as $sm): ?>
-                            <?php
-                                $smTotal = $sm['panjang'] > 0 ? $sm['panjang'] : 1;
-                                $smPct   = $totalPanjang > 0 ? ($sm['panjang'] / $totalPanjang) * 100 : 0;
-                            ?>
-                            <div class="flex h-full flex-shrink-0" style="width: <?= number_format($smPct, 4, '.', '') ?>%">
+            <!-- Kiri: Pie Charts (lg:col-span-4) -->
+            <div class="lg:col-span-4 flex flex-col gap-6">
+                <!-- Pie Chart 1: Proporsi Kondisi Jalan -->
+                <div class="flex flex-col items-center justify-center bg-gray-50/60 rounded-2xl p-5 border border-gray-100 min-h-[220px]">
+                    <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Proporsi Kondisi Jalan</h4>
+                    <style>
+                        @keyframes pie-spin-in {
+                            from { transform: scale(0) rotate(-90deg); opacity: 0; }
+                            to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+                        }
+                        .pie-chart-container canvas {
+                            animation: pie-spin-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                        }
+                        .pie-chart-container {
+                            filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
+                        }
+                    </style>
+                    <div class="pie-chart-container w-full max-w-[180px] aspect-square relative">
+                        <canvas id="conditionPieChart"></canvas>
+                    </div>
+                    <!-- Legend -->
+                    <div class="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-5">
+                        <?php
+                            $legendItems = [
+                                ['label' => 'Baik',         'color' => '#22c55e', 'pct' => $pctBaik,   'val' => $totalBaik],
+                                ['label' => 'Sedang',       'color' => '#facc15', 'pct' => $pctSedang, 'val' => $totalSedang],
+                                ['label' => 'Rusak Ringan', 'color' => '#f97316', 'pct' => $pctRR,     'val' => $totalRR],
+                                ['label' => 'Rusak Berat',  'color' => '#ef4444', 'pct' => $pctRB,     'val' => $totalRB],
+                            ];
+                        ?>
+                        <?php foreach ($legendItems as $li): ?>
+                            <?php if ($li['val'] > 0): ?>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-full" style="background: <?= $li['color'] ?>"></span>
+                                <span class="text-[11px] font-medium text-gray-600"><?= $li['label'] ?></span>
+                                <span class="text-[10px] text-gray-400"><?= number_format($li['pct'], 1) ?>%</span>
+                            </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Pie Chart 2: Kemantapan Jalan -->
+                <div class="flex flex-col items-center justify-center bg-gray-50/60 rounded-2xl p-5 border border-gray-100 min-h-[220px]">
+                    <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Kemantapan Jalan</h4>
+                    <div class="pie-chart-container w-full max-w-[180px] aspect-square relative">
+                        <canvas id="stabilityPieChart"></canvas>
+                    </div>
+                    <!-- Legend -->
+                    <div class="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="text-[11px] font-medium text-gray-600">Mantap</span>
+                            <span class="text-[10px] text-gray-400"><?= number_format($pctMantap, 1) ?>%</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span class="text-[11px] font-medium text-gray-600">Tidak Mantap</span>
+                            <span class="text-[10px] text-gray-400"><?= number_format($pctTidakMantap, 1) ?>%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kanan: Line Chart & Stats (lg:col-span-8) -->
+            <div class="lg:col-span-8 flex flex-col space-y-3">
+                <!-- Linear Strip Map Chunks (Max 5 km per bar, sesuai Task 7) -->
+                <div class="space-y-3">
+                    <?php foreach ($chunks as $chunkIdx => $chunk): ?>
+                        <?php 
+                            $chunkTotalPanjang = $chunk['end'] - $chunk['start']; 
+                            if ($chunkTotalPanjang <= 0) continue;
+                        ?>
+                        <div class="space-y-1 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-mono">
+                                    <?= meter_to_sta($chunk['start']) ?> — <?= meter_to_sta($chunk['end']) ?>
+                                </span>
+                            </div>
+
+                            <!-- Container Bar Jalur Linear (Dipertipis ke h-8, sesuai Task 3) -->
+                            <div class="flex h-8 rounded-xl overflow-hidden shadow-md bg-gray-100 border border-gray-200">
                                 <?php
-                                    $segConditions = [
-                                        ['label' => 'Baik',         'value' => $sm['baik'],         'color' => '#22c55e'],
-                                        ['label' => 'Sedang',       'value' => $sm['sedang'],       'color' => '#eab308'],
-                                        ['label' => 'Rusak Ringan', 'value' => $sm['rusak_ringan'], 'color' => '#f97316'],
-                                        ['label' => 'Rusak Berat',  'value' => $sm['rusak_berat'],  'color' => '#ef4444'],
-                                    ];
-                                    // Saring kondisi aktif
-                                    $activeSeg = array_values(array_filter($segConditions, fn($c) => $c['value'] > 0));
+                                    $cumulativePct = 0;
                                 ?>
-                                <?php foreach ($activeSeg as $sc): ?>
-                                    <?php $scPct = ($sc['value'] / $smTotal) * 100; ?>
-                                    <div class="h-full flex-shrink-0 relative group transition-all duration-300 hover:scale-y-105 hover:z-10"
-                                         style="width: <?= number_format($scPct, 4, '.', '') ?>%; background-color: <?= $sc['color'] ?>;">
-                                         
-                                         <!-- Tooltip Hover -->
-                                         <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                                             <p class="font-bold text-sm"><?= meter_to_sta($sm['sta_awal']) ?> — <?= meter_to_sta($sm['sta_akhir']) ?></p>
-                                             <p class="mt-1">Kondisi: <span class="font-semibold"><?= $sc['label'] ?></span></p>
-                                             <p>Panjang Kondisi: <?= format_number($sc['value']) ?> m</p>
-                                             <p>Panjang Segmen: <?= format_number($sm['panjang']) ?> m</p>
-                                             <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
-                                         </div>
+                                <?php foreach ($chunk['stripmaps'] as $sm): ?>
+                                    <?php
+                                        $smTotal = $sm['panjang'] > 0 ? $sm['panjang'] : 1;
+                                        $smPct   = $chunkTotalPanjang > 0 ? ($sm['panjang'] / $chunkTotalPanjang) * 100 : 0;
+                                    ?>
+                                    <div class="flex h-full flex-shrink-0" style="width: <?= number_format($smPct, 4, '.', '') ?>%">
+                                        <?php if (!empty($sm['is_gap'])): ?>
+                                            <?php
+                                                $subWidthGlobal = ($sm['panjang'] / $chunkTotalPanjang) * 100;
+                                                $subMidPct = $cumulativePct + ($subWidthGlobal / 2);
+                                                $cumulativePct += $subWidthGlobal;
+                                                $staLabelStr = meter_to_sta($sm['sta_awal']) . ' — ' . meter_to_sta($sm['sta_akhir']);
+                                            ?>
+                                            <div class="h-full w-full flex-shrink-0 relative group transition-all duration-300 cursor-pointer bg-gray-50"
+                                                 @mouseenter="if (window.matchMedia('(hover: hover)').matches) { activeLabel = { panjang: '<?= format_number($sm['panjang']) ?>', kondisi: 'Belum Ada Data', sta: '<?= $staLabelStr ?>', color: '#9ca3af' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?> }"
+                                                 @mouseleave="if (window.matchMedia('(hover: hover)').matches) { activeLabel = null; activeChunk = null }"
+                                                 @click.stop="activeLabel = (activeLabel && activeLabel.sta === '<?= $staLabelStr ?>' && activeLabel.kondisi === 'Belum Ada Data') ? null : { panjang: '<?= format_number($sm['panjang']) ?>', kondisi: 'Belum Ada Data', sta: '<?= $staLabelStr ?>', color: '#9ca3af' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?>"`,StartLine:254,TargetContent:>
+                                                 
+                                                 <!-- Diagonal stripes for gap block -->
+                                                 <div class="absolute inset-0 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_50%,#e5e7eb_50%,#e5e7eb_75%,transparent_75%,transparent)] bg-[length:10px_10px] opacity-40"></div>
+                                                 <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                            </div>
+                                        <?php else: ?>
+                                            <?php
+                                                $segConditions = [
+                                                    ['label' => 'Baik',         'value' => $sm['baik'],         'color' => '#22c55e'],
+                                                    ['label' => 'Sedang',       'value' => $sm['sedang'],       'color' => '#facc15'],
+                                                    ['label' => 'Rusak Ringan', 'value' => $sm['rusak_ringan'], 'color' => '#f97316'],
+                                                    ['label' => 'Rusak Berat',  'value' => $sm['rusak_berat'],  'color' => '#ef4444'],
+                                                ];
+                                                $activeSeg = array_values(array_filter($segConditions, fn($c) => $c['value'] > 0));
+                                            ?>
+                                            <?php foreach ($activeSeg as $sc): ?>
+                                                <?php
+                                                    $scPct = ($sc['value'] / $smTotal) * 100;
+                                                    // Hitung posisi tengah sub-segmen secara global
+                                                    $subWidthGlobal = ($sc['value'] / $chunkTotalPanjang) * 100;
+                                                    $subMidPct = $cumulativePct + ($subWidthGlobal / 2);
+                                                    $cumulativePct += $subWidthGlobal;
+                                                    $staLabelStr = meter_to_sta($sm['sta_awal']) . ' — ' . meter_to_sta($sm['sta_akhir']);
+                                                ?>
+                                                <div class="h-full flex-shrink-0 relative group transition-all duration-300 cursor-pointer"
+                                                     style="width: <?= number_format($scPct, 4, '.', '') ?>%; background-color: <?= $sc['color'] ?>;"
+                                                     @mouseenter="if (window.matchMedia('(hover: hover)').matches) { activeLabel = { panjang: '<?= format_number($sc['value']) ?>', kondisi: '<?= $sc['label'] ?>', sta: '<?= $staLabelStr ?>', color: '<?= $sc['color'] ?>' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?> }"
+                                                     @mouseleave="if (window.matchMedia('(hover: hover)').matches) { activeLabel = null; activeChunk = null }"
+                                                     @click.stop="activeLabel = (activeLabel && activeLabel.sta === '<?= $staLabelStr ?>' && activeLabel.kondisi === '<?= $sc['label'] ?>') ? null : { panjang: '<?= format_number($sc['value']) ?>', kondisi: '<?= $sc['label'] ?>', sta: '<?= $staLabelStr ?>', color: '<?= $sc['color'] ?>' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?>">
+
+                                                     <!-- Highlight ring saat aktif -->
+                                                     <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
 
-                    <!-- Skala Penggaris STA -->
-                    <?php
-                        $ticks = [];
-                        $currentMeter = $ruas['sta_awal'];
+                            <!-- Label Keterangan -->
+                            <div class="relative w-full h-0 z-20">
+                                <template x-if="activeLabel && activeChunk === <?= $chunkIdx ?>">
+                                    <div class="absolute top-1 flex flex-col items-center -translate-x-1/2 transition-all duration-150 ease-out"
+                                         :style="'left:' + activePct + '%'">
+                                        <!-- Garis penunjuk vertikal -->
+                                        <div class="w-px h-3" :style="'background-color:' + activeLabel.color"></div>
+                                        <!-- Kotak info -->
+                                        <div class="mt-0.5 px-2.5 py-1.5 rounded-lg border shadow-sm text-center whitespace-nowrap backdrop-blur-sm"
+                                             :style="'border-color:' + activeLabel.color + '40; background-color:' + activeLabel.color + '15'">
+                                            <p class="text-xs font-bold" :style="'color:' + activeLabel.color" x-text="activeLabel.panjang + ' m'"></p>
+                                            <p class="text-[10px] font-semibold text-gray-600" x-text="activeLabel.kondisi"></p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
 
-                        // Tambahkan tick awal
-                        $ticks[] = [
-                            'meter' => $currentMeter,
-                            'pct'   => 0
-                        ];
+                            <!-- Skala Penggaris STA -->
+                            <?php
+                                $ticks = [];
+                                $ticks[] = ['meter' => $chunk['start'], 'pct' => 0];
 
-                        foreach ($stripmaps as $sm) {
-                            $segConditions = [
-                                ['label' => 'Baik',         'value' => (float)$sm['baik']],
-                                ['label' => 'Sedang',       'value' => (float)$sm['sedang']],
-                                ['label' => 'Rusak Ringan', 'value' => (float)$sm['rusak_ringan']],
-                                ['label' => 'Rusak Berat',  'value' => (float)$sm['rusak_berat']],
-                            ];
-                            // Ambil kondisi yang bernilai > 0
-                            $activeSeg = array_values(array_filter($segConditions, fn($c) => $c['value'] > 0));
-                            
-                            // Kita telusuri kondisi aktif di segmen ini untuk mendapatkan titik transisi
-                            foreach ($activeSeg as $sc) {
-                                $currentMeter += $sc['value'];
-                                $pct = $totalPanjang > 0 ? (($currentMeter - $ruas['sta_awal']) / $totalPanjang) * 100 : 0;
-                                
-                                $ticks[] = [
-                                    'meter' => $currentMeter,
-                                    'pct'   => $pct
-                                ];
-                            }
-                        }
+                                foreach ($chunk['stripmaps'] as $sm) {
+                                    $smAwal  = (float)$sm['sta_awal'];
+                                    $smAkhir = (float)$sm['sta_akhir'];
 
-                        // Filter tick agar tidak tumpang tindih secara visual
-                        $filteredTicks = [];
-                        $lastPct = -100;
-                        $totalTicksCount = count($ticks);
+                                    $pctAwal = $chunkTotalPanjang > 0 ? (($smAwal - $chunk['start']) / $chunkTotalPanjang) * 100 : 0;
+                                    $ticks[] = ['meter' => $smAwal, 'pct' => $pctAwal];
 
-                        foreach ($ticks as $index => $tick) {
-                            // Selalu masukkan tick pertama dan terakhir
-                            if ($index === 0 || $index === $totalTicksCount - 1) {
-                                $filteredTicks[] = $tick;
-                                if ($index === 0) {
-                                    $lastPct = $tick['pct'];
+                                    $pctAkhir = $chunkTotalPanjang > 0 ? (($smAkhir - $chunk['start']) / $chunkTotalPanjang) * 100 : 0;
+                                    $ticks[] = ['meter' => $smAkhir, 'pct' => $pctAkhir];
                                 }
-                                continue;
-                            }
-                            
-                            // Pastikan ada jarak minimal 4% secara visual agar label tidak menumpuk
-                            $pctFromStart = $tick['pct'] - $lastPct;
-                            $pctFromEnd = 100 - $tick['pct'];
-                            
-                            if ($pctFromStart >= 4.0 && $pctFromEnd >= 4.0) {
-                                // Hindari duplikasi meter yang sama
-                                $exists = false;
-                                foreach ($filteredTicks as $ft) {
-                                    if (abs($ft['meter'] - $tick['meter']) < 0.1) {
-                                        $exists = true;
-                                        break;
+
+                                $uniqueTicks = [];
+                                $seen = [];
+                                foreach ($ticks as $t) {
+                                    $key = round($t['meter'], 1);
+                                    if (!isset($seen[$key])) {
+                                        $seen[$key] = true;
+                                        $uniqueTicks[] = $t;
                                     }
                                 }
-                                if (!$exists) {
-                                    $filteredTicks[] = $tick;
-                                    $lastPct = $tick['pct'];
+                                usort($uniqueTicks, fn($a, $b) => $a['pct'] <=> $b['pct']);
+
+                                $filteredTicks = [];
+                                $filteredTicks[] = $uniqueTicks[0];
+                                $lastPct = $uniqueTicks[0]['pct'];
+                                $totalTicksCount = count($uniqueTicks);
+
+                                for ($i = 1; $i < $totalTicksCount - 1; $i++) {
+                                    $tick = $uniqueTicks[$i];
+                                    $pctFromLast = $tick['pct'] - $lastPct;
+                                    $pctFromEnd  = 100 - $tick['pct'];
+
+                                    // Batasi jarak minimal 7.0% agar tidak tumpang tindih, dan 5.0% dari ujung kanan
+                                    if ($pctFromLast >= 7.0 && $pctFromEnd >= 5.0) {
+                                        $filteredTicks[] = $tick;
+                                        $lastPct = $tick['pct'];
+                                    }
                                 }
-                            }
-                        }
-                    ?>
-                    <div class="relative w-full h-10 mt-1">
-                        <!-- Garis horizontal penggaris -->
-                        <div class="absolute top-0 left-0 right-0 h-px bg-gray-300"></div>
-                        
-                        <!-- Poin Tanda Skala -->
-                        <?php foreach ($filteredTicks as $tick): ?>
-                            <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" style="left: <?= number_format($tick['pct'], 4, '.', '') ?>%">
-                                <div class="w-px h-2 bg-gray-400"></div>
-                                <span class="text-[10px] font-mono font-semibold text-gray-500 mt-1"><?= meter_to_sta($tick['meter']) ?></span>
+
+                                // Selalu masukkan tick terakhir secara aman
+                                if ($totalTicksCount > 1) {
+                                    $lastTick = $uniqueTicks[$totalTicksCount - 1];
+                                    $pctFromLast = $lastTick['pct'] - $lastPct;
+                                    if ($pctFromLast < 5.0 && count($filteredTicks) > 1) {
+                                        // Jika terlalu dekat dengan tick terakhir yang dimasukkan, buang tick sebelumnya demi kejelasan ujung kanan
+                                        array_pop($filteredTicks);
+                                    }
+                                    $filteredTicks[] = $lastTick;
+                                }
+                            ?>
+
+                            <div class="relative w-full h-8">
+                                <div class="absolute top-0 left-0 right-0 h-px bg-gray-300"></div>
+                                <?php foreach ($filteredTicks as $tick): ?>
+                                    <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" style="left: <?= number_format($tick['pct'], 4, '.', '') ?>%">
+                                        <div class="w-px h-2 bg-gray-400"></div>
+                                        <span class="text-[10px] font-mono font-semibold text-gray-500 mt-0.5"><?= meter_to_sta($tick['meter']) ?></span>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-
-                <!-- Legend + Stats -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <!-- Baik -->
-                    <div class="p-4 rounded-xl bg-green-50 border border-green-100">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 rounded-full bg-green-500"></span>
-                            <span class="text-xs font-semibold text-green-800">Baik</span>
                         </div>
-                        <p class="text-xl font-bold text-green-700"><?= format_number($totalBaik) ?> <span class="text-xs font-normal">m</span></p>
-                        <p class="text-xs text-green-600 mt-1"><?= number_format($pctBaik, 1) ?>%</p>
-                    </div>
-                    <!-- Sedang -->
-                    <div class="p-4 rounded-xl bg-yellow-50 border border-yellow-100">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
-                            <span class="text-xs font-semibold text-yellow-800">Sedang</span>
-                        </div>
-                        <p class="text-xl font-bold text-yellow-700"><?= format_number($totalSedang) ?> <span class="text-xs font-normal">m</span></p>
-                        <p class="text-xs text-yellow-600 mt-1"><?= number_format($pctSedang, 1) ?>%</p>
-                    </div>
-                    <!-- Rusak Ringan -->
-                    <div class="p-4 rounded-xl bg-orange-50 border border-orange-100">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 rounded-full bg-orange-500"></span>
-                            <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
-                        </div>
-                        <p class="text-xl font-bold text-orange-700"><?= format_number($totalRR) ?> <span class="text-xs font-normal">m</span></p>
-                        <p class="text-xs text-orange-600 mt-1"><?= number_format($pctRR, 1) ?>%</p>
-                    </div>
-                    <!-- Rusak Berat -->
-                    <div class="p-4 rounded-xl bg-red-50 border border-red-100">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
-                            <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
-                        </div>
-                        <p class="text-xl font-bold text-red-700"><?= format_number($totalRB) ?> <span class="text-xs font-normal">m</span></p>
-                        <p class="text-xs text-red-600 mt-1"><?= number_format($pctRB, 1) ?>%</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kolom Kanan: Pie Chart -->
-            <div class="flex flex-col items-center justify-center bg-gray-50/60 rounded-2xl p-5 border border-gray-100 min-h-[220px]">
-                <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Proporsi Kondisi Jalan</h4>
-                <style>
-                    @keyframes pie-spin-in {
-                        from { transform: scale(0) rotate(-90deg); opacity: 0; }
-                        to   { transform: scale(1) rotate(0deg);   opacity: 1; }
-                    }
-                    #pieChartWrapper canvas {
-                        animation: pie-spin-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-                    }
-                    #pieChartWrapper {
-                        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
-                    }
-                </style>
-                <div id="pieChartWrapper" class="w-full max-w-[280px] aspect-square relative">
-                    <canvas id="conditionPieChart"></canvas>
-                </div>
-                <!-- Modern Legend -->
-                <div class="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-5">
-                    <?php
-                        $legendItems = [
-                            ['label' => 'Baik',         'color' => '#22c55e', 'pct' => $pctBaik,   'val' => $totalBaik],
-                            ['label' => 'Sedang',       'color' => '#eab308', 'pct' => $pctSedang, 'val' => $totalSedang],
-                            ['label' => 'Rusak Ringan', 'color' => '#f97316', 'pct' => $pctRR,     'val' => $totalRR],
-                            ['label' => 'Rusak Berat',  'color' => '#ef4444', 'pct' => $pctRB,     'val' => $totalRB],
-                        ];
-                    ?>
-                    <?php foreach ($legendItems as $li): ?>
-                        <?php if ($li['val'] > 0): ?>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full" style="background: <?= $li['color'] ?>"></span>
-                            <span class="text-[11px] font-medium text-gray-600"><?= $li['label'] ?></span>
-                            <span class="text-[10px] text-gray-400"><?= number_format($li['pct'], 1) ?>%</span>
-                        </div>
-                        <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
+
+                <!-- Stats Grid: Dipindahkan ke dalam kolom kanan agar mengisi space kosong -->
+                <div class="pt-6 border-t border-gray-100 space-y-6">
+                    <!-- Row 1: 4 Kondisi Jalan -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Detail Kondisi Segmen</h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <!-- Baik -->
+                            <div class="p-4 rounded-xl bg-green-50 border border-green-100/60 shadow-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                                    <span class="text-xs font-semibold text-green-800">Baik</span>
+                                </div>
+                                <p class="text-xl font-bold text-green-700"><?= format_number($totalBaik) ?> <span class="text-xs font-normal text-green-600">m</span></p>
+                                <p class="text-xs text-green-600 mt-1"><?= number_format($pctBaik, 1) ?>%</p>
+                            </div>
+                            <!-- Sedang -->
+                            <div class="p-4 rounded-xl bg-yellow-50 border border-yellow-100/60 shadow-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                    <span class="text-xs font-semibold text-yellow-800">Sedang</span>
+                                </div>
+                                <p class="text-xl font-bold text-yellow-700"><?= format_number($totalSedang) ?> <span class="text-xs font-normal text-yellow-600">m</span></p>
+                                <p class="text-xs text-yellow-600 mt-1"><?= number_format($pctSedang, 1) ?>%</p>
+                            </div>
+                            <!-- Rusak Ringan -->
+                            <div class="p-4 rounded-xl bg-orange-50 border border-orange-100/60 shadow-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                                    <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
+                                </div>
+                                <p class="text-xl font-bold text-orange-700"><?= format_number($totalRR) ?> <span class="text-xs font-normal text-orange-600">m</span></p>
+                                <p class="text-xs text-orange-600 mt-1"><?= number_format($pctRR, 1) ?>%</p>
+                            </div>
+                            <!-- Rusak Berat -->
+                            <div class="p-4 rounded-xl bg-red-50 border border-red-100/60 shadow-sm">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                    <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
+                                </div>
+                                <p class="text-xl font-bold text-red-700"><?= format_number($totalRB) ?> <span class="text-xs font-normal text-red-600">m</span></p>
+                                <p class="text-xs text-red-600 mt-1"><?= number_format($pctRB, 1) ?>%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: 2 Kemantapan Jalan -->
+                    <div>
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Kemantapan Jalan (Stability)</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Mantap -->
+                            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                        <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
+                                    </div>
+                                    <span class="text-xs font-bold text-emerald-600"><?= number_format($pctMantap, 1) ?>%</span>
+                                </div>
+                                <p class="text-2xl font-extrabold text-emerald-700"><?= format_number($totalMantap) ?> <span class="text-sm font-semibold text-emerald-600">m</span></p>
+                                <div class="mt-3 w-full bg-emerald-200/50 rounded-full h-2">
+                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: <?= number_format($pctMantap, 4, '.', '') ?>%"></div>
+                                </div>
+                            </div>
+                            <!-- Tidak Mantap -->
+                            <div class="p-4 rounded-xl bg-rose-50 border border-rose-100 shadow-sm">
+                                <div class="flex items-center justify-between mb-2">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                        <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(Rusak Ringan + Rusak Berat)</span></span>
+                                    </div>
+                                    <span class="text-xs font-bold text-rose-600"><?= number_format($pctTidakMantap, 1) ?>%</span>
+                                </div>
+                                <p class="text-2xl font-extrabold text-rose-700"><?= format_number($totalTidakMantap) ?> <span class="text-sm font-semibold text-rose-600">m</span></p>
+                                <div class="mt-3 w-full bg-rose-200/50 rounded-full h-2">
+                                    <div class="bg-rose-500 h-2 rounded-full" style="width: <?= number_format($pctTidakMantap, 4, '.', '') ?>%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
         </div>
+
     </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const ctx = document.getElementById('conditionPieChart').getContext('2d');
+    // --------------------------------------------------------
+    // Chart 1: Proporsi Kondisi Jalan (Baik, Sedang, RR, RB)
+    // --------------------------------------------------------
+    const ctx1 = document.getElementById('conditionPieChart').getContext('2d');
 
-    const chartColors = ['#22c55e', '#eab308', '#f97316', '#ef4444'];
-    const chartLabels = ['Baik', 'Sedang', 'Rusak Ringan', 'Rusak Berat'];
-    const chartData   = [
+    const chartColors1 = ['#22c55e', '#facc15', '#f97316', '#ef4444'];
+    const chartLabels1 = ['Baik', 'Sedang', 'Rusak Ringan', 'Rusak Berat'];
+    const chartData1   = [
         <?= (float)$totalBaik ?>,
         <?= (float)$totalSedang ?>,
         <?= (float)$totalRR ?>,
@@ -251,22 +482,22 @@ document.addEventListener("DOMContentLoaded", function() {
     ];
 
     // Filter out zero values
-    const filtered = chartLabels.reduce((acc, label, i) => {
-        if (chartData[i] > 0) {
+    const filtered1 = chartLabels1.reduce((acc, label, i) => {
+        if (chartData1[i] > 0) {
             acc.labels.push(label);
-            acc.data.push(chartData[i]);
-            acc.colors.push(chartColors[i]);
+            acc.data.push(chartData1[i]);
+            acc.colors.push(chartColors1[i]);
         }
         return acc;
     }, { labels: [], data: [], colors: [] });
 
-    new Chart(ctx, {
+    new Chart(ctx1, {
         type: 'pie',
         data: {
-            labels: filtered.labels,
+            labels: filtered1.labels,
             datasets: [{
-                data: filtered.data,
-                backgroundColor: filtered.colors,
+                data: filtered1.data,
+                backgroundColor: filtered1.colors,
                 borderWidth: 2.5,
                 borderColor: '#ffffff',
                 hoverBorderWidth: 3,
@@ -275,7 +506,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }]
         },
         plugins: [{
-            id: 'modernLabels',
+            id: 'modernLabels1',
             afterDraw: (chart) => {
                 const ctx2 = chart.ctx;
                 const dataset = chart.data.datasets[0];
@@ -300,8 +531,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     };
 
                     ctx2.save();
-
-                    // Thin connector line
                     ctx2.strokeStyle = 'rgba(156,163,175,0.4)';
                     ctx2.lineWidth = 0.8;
                     ctx2.beginPath();
@@ -309,7 +538,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     ctx2.lineTo(outerPt.x, outerPt.y);
                     ctx2.stroke();
 
-                    // Percentage text (no black circle)
                     const labelPt = {
                         x: element.x + Math.cos(midAngle) * (element.outerRadius + 24),
                         y: element.y + Math.sin(midAngle) * (element.outerRadius + 24)
@@ -326,9 +554,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }],
         options: {
-            layout: {
-                padding: 40
-            },
+            layout: { padding: 40 },
             responsive: true,
             maintainAspectRatio: true,
             animation: {
@@ -338,9 +564,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 easing: 'easeOutQuart'
             },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     backgroundColor: 'rgba(31,41,55,0.95)',
                     titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '600' },
@@ -363,6 +587,124 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
+
+    // --------------------------------------------------------
+    // Chart 2: Kemantapan Jalan (Mantap vs Tidak Mantap)
+    // --------------------------------------------------------
+    const ctx2 = document.getElementById('stabilityPieChart').getContext('2d');
+    const chartData2 = [
+        <?= (float)$totalMantap ?>,
+        <?= (float)$totalTidakMantap ?>
+    ];
+    const chartLabels2 = ['Mantap', 'Tidak Mantap'];
+    const chartColors2 = ['#10b981', '#ef4444']; // Hijau & Merah
+
+    const filtered2 = chartLabels2.reduce((acc, label, i) => {
+        if (chartData2[i] > 0) {
+            acc.labels.push(label);
+            acc.data.push(chartData2[i]);
+            acc.colors.push(chartColors2[i]);
+        }
+        return acc;
+    }, { labels: [], data: [], colors: [] });
+
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: filtered2.labels,
+            datasets: [{
+                data: filtered2.data,
+                backgroundColor: filtered2.colors,
+                borderWidth: 2.5,
+                borderColor: '#ffffff',
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#ffffff',
+                hoverOffset: 12
+            }]
+        },
+        plugins: [{
+            id: 'modernLabels2',
+            afterDraw: (chart) => {
+                const ctx2Draw = chart.ctx;
+                const dataset = chart.data.datasets[0];
+                const meta = chart.getDatasetMeta(0);
+                const total = dataset.data.reduce((a, b) => a + b, 0);
+                if (total <= 0) return;
+
+                meta.data.forEach((element, index) => {
+                    const dataVal = dataset.data[index];
+                    if (dataVal <= 0) return;
+
+                    const pct = ((dataVal / total) * 100).toFixed(1);
+                    const midAngle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+
+                    const innerPt = {
+                        x: element.x + Math.cos(midAngle) * (element.outerRadius + 4),
+                        y: element.y + Math.sin(midAngle) * (element.outerRadius + 4)
+                    };
+                    const outerPt = {
+                        x: element.x + Math.cos(midAngle) * (element.outerRadius + 16),
+                        y: element.y + Math.sin(midAngle) * (element.outerRadius + 16)
+                    };
+
+                    ctx2Draw.save();
+                    ctx2Draw.strokeStyle = 'rgba(156,163,175,0.4)';
+                    ctx2Draw.lineWidth = 0.8;
+                    ctx2Draw.beginPath();
+                    ctx2Draw.moveTo(innerPt.x, innerPt.y);
+                    ctx2Draw.lineTo(outerPt.x, outerPt.y);
+                    ctx2Draw.stroke();
+
+                    const labelPt = {
+                        x: element.x + Math.cos(midAngle) * (element.outerRadius + 24),
+                        y: element.y + Math.sin(midAngle) * (element.outerRadius + 24)
+                    };
+
+                    ctx2Draw.fillStyle = '#374151';
+                    ctx2Draw.font = '600 10px Inter, system-ui, sans-serif';
+                    ctx2Draw.textAlign = 'center';
+                    ctx2Draw.textBaseline = 'middle';
+                    ctx2Draw.fillText(pct + '%', labelPt.x, labelPt.y);
+
+                    ctx2Draw.restore();
+                });
+            }
+        }],
+        options: {
+            layout: { padding: 40 },
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1000,
+                easing: 'easeOutQuart'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: 'rgba(31,41,55,0.95)',
+                    titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '600' },
+                    bodyFont: { family: 'Inter, system-ui, sans-serif', size: 11 },
+                    padding: { top: 10, bottom: 10, left: 14, right: 14 },
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    boxPadding: 4,
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.raw;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return ` ${context.label}: ${new Intl.NumberFormat('id-ID').format(value)} m (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
 });
 </script>
 <?php endif; ?>

@@ -14,12 +14,8 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Strip Map: <?= e($ruas['nama_ruas']) ?></h1>
-                <p class="mt-1 text-sm text-gray-500">
-                    <span class="font-mono"><?= e($ruas['kode_ruas']) ?></span> &middot;
-                    STA <?= meter_to_sta($ruas['sta_awal']) ?> — <?= meter_to_sta($ruas['sta_akhir']) ?> &middot;
-                    Panjang: <?= format_number($ruas['panjang']) ?> m
-                </p>
+                <h1 class="text-2xl font-bold text-gray-900">Strip Map Ruas Jalan</h1>
+                <p class="text-sm text-gray-500">Manajemen segmen kondisi dan data teknis jalan.</p>
             </div>
         </div>
         <div class="flex gap-2">
@@ -40,6 +36,33 @@
                 </svg>
                 Tambah Segmen
             </a>
+        </div>
+    </div>
+
+    <!-- Data Umum Ruas Jalan Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Data Umum Ruas Jalan</h2>
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+            <div>
+                <span class="block text-xs font-medium text-gray-400 mb-1">Nama Ruas</span>
+                <span class="text-sm font-bold text-gray-900"><?= e($ruas['nama_ruas']) ?></span>
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-gray-400 mb-1">Nomor Ruas</span>
+                <span class="text-sm font-semibold font-mono text-gray-800"><?= e($ruas['kode_ruas']) ?></span>
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-gray-400 mb-1">Panjang Ruas</span>
+                <span class="text-sm font-bold text-gray-900"><?= format_number($ruas['panjang']) ?> m</span>
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-gray-400 mb-1">Koridor</span>
+                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['koridor'] ?? '-') ?></span>
+            </div>
+            <div>
+                <span class="block text-xs font-medium text-gray-400 mb-1">Kabupaten / Kota</span>
+                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['kabupaten_kota'] ?? '-') ?></span>
+            </div>
         </div>
     </div>
 

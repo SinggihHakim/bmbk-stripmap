@@ -56,6 +56,8 @@ class RuasService
             'sta_awal'  => $staAwal,
             'sta_akhir' => $staAkhir,
             'panjang'   => $panjang,
+            'koridor'   => !empty(trim($input['koridor'] ?? '')) ? trim($input['koridor']) : null,
+            'kabupaten_kota' => !empty(trim($input['kabupaten_kota'] ?? '')) ? trim($input['kabupaten_kota']) : null,
         ]);
 
         return ['success' => true, 'message' => 'Ruas jalan berhasil ditambahkan.', 'id' => $id];
@@ -75,6 +77,8 @@ class RuasService
         $this->model->update($id, [
             'kode_ruas' => trim($input['kode_ruas']),
             'nama_ruas' => trim($input['nama_ruas']),
+            'koridor'   => !empty(trim($input['koridor'] ?? '')) ? trim($input['koridor']) : null,
+            'kabupaten_kota' => !empty(trim($input['kabupaten_kota'] ?? '')) ? trim($input['kabupaten_kota']) : null,
         ]);
 
         return ['success' => true, 'message' => 'Ruas jalan berhasil diperbarui.'];

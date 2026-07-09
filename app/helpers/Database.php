@@ -50,7 +50,10 @@ class Database
             // Tampilkan halaman error yang jelas dengan link ke installer
             http_response_code(500);
             echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Database Error</title>';
+            echo '<link rel="shortcut icon" href="' . $baseUrl . '/assets/img/favicon.png" type="image/png">';
             echo '<script src="https://cdn.tailwindcss.com"></script>';
+
+
             echo '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">';
             echo '</head><body class="bg-gray-50 font-[Inter] min-h-screen flex items-center justify-center p-4">';
             echo '<div class="bg-white rounded-2xl shadow-lg border border-gray-200 max-w-md w-full p-8 text-center">';

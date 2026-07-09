@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($title ?? 'Strip Map Ruas Jalan') ?></title>
+    <link rel="shortcut icon" href="<?= base_url('assets/img/favicon.png') ?>" type="image/png">
+
+
 
     <!-- Google Font: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

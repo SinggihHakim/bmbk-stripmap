@@ -38,6 +38,8 @@ try {
             `sta_awal`   DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
             `sta_akhir`  DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
             `panjang`    DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+            `koridor`    VARCHAR(100)    NULL,
+            `kabupaten_kota` VARCHAR(100)    NULL,
             `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
             `updated_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (`id`),
@@ -84,6 +86,9 @@ try {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Installer — Strip Map Ruas Jalan</title>
+    <link rel="shortcut icon" href="assets/img/favicon.png" type="image/png">
+
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script>tailwind.config={theme:{extend:{fontFamily:{sans:['Inter','system-ui','sans-serif']}}}}</script>

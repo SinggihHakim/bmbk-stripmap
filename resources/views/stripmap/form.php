@@ -37,7 +37,7 @@
     <div x-data="stripmapForm()" class="space-y-6">
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <form action="<?= $action ?>" method="POST" class="p-6 space-y-6" @submit="return validateForm($event)">
+            <form action="<?= $action ?>" method="POST" class="p-6 space-y-6" @submit="validateForm($event)">
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left">
@@ -156,25 +156,39 @@
              class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900">Preview Strip Map (Realtime)</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Hover atau klik segmen warna untuk lihat detail kondisi.</p>
             </div>
             <div class="p-6 space-y-6">
-                <template x-for="(row, index) in validRows" :key="row.id">
-                    <div>
+                <template x-for="(row, rIdx) in validRows" :key="row.id">
+                    <div x-data="{ activeLabel: null, activePct: 0 }">
                         <div class="flex justify-between items-center mb-1 text-sm">
                             <span class="font-medium text-gray-700">STA <span x-text="row.staAwal"></span> - <span x-text="row.staAkhir"></span></span>
                             <span class="text-gray-500" x-text="formatNumber(row.panjang) + ' m'"></span>
                         </div>
-                        <div class="flex h-8 rounded-lg overflow-hidden shadow-sm">
+                        <!-- Strip Bar -->
+                        <div class="flex h-10 rounded-lg overflow-hidden shadow-sm">
                             <template x-for="(segment, idx) in getSegments(row)" :key="segment.key">
-                                <div class="relative group transition-all duration-300 ease-out"
+                                <div class="relative transition-all duration-300 ease-out cursor-pointer"
                                      :style="'width:' + segment.percent + '%; ' + segment.bgStyle"
-                                     x-show="segment.value > 0">
-                                    <!-- Tooltip -->
-                                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                                        <span x-text="segment.label" class="font-semibold"></span><br>
-                                        <span x-text="formatNumber(segment.value) + ' m'"></span><br>
-                                        <span x-text="segment.percent.toFixed(1) + '%'"></span>
-                                        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-1 border-4 border-transparent border-t-gray-900"></div>
+                                     x-show="segment.value > 0"
+                                     @mouseenter="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct"
+                                     @mouseleave="activeLabel = null"
+                                     @click="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct">
+                                    <!-- Highlight ring -->
+                                    <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 hover:opacity-100 transition-opacity"></div>
+                                </div>
+                            </template>
+                        </div>
+                        <!-- Label di Bawah Bar -->
+                        <div class="relative w-full h-0 z-20">
+                            <template x-if="activeLabel">
+                                <div class="absolute top-1 flex flex-col items-center -translate-x-1/2 transition-all duration-150 ease-out"
+                                     :style="'left:' + activePct + '%'">
+                                    <div class="w-px h-2.5" :style="'background-color:' + activeLabel.color"></div>
+                                    <div class="mt-0.5 px-2 py-1 rounded-md border shadow-sm text-center whitespace-nowrap backdrop-blur-sm"
+                                         :style="'border-color:' + activeLabel.color + '40; background-color:' + activeLabel.color + '15'">
+                                        <p class="text-xs font-bold" :style="'color:' + activeLabel.color" x-text="activeLabel.panjang + ' m'"></p>
+                                        <p class="text-[10px] font-semibold text-gray-600" x-text="activeLabel.kondisi"></p>
                                     </div>
                                 </div>
                             </template>
@@ -183,11 +197,11 @@
                 </template>
 
                 <!-- Legend -->
-                <div class="flex flex-wrap gap-4 mt-6 pt-4 border-t border-gray-100 justify-center">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-xs text-gray-600">Baik</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-400"></span><span class="text-xs text-gray-600">Sedang</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span><span class="text-xs text-gray-600">Rusak Ringan</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-red-500"></span><span class="text-xs text-gray-600">Rusak Berat</span></div>
+                <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-100 justify-center">
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#22c55e"></span><span class="text-xs text-gray-600">Baik</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#eab308"></span><span class="text-xs text-gray-600">Sedang</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#f97316"></span><span class="text-xs text-gray-600">Rusak Ringan</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#ef4444"></span><span class="text-xs text-gray-600">Rusak Berat</span></div>
                 </div>
             </div>
         </div>
@@ -336,17 +350,37 @@ function stripmapForm() {
 
         get formErrors() {
             let errors = [];
+            let validSegments = [];
+
             this.rows.forEach((row, idx) => {
                 // Abaikan baris kosong sepenuhnya (kecuali form isEdit)
                 const isTotallyEmpty = !row.staAwal && !row.staAkhir && !row.baik && !row.sedang && !row.rusakRingan && !row.rusakBerat;
 
-                if (!isTotallyEmpty && row.error) {
-                    errors.push(`Baris ${idx + 1}: ${row.error}`);
-                }
-                if (!isTotallyEmpty && !row.error && !row.isValid) {
-                    errors.push(`Baris ${idx + 1}: Data belum valid.`);
+                if (!isTotallyEmpty) {
+                    if (row.error) {
+                        errors.push(`Baris ${idx + 1}: ${row.error}`);
+                    } else if (!row.isValid) {
+                        errors.push(`Baris ${idx + 1}: Data belum valid.`);
+                    } else {
+                        validSegments.push({
+                            index: idx + 1,
+                            awal: this.staToMeter(row.staAwal),
+                            akhir: this.staToMeter(row.staAkhir),
+                            staAwalStr: row.staAwal,
+                            staAkhirStr: row.staAkhir
+                        });
+                    }
                 }
             });
+
+            // Deteksi Tumpang Tindih (Overlapping) Segmen
+            validSegments.sort((a, b) => a.awal - b.awal);
+            for (let i = 1; i < validSegments.length; i++) {
+                if (validSegments[i].awal < validSegments[i-1].akhir) {
+                    errors.push(`Tumpang tindih terdeteksi antara Baris ${validSegments[i-1].index} (${validSegments[i-1].staAwalStr} s/d ${validSegments[i-1].staAkhirStr}) dan Baris ${validSegments[i].index} (${validSegments[i].staAwalStr} s/d ${validSegments[i].staAkhirStr}).`);
+                }
+            }
+
             return errors;
         },
 
@@ -359,6 +393,7 @@ function stripmapForm() {
         },
 
         get isFormValid() {
+            if (this.formErrors.length > 0) return false;
             const active = this.activeRows;
             return active.length > 0 && active.every(row => row.isValid);
         },
@@ -441,8 +476,13 @@ function stripmapForm() {
 
             const active = conditions.filter(c => c.value > 0);
 
+            // Hitung posisi tengah kumulatif untuk label pointer
+            let cumulative = 0;
             return active.map((c, idx) => {
-                c.bgStyle = `background-color: ${c.color}`;
+                const nextColor = idx < active.length - 1 ? active[idx + 1].color : c.color;
+                c.bgStyle = `background: linear-gradient(to right, ${c.color} 60%, ${nextColor} 100%)`;
+                c.midPct = cumulative + (c.percent / 2);
+                cumulative += c.percent;
                 return c;
             });
         },
