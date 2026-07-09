@@ -138,7 +138,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <?php if ($totalPanjang > 0): ?>
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style="background-color: #ffffff; border-color: #e5e7eb;"
      x-data="{ activeLabel: null, activePct: 0, activeChunk: null }"
      @click.outside="activeLabel = null; activeChunk = null">
     <div class="px-6 py-4 border-b border-gray-200">
@@ -153,7 +153,7 @@
             <!-- Kiri: Pie Charts (lg:col-span-4) -->
             <div class="lg:col-span-4 flex flex-col gap-6">
                 <!-- Pie Chart 1: Proporsi Kondisi Jalan -->
-                <div class="flex flex-col items-center justify-center bg-gray-50/60 rounded-2xl p-5 border border-gray-100 min-h-[220px]">
+                <div class="flex flex-col items-center justify-center rounded-2xl p-5 border min-h-[220px]" style="background-color: rgba(249, 250, 251, 0.6); border-color: #e5e7eb;">
                     <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Proporsi Kondisi Jalan</h4>
                     <style>
                         @keyframes pie-spin-in {
@@ -174,7 +174,7 @@
                     <div class="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-5">
                         <?php
                             $legendItems = [
-                                ['label' => 'Baik',         'color' => '#22c55e', 'pct' => $pctBaik,   'val' => $totalBaik],
+                                ['label' => 'Baik',         'color' => '#10b981', 'pct' => $pctBaik,   'val' => $totalBaik],
                                 ['label' => 'Sedang',       'color' => '#facc15', 'pct' => $pctSedang, 'val' => $totalSedang],
                                 ['label' => 'Rusak Ringan', 'color' => '#f97316', 'pct' => $pctRR,     'val' => $totalRR],
                                 ['label' => 'Rusak Berat',  'color' => '#ef4444', 'pct' => $pctRB,     'val' => $totalRB],
@@ -183,7 +183,7 @@
                         <?php foreach ($legendItems as $li): ?>
                             <?php if ($li['val'] > 0): ?>
                             <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full" style="background: <?= $li['color'] ?>"></span>
+                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?= $li['color'] ?>;"></span>
                                 <span class="text-[11px] font-medium text-gray-600"><?= $li['label'] ?></span>
                                 <span class="text-[10px] text-gray-400"><?= number_format($li['pct'], 1) ?>%</span>
                             </div>
@@ -193,7 +193,7 @@
                 </div>
 
                 <!-- Pie Chart 2: Kemantapan Jalan -->
-                <div class="flex flex-col items-center justify-center bg-gray-50/60 rounded-2xl p-5 border border-gray-100 min-h-[220px]">
+                <div class="flex flex-col items-center justify-center rounded-2xl p-5 border min-h-[220px]" style="background-color: rgba(249, 250, 251, 0.6); border-color: #e5e7eb;">
                     <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Kemantapan Jalan</h4>
                     <div class="pie-chart-container w-full max-w-[180px] aspect-square relative">
                         <canvas id="stabilityPieChart"></canvas>
@@ -201,12 +201,12 @@
                     <!-- Legend -->
                     <div class="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5">
                         <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
                             <span class="text-[11px] font-medium text-gray-600">Mantap</span>
                             <span class="text-[10px] text-gray-400"><?= number_format($pctMantap, 1) ?>%</span>
                         </div>
                         <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
                             <span class="text-[11px] font-medium text-gray-600">Tidak Mantap</span>
                             <span class="text-[10px] text-gray-400"><?= number_format($pctTidakMantap, 1) ?>%</span>
                         </div>
@@ -217,21 +217,16 @@
             <!-- Kanan: Line Chart & Stats (lg:col-span-8) -->
             <div class="lg:col-span-8 flex flex-col space-y-3">
                 <!-- Linear Strip Map Chunks (Max 5 km per bar, sesuai Task 7) -->
-                <div class="space-y-3">
+                <div class="space-y-1.5">
                     <?php foreach ($chunks as $chunkIdx => $chunk): ?>
                         <?php 
                             $chunkTotalPanjang = $chunk['end'] - $chunk['start']; 
                             if ($chunkTotalPanjang <= 0) continue;
                         ?>
-                        <div class="space-y-1 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md font-mono">
-                                    <?= meter_to_sta($chunk['start']) ?> — <?= meter_to_sta($chunk['end']) ?>
-                                </span>
-                            </div>
+                        <div class="space-y-1 border-b border-gray-100 pb-1.5 last:border-0 last:pb-0">
 
-                            <!-- Container Bar Jalur Linear (Dipertipis ke h-8, sesuai Task 3) -->
-                            <div class="flex h-8 rounded-xl overflow-hidden shadow-md bg-gray-100 border border-gray-200">
+                            <!-- Container Bar Jalur Linear (Dipertipis ke h-5) -->
+                            <div class="flex h-5 rounded-lg overflow-hidden shadow bg-gray-100 border border-gray-200">
                                 <?php
                                     $cumulativePct = 0;
                                 ?>
@@ -260,7 +255,7 @@
                                         <?php else: ?>
                                             <?php
                                                 $segConditions = [
-                                                    ['label' => 'Baik',         'value' => $sm['baik'],         'color' => '#22c55e'],
+                                                    ['label' => 'Baik',         'value' => $sm['baik'],         'color' => '#10b981'],
                                                     ['label' => 'Sedang',       'value' => $sm['sedang'],       'color' => '#facc15'],
                                                     ['label' => 'Rusak Ringan', 'value' => $sm['rusak_ringan'], 'color' => '#f97316'],
                                                     ['label' => 'Rusak Berat',  'value' => $sm['rusak_berat'],  'color' => '#ef4444'],
@@ -308,63 +303,33 @@
                                 </template>
                             </div>
 
-                            <!-- Skala Penggaris STA -->
+                            <!-- Skala Penggaris STA (Setiap 250m) -->
                             <?php
-                                $ticks = [];
-                                $ticks[] = ['meter' => $chunk['start'], 'pct' => 0];
-
-                                foreach ($chunk['stripmaps'] as $sm) {
-                                    $smAwal  = (float)$sm['sta_awal'];
-                                    $smAkhir = (float)$sm['sta_akhir'];
-
-                                    $pctAwal = $chunkTotalPanjang > 0 ? (($smAwal - $chunk['start']) / $chunkTotalPanjang) * 100 : 0;
-                                    $ticks[] = ['meter' => $smAwal, 'pct' => $pctAwal];
-
-                                    $pctAkhir = $chunkTotalPanjang > 0 ? (($smAkhir - $chunk['start']) / $chunkTotalPanjang) * 100 : 0;
-                                    $ticks[] = ['meter' => $smAkhir, 'pct' => $pctAkhir];
-                                }
-
-                                $uniqueTicks = [];
-                                $seen = [];
-                                foreach ($ticks as $t) {
-                                    $key = round($t['meter'], 1);
-                                    if (!isset($seen[$key])) {
-                                        $seen[$key] = true;
-                                        $uniqueTicks[] = $t;
-                                    }
-                                }
-                                usort($uniqueTicks, fn($a, $b) => $a['pct'] <=> $b['pct']);
-
                                 $filteredTicks = [];
-                                $filteredTicks[] = $uniqueTicks[0];
-                                $lastPct = $uniqueTicks[0]['pct'];
-                                $totalTicksCount = count($uniqueTicks);
+                                $filteredTicks[] = ['meter' => $chunk['start'], 'pct' => 0];
 
-                                for ($i = 1; $i < $totalTicksCount - 1; $i++) {
-                                    $tick = $uniqueTicks[$i];
-                                    $pctFromLast = $tick['pct'] - $lastPct;
-                                    $pctFromEnd  = 100 - $tick['pct'];
+                                $firstMultiple = ceil($chunk['start'] / 250) * 250;
+                                if ($firstMultiple == $chunk['start']) {
+                                    $firstMultiple += 250;
+                                }
 
-                                    // Batasi jarak minimal 7.0% agar tidak tumpang tindih, dan 5.0% dari ujung kanan
-                                    if ($pctFromLast >= 7.0 && $pctFromEnd >= 5.0) {
-                                        $filteredTicks[] = $tick;
-                                        $lastPct = $tick['pct'];
+                                for ($m = $firstMultiple; $m < $chunk['end']; $m += 250) {
+                                    $pct = (($m - $chunk['start']) / $chunkTotalPanjang) * 100;
+                                    // Berikan toleransi jarak minimal (50m) agar tidak bertabrakan dengan ujung
+                                    if (($m - $chunk['start']) >= 50 && ($chunk['end'] - $m) >= 50) {
+                                        $filteredTicks[] = [
+                                            'meter' => $m,
+                                            'pct'   => $pct
+                                        ];
                                     }
                                 }
 
-                                // Selalu masukkan tick terakhir secara aman
-                                if ($totalTicksCount > 1) {
-                                    $lastTick = $uniqueTicks[$totalTicksCount - 1];
-                                    $pctFromLast = $lastTick['pct'] - $lastPct;
-                                    if ($pctFromLast < 5.0 && count($filteredTicks) > 1) {
-                                        // Jika terlalu dekat dengan tick terakhir yang dimasukkan, buang tick sebelumnya demi kejelasan ujung kanan
-                                        array_pop($filteredTicks);
-                                    }
-                                    $filteredTicks[] = $lastTick;
+                                if ($chunk['end'] > $chunk['start']) {
+                                    $filteredTicks[] = ['meter' => $chunk['end'], 'pct' => 100];
                                 }
                             ?>
 
-                            <div class="relative w-full h-8">
+                            <div class="relative w-full h-6">
                                 <div class="absolute top-0 left-0 right-0 h-px bg-gray-300"></div>
                                 <?php foreach ($filteredTicks as $tick): ?>
                                     <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" style="left: <?= number_format($tick['pct'], 4, '.', '') ?>%">
@@ -384,36 +349,36 @@
                         <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Detail Kondisi Segmen</h4>
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <!-- Baik -->
-                            <div class="p-4 rounded-xl bg-green-50 border border-green-100/60 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #f0fdf4; border-color: #d1fae5;">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
-                                    <span class="text-xs font-semibold text-green-800">Baik</span>
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
+                                    <span class="text-xs font-semibold text-emerald-800">Baik</span>
                                 </div>
-                                <p class="text-xl font-bold text-green-700"><?= format_number($totalBaik) ?> <span class="text-xs font-normal text-green-600">m</span></p>
-                                <p class="text-xs text-green-600 mt-1"><?= number_format($pctBaik, 1) ?>%</p>
+                                <p class="text-xl font-bold text-emerald-700"><?= format_number($totalBaik) ?> <span class="text-xs font-normal text-emerald-600">m</span></p>
+                                <p class="text-xs text-emerald-600 mt-1"><?= number_format($pctBaik, 1) ?>%</p>
                             </div>
                             <!-- Sedang -->
-                            <div class="p-4 rounded-xl bg-yellow-50 border border-yellow-100/60 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fefce8; border-color: #fef08a;">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15;"></span>
                                     <span class="text-xs font-semibold text-yellow-800">Sedang</span>
                                 </div>
                                 <p class="text-xl font-bold text-yellow-700"><?= format_number($totalSedang) ?> <span class="text-xs font-normal text-yellow-600">m</span></p>
                                 <p class="text-xs text-yellow-600 mt-1"><?= number_format($pctSedang, 1) ?>%</p>
                             </div>
                             <!-- Rusak Ringan -->
-                            <div class="p-4 rounded-xl bg-orange-50 border border-orange-100/60 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fff7ed; border-color: #ffedd5;">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-orange-500"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316;"></span>
                                     <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
                                 </div>
                                 <p class="text-xl font-bold text-orange-700"><?= format_number($totalRR) ?> <span class="text-xs font-normal text-orange-600">m</span></p>
                                 <p class="text-xs text-orange-600 mt-1"><?= number_format($pctRR, 1) ?>%</p>
                             </div>
                             <!-- Rusak Berat -->
-                            <div class="p-4 rounded-xl bg-red-50 border border-red-100/60 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fef2f2; border-color: #fee2e2;">
                                 <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
                                     <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
                                 </div>
                                 <p class="text-xl font-bold text-red-700"><?= format_number($totalRB) ?> <span class="text-xs font-normal text-red-600">m</span></p>
@@ -427,31 +392,31 @@
                         <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Kemantapan Jalan (Stability)</h4>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Mantap -->
-                            <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-100 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #f0fdf4; border-color: #d1fae5;">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
                                         <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                                     </div>
                                     <span class="text-xs font-bold text-emerald-600"><?= number_format($pctMantap, 1) ?>%</span>
                                 </div>
                                 <p class="text-2xl font-extrabold text-emerald-700"><?= format_number($totalMantap) ?> <span class="text-sm font-semibold text-emerald-600">m</span></p>
-                                <div class="mt-3 w-full bg-emerald-200/50 rounded-full h-2">
-                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: <?= number_format($pctMantap, 4, '.', '') ?>%"></div>
+                                <div class="mt-3 w-full rounded-full h-2" style="background-color: rgba(16, 185, 129, 0.2);">
+                                    <div class="h-2 rounded-full" style="width: <?= number_format($pctMantap, 4, '.', '') ?>%; background-color: #10b981;"></div>
                                 </div>
                             </div>
                             <!-- Tidak Mantap -->
-                            <div class="p-4 rounded-xl bg-rose-50 border border-rose-100 shadow-sm">
+                            <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fff1f2; border-color: #ffe4e6;">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
                                         <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(Rusak Ringan + Rusak Berat)</span></span>
                                     </div>
                                     <span class="text-xs font-bold text-rose-600"><?= number_format($pctTidakMantap, 1) ?>%</span>
                                 </div>
                                 <p class="text-2xl font-extrabold text-rose-700"><?= format_number($totalTidakMantap) ?> <span class="text-sm font-semibold text-rose-600">m</span></p>
-                                <div class="mt-3 w-full bg-rose-200/50 rounded-full h-2">
-                                    <div class="bg-rose-500 h-2 rounded-full" style="width: <?= number_format($pctTidakMantap, 4, '.', '') ?>%"></div>
+                                <div class="mt-3 w-full rounded-full h-2" style="background-color: rgba(239, 68, 68, 0.2);">
+                                    <div class="h-2 rounded-full" style="width: <?= number_format($pctTidakMantap, 4, '.', '') ?>%; background-color: #ef4444;"></div>
                                 </div>
                             </div>
                         </div>
@@ -467,12 +432,13 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
+    const isPreview = window.location.pathname.includes('/preview/');
     // --------------------------------------------------------
     // Chart 1: Proporsi Kondisi Jalan (Baik, Sedang, RR, RB)
     // --------------------------------------------------------
     const ctx1 = document.getElementById('conditionPieChart').getContext('2d');
 
-    const chartColors1 = ['#22c55e', '#facc15', '#f97316', '#ef4444'];
+    const chartColors1 = ['#10b981', '#facc15', '#f97316', '#ef4444'];
     const chartLabels1 = ['Baik', 'Sedang', 'Rusak Ringan', 'Rusak Berat'];
     const chartData1   = [
         <?= (float)$totalBaik ?>,
@@ -558,9 +524,9 @@ document.addEventListener("DOMContentLoaded", function() {
             responsive: true,
             maintainAspectRatio: true,
             animation: {
-                animateRotate: true,
-                animateScale: true,
-                duration: 1000,
+                animateRotate: !isPreview,
+                animateScale: !isPreview,
+                duration: isPreview ? 0 : 1000,
                 easing: 'easeOutQuart'
             },
             plugins: {
@@ -675,9 +641,9 @@ document.addEventListener("DOMContentLoaded", function() {
             responsive: true,
             maintainAspectRatio: true,
             animation: {
-                animateRotate: true,
-                animateScale: true,
-                duration: 1000,
+                animateRotate: !isPreview,
+                animateScale: !isPreview,
+                duration: isPreview ? 0 : 1000,
                 easing: 'easeOutQuart'
             },
             plugins: {

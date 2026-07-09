@@ -40,29 +40,35 @@
     </div>
 
     <!-- Data Umum Ruas Jalan Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Data Umum Ruas Jalan</h2>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Nama Ruas</span>
-                <span class="text-sm font-bold text-gray-900"><?= e($ruas['nama_ruas']) ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Nomor Ruas</span>
-                <span class="text-sm font-semibold font-mono text-gray-800"><?= e($ruas['kode_ruas']) ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Panjang Ruas</span>
-                <span class="text-sm font-bold text-gray-900"><?= format_number($ruas['panjang']) ?> m</span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Koridor</span>
-                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['koridor'] ?? '-') ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Kabupaten / Kota</span>
-                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['kabupaten_kota'] ?? '-') ?></span>
-            </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-sm font-semibold text-gray-900">Data Umum Ruas Jalan</h2>
+        </div>
+        <div class="border-t border-gray-100">
+            <table class="w-full text-sm text-left">
+                <tbody class="divide-y divide-gray-100">
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Nama Ruas</td>
+                        <td class="px-6 py-3 text-gray-900 font-bold"><?= e($ruas['nama_ruas']) ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Nomor Ruas</td>
+                        <td class="px-6 py-3 text-gray-800 font-semibold font-mono"><?= e($ruas['kode_ruas']) ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Panjang Ruas</td>
+                        <td class="px-6 py-3 text-gray-900 font-bold"><?= format_number($ruas['panjang']) ?> m</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Koridor</td>
+                        <td class="px-6 py-3 text-gray-900 font-semibold"><?= e($ruas['koridor'] ?? '-') ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Kabupaten / Kota</td>
+                        <td class="px-6 py-3 text-gray-900 font-semibold"><?= e($ruas['kabupaten_kota'] ?? '-') ?></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -73,11 +79,16 @@
 
     <!-- Table Card -->
     <?php if (!empty($stripmaps)): ?>
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
+    <div x-data="{ isOpen: true }" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer select-none" @click="isOpen = !isOpen">
             <h2 class="text-lg font-semibold text-gray-900">Data Segmen Strip Map</h2>
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none transition-transform duration-200" :class="isOpen ? 'rotate-90' : 'rotate-0'">
+                <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+            </button>
         </div>
-        <div class="overflow-x-auto">
+        <div x-show="isOpen" x-collapse class="overflow-x-auto">
             <table class="w-full">
                 <thead>
                     <tr class="bg-gray-50 border-b border-gray-200">
@@ -85,7 +96,7 @@
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">STA Awal</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">STA Akhir</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Panjang</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-green-700 uppercase tracking-wider">Baik</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-emerald-700 uppercase tracking-wider">Baik</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-yellow-700 uppercase tracking-wider">Sedang</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-orange-700 uppercase tracking-wider">R. Ringan</th>
                         <th class="px-4 py-3 text-center text-xs font-semibold text-red-700 uppercase tracking-wider">R. Berat</th>
@@ -100,7 +111,7 @@
                         <td class="px-4 py-3 text-sm text-gray-700 text-center font-mono"><?= meter_to_sta($sm['sta_akhir']) ?></td>
                         <td class="px-4 py-3 text-sm text-gray-700 text-center font-semibold"><?= format_number($sm['panjang']) ?></td>
                         <td class="px-4 py-3 text-sm text-center">
-                            <span class="inline-flex px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-xs font-semibold"><?= format_number($sm['baik']) ?></span>
+                            <span class="inline-flex px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-xs font-semibold"><?= format_number($sm['baik']) ?></span>
                         </td>
                         <td class="px-4 py-3 text-sm text-center">
                             <span class="inline-flex px-2 py-0.5 rounded-md bg-yellow-50 text-yellow-700 text-xs font-semibold"><?= format_number($sm['sedang']) ?></span>
