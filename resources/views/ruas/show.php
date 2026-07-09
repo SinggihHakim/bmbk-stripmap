@@ -19,29 +19,35 @@
     </div>
 
     <!-- Data Umum Ruas Jalan Card -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Data Umum Ruas Jalan</h2>
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-6">
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Nama Ruas</span>
-                <span class="text-sm font-bold text-gray-900"><?= e($ruas['nama_ruas']) ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Nomor Ruas</span>
-                <span class="text-sm font-semibold font-mono text-gray-800"><?= e($ruas['kode_ruas']) ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Panjang Ruas</span>
-                <span class="text-sm font-bold text-gray-900"><?= format_number($ruas['panjang']) ?> m</span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Koridor</span>
-                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['koridor'] ?? '-') ?></span>
-            </div>
-            <div>
-                <span class="block text-xs font-medium text-gray-400 mb-1">Kabupaten / Kota</span>
-                <span class="text-sm font-semibold text-gray-900"><?= e($ruas['kabupaten_kota'] ?? '-') ?></span>
-            </div>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-sm font-semibold text-gray-900">Data Umum Ruas Jalan</h2>
+        </div>
+        <div class="border-t border-gray-100">
+            <table class="w-full text-sm text-left">
+                <tbody class="divide-y divide-gray-100">
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Nama Ruas</td>
+                        <td class="px-6 py-3 text-gray-900 font-bold"><?= e($ruas['nama_ruas']) ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Nomor Ruas</td>
+                        <td class="px-6 py-3 text-gray-800 font-semibold font-mono"><?= e($ruas['kode_ruas']) ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Panjang Ruas</td>
+                        <td class="px-6 py-3 text-gray-900 font-bold"><?= format_number($ruas['panjang']) ?> m</td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Koridor</td>
+                        <td class="px-6 py-3 text-gray-900 font-semibold"><?= e($ruas['koridor'] ?? '-') ?></td>
+                    </tr>
+                    <tr class="hover:bg-gray-50/50 transition-colors">
+                        <td class="px-6 py-3 font-semibold text-gray-500 w-1/4">Kabupaten / Kota</td>
+                        <td class="px-6 py-3 text-gray-900 font-semibold"><?= e($ruas['kabupaten_kota'] ?? '-') ?></td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

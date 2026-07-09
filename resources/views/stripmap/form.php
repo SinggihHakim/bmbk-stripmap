@@ -198,7 +198,7 @@
 
                 <!-- Legend -->
                 <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-100 justify-center">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#22c55e"></span><span class="text-xs text-gray-600">Baik</span></div>
+                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#10b981"></span><span class="text-xs text-gray-600">Baik</span></div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#eab308"></span><span class="text-xs text-gray-600">Sedang</span></div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#f97316"></span><span class="text-xs text-gray-600">Rusak Ringan</span></div>
                     <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#ef4444"></span><span class="text-xs text-gray-600">Rusak Berat</span></div>
@@ -468,7 +468,7 @@ function stripmapForm() {
             const total = baik + sedang + rRingan + rBerat || 1;
 
             const conditions = [
-                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#22c55e' },
+                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#10b981' },
                 { key: 'sedang', label: 'Sedang', value: sedang, percent: (sedang / total) * 100, color: '#eab308' },
                 { key: 'rusak_ringan', label: 'Rusak Ringan', value: rRingan, percent: (rRingan / total) * 100, color: '#f97316' },
                 { key: 'rusak_berat', label: 'Rusak Berat', value: rBerat, percent: (rBerat / total) * 100, color: '#ef4444' }

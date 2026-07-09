@@ -46,7 +46,7 @@
         <!-- Card 3: Kondisi Baik -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
             <div class="mb-4">
-                <div class="w-10 h-10 bg-green-50 text-green-600 rounded-lg flex items-center justify-center">
+                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -55,7 +55,7 @@
             <h3 class="text-3xl font-bold text-gray-900"><?= $kondisiBaik ?? 68 ?>%</h3>
             <p class="text-[13px] font-medium text-gray-500 mt-1">Kondisi Baik</p>
             <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5">
-                <div class="bg-green-500 h-1.5 rounded-full" style="width: <?= $kondisiBaik ?? 68 ?>%"></div>
+                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <?= $kondisiBaik ?? 68 ?>%"></div>
             </div>
         </div>
 

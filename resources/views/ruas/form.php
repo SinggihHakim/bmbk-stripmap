@@ -523,7 +523,7 @@ function ruasDanStripmapForm() {
             const total = baik + sedang + rRingan + rBerat || 1;
 
             const conditions = [
-                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#22c55e' },
+                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#10b981' },
                 { key: 'sedang', label: 'Sedang', value: sedang, percent: (sedang / total) * 100, color: '#facc15' },
                 { key: 'rusak_ringan', label: 'Rusak Ringan', value: rRingan, percent: (rRingan / total) * 100, color: '#f97316' },
                 { key: 'rusak_berat', label: 'Rusak Berat', value: rBerat, percent: (rBerat / total) * 100, color: '#ef4444' }
