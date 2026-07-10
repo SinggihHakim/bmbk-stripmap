@@ -193,7 +193,7 @@
         }
      }"
      @click.outside="activeLabel = null; activeChunk = null">
-    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between gap-4">
         <div>
             <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
             <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
