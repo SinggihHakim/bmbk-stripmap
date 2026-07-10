@@ -14,8 +14,6 @@ class StripmapController
 
     public function __construct()
     {
-        require_once BASE_PATH . '/app/services/StripmapService.php';
-        require_once BASE_PATH . '/app/services/RuasService.php';
         $this->service     = new StripmapService();
         $this->ruasService = new RuasService();
     }

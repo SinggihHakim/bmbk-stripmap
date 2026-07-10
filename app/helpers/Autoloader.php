@@ -3,7 +3,7 @@
 /**
  * Autoloader sederhana
  *
- * Memuat class secara otomatis berdasarkan namespace/path.
+ * Memuat class secara otomatis berdasarkan namespace/path maupun fallback global class.
  */
 
 spl_autoload_register(function ($className) {
@@ -24,6 +24,22 @@ spl_autoload_register(function ($className) {
                 require_once $file;
                 return;
             }
+        }
+    }
+
+    // Fallback: cari class global di direktori aplikasi
+    $directories = [
+        BASE_PATH . '/app/controllers/',
+        BASE_PATH . '/app/models/',
+        BASE_PATH . '/app/services/',
+        BASE_PATH . '/app/helpers/',
+    ];
+
+    foreach ($directories as $directory) {
+        $file = $directory . $className . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
         }
     }
 });

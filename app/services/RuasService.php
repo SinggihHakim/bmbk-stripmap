@@ -14,7 +14,6 @@ class RuasService
 
     public function __construct()
     {
-        require_once BASE_PATH . '/app/models/RuasJalan.php';
         $this->model = new RuasJalan();
     }
 

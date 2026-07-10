@@ -65,10 +65,17 @@ class RuasJalan
     {
         $sets   = [];
         $params = ['id' => $id];
+        $allowedColumns = ['kode_ruas', 'nama_ruas', 'sta_awal', 'sta_akhir', 'panjang', 'koridor', 'kabupaten_kota'];
 
         foreach ($data as $key => $value) {
-            $sets[]       = "$key = :$key";
-            $params[$key] = $value;
+            if (in_array($key, $allowedColumns, true)) {
+                $sets[]       = "$key = :$key";
+                $params[$key] = $value;
+            }
+        }
+
+        if (empty($sets)) {
+            return false;
         }
 
         $sql = 'UPDATE ruas_jalan SET ' . implode(', ', $sets) . ' WHERE id = :id';
@@ -82,17 +89,23 @@ class RuasJalan
     public function updateStaFromStripmap(int $ruasId): bool
     {
         $sql = 'UPDATE ruas_jalan r
-                SET r.sta_awal  = COALESCE((SELECT MIN(s.sta_awal) FROM stripmap s WHERE s.ruas_id = :id1), 0),
-                    r.sta_akhir = COALESCE((SELECT MAX(s.sta_akhir) FROM stripmap s WHERE s.ruas_id = :id2), 0),
-                    r.panjang   = COALESCE((SELECT SUM(s.panjang) FROM stripmap s WHERE s.ruas_id = :id3), 0)
-                WHERE r.id = :id4';
+                JOIN (
+                    SELECT 
+                        COALESCE(MIN(sta_awal), 0) as min_awal,
+                        COALESCE(MAX(sta_akhir), 0) as max_akhir,
+                        COALESCE(SUM(panjang), 0) as total_panjang
+                    FROM stripmap
+                    WHERE ruas_id = :ruas_id
+                ) s
+                SET r.sta_awal  = s.min_awal,
+                    r.sta_akhir = s.max_akhir,
+                    r.panjang   = s.total_panjang
+                WHERE r.id = :id';
 
         $stmt = $this->db->prepare($sql);
         return $stmt->execute([
-            'id1' => $ruasId,
-            'id2' => $ruasId,
-            'id3' => $ruasId,
-            'id4' => $ruasId,
+            'ruas_id' => $ruasId,
+            'id'      => $ruasId,
         ]);
     }
 

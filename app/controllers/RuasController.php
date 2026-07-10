@@ -13,7 +13,6 @@ class RuasController
 
     public function __construct()
     {
-        require_once BASE_PATH . '/app/services/RuasService.php';
         $this->service = new RuasService();
     }
 
@@ -57,7 +56,6 @@ class RuasController
                 });
 
                 if (!empty($rows)) {
-                    require_once BASE_PATH . '/app/services/StripmapService.php';
                     $stripmapService = new StripmapService();
 
                     // Gunakan fungsi batchCreate dari StripmapService
@@ -98,7 +96,6 @@ class RuasController
             return;
         }
 
-        require_once BASE_PATH . '/app/services/StripmapService.php';
         $stripmapService = new StripmapService();
         $stripmaps = $stripmapService->getByRuasId($id);
 
@@ -118,7 +115,6 @@ class RuasController
         $result = $this->service->update($id, $_POST);
 
         if ($result['success']) {
-            require_once BASE_PATH . '/app/services/StripmapService.php';
             $stripmapService = new StripmapService();
 
             // Hapus segmen lama terlebih dahulu untuk digantikan dengan baris yang baru disubmit
@@ -183,7 +179,6 @@ class RuasController
             return;
         }
 
-        require_once BASE_PATH . '/app/services/StripmapService.php';
         $stripmapService = new StripmapService();
 
         $data = [

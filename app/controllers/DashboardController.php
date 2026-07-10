@@ -10,9 +10,6 @@ class DashboardController
 {
     public function index(): void
     {
-        require_once BASE_PATH . '/app/services/RuasService.php';
-        require_once BASE_PATH . '/app/services/StripmapService.php';
-
         $ruasService = new RuasService();
         $ruasList    = $ruasService->getAll();
         
@@ -44,7 +41,7 @@ class DashboardController
 
         $data = [
             'title'          => 'Dashboard',
-            'totalRuas'      => $ruasService->count(),
+            'totalRuas'      => count($ruasList),
             'ruasList'       => $ruasList,
             'totalPanjang'   => $totalPanjangKm,
             'baikKm'         => $baikKm,

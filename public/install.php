@@ -9,6 +9,12 @@
 
 define('BASE_PATH', dirname(__DIR__));
 
+$lockFile = BASE_PATH . '/config/install.lock';
+if (file_exists($lockFile)) {
+    http_response_code(403);
+    die('<h3>Akses Ditolak: Aplikasi telah terinstal secara aman.</h3><p>Untuk menjalankan ulang installer, silakan hapus file <code>config/install.lock</code> terlebih dahulu.</p>');
+}
+
 $config = require BASE_PATH . '/config/database.php';
 
 $messages = [];
@@ -74,6 +80,9 @@ try {
     // 6. Verifikasi
     $tables = $pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
     $messages[] = ['ok', 'Tabel aktif: ' . implode(', ', $tables)];
+
+    // Buat file lock keamanan
+    @file_put_contents($lockFile, 'Installed on ' . date('Y-m-d H:i:s'));
 
 } catch (PDOException $e) {
     $success = false;
