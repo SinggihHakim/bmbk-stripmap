@@ -143,20 +143,7 @@
         activeLabel: null, 
         activePct: 0, 
         activeChunk: null,
-        tickInterval: (function() {
-            try {
-                let saved = localStorage.getItem('sta_tick_interval');
-                if (saved) return parseInt(saved);
-            } catch (e) {}
-            return <?= $totalPanjang < 1500 ? 100 : ($totalPanjang < 4000 ? 250 : ($totalPanjang < 10000 ? 500 : 1000)) ?>;
-        })(),
-        init() {
-            this.$watch('tickInterval', value => {
-                try {
-                    localStorage.setItem('sta_tick_interval', value);
-                } catch (e) {}
-            });
-        },
+        tickInterval: <?= $totalPanjang < 1500 ? 100 : ($totalPanjang < 4000 ? 250 : ($totalPanjang < 10000 ? 500 : 1000)) ?>,
         meterToSta(meter) {
             let km = Math.floor(meter / 1000);
             let m = Math.round(meter - (km * 1000));
@@ -193,21 +180,9 @@
         }
      }"
      @click.outside="activeLabel = null; activeChunk = null">
-    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
-            <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
-        </div>
-        <div class="flex items-center gap-2 print:hidden">
-            <span class="text-xs font-semibold text-gray-500">Skala Label STA:</span>
-            <select x-model.number="tickInterval" class="text-xs rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 font-medium text-gray-700 hover:bg-gray-100 focus:border-blue-500 focus:outline-none transition-colors">
-                <option value="100">100 m</option>
-                <option value="200">200 m</option>
-                <option value="250">250 m</option>
-                <option value="500">500 m</option>
-                <option value="1000">1 km</option>
-            </select>
-        </div>
+    <div class="px-6 py-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
+        <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
     </div>
 
     <div class="p-6">
