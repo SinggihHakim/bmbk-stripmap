@@ -139,11 +139,75 @@
 
 <?php if ($totalPanjang > 0): ?>
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style="background-color: #ffffff; border-color: #e5e7eb;"
-     x-data="{ activeLabel: null, activePct: 0, activeChunk: null }"
+     x-data="{ 
+        activeLabel: null, 
+        activePct: 0, 
+        activeChunk: null,
+        tickInterval: (function() {
+            try {
+                let saved = localStorage.getItem('sta_tick_interval');
+                if (saved) return parseInt(saved);
+            } catch (e) {}
+            return <?= $totalPanjang < 1500 ? 100 : ($totalPanjang < 4000 ? 250 : ($totalPanjang < 10000 ? 500 : 1000)) ?>;
+        })(),
+        init() {
+            this.$watch('tickInterval', value => {
+                try {
+                    localStorage.setItem('sta_tick_interval', value);
+                } catch (e) {}
+            });
+        },
+        meterToSta(meter) {
+            let km = Math.floor(meter / 1000);
+            let m = Math.round(meter - (km * 1000));
+            return km + '+' + String(m).padStart(3, '0');
+        },
+        getTicks(start, end) {
+            let ticks = [];
+            ticks.push({ meter: start, pct: 0 });
+            
+            let interval = this.tickInterval;
+            let firstMultiple = Math.ceil(start / interval) * interval;
+            if (firstMultiple === start) {
+                firstMultiple += interval;
+            }
+            
+            let chunkTotal = end - start;
+            if (chunkTotal <= 0) return ticks;
+
+            for (let m = firstMultiple; m < end; m += interval) {
+                let pct = ((m - start) / chunkTotal) * 100;
+                let minTolerance = Math.min(50, interval * 0.2);
+                if ((m - start) >= minTolerance && (end - m) >= minTolerance) {
+                    ticks.push({
+                        meter: m,
+                        pct: pct
+                    });
+                }
+            }
+            
+            if (end > start) {
+                ticks.push({ meter: end, pct: 100 });
+            }
+            return ticks;
+        }
+     }"
      @click.outside="activeLabel = null; activeChunk = null">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
-        <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
+    <div class="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h3 class="text-lg font-semibold text-gray-900">Visualisasi Strip Map</h3>
+            <p class="text-xs text-gray-500 mt-0.5">Total panjang: <?= format_number($totalPanjang) ?> m — Klik atau hover segmen untuk melihat detail kondisi.</p>
+        </div>
+        <div class="flex items-center gap-2 print:hidden">
+            <span class="text-xs font-semibold text-gray-500">Skala Label STA:</span>
+            <select x-model.number="tickInterval" class="text-xs rounded-lg border border-gray-200 bg-gray-50 px-2.5 py-1.5 font-medium text-gray-700 hover:bg-gray-100 focus:border-blue-500 focus:outline-none transition-colors">
+                <option value="100">100 m</option>
+                <option value="200">200 m</option>
+                <option value="250">250 m</option>
+                <option value="500">500 m</option>
+                <option value="1000">1 km</option>
+            </select>
+        </div>
     </div>
 
     <div class="p-6">
@@ -303,40 +367,15 @@
                                 </template>
                             </div>
 
-                            <!-- Skala Penggaris STA (Setiap 250m) -->
-                            <?php
-                                $filteredTicks = [];
-                                $filteredTicks[] = ['meter' => $chunk['start'], 'pct' => 0];
-
-                                $firstMultiple = ceil($chunk['start'] / 250) * 250;
-                                if ($firstMultiple == $chunk['start']) {
-                                    $firstMultiple += 250;
-                                }
-
-                                for ($m = $firstMultiple; $m < $chunk['end']; $m += 250) {
-                                    $pct = (($m - $chunk['start']) / $chunkTotalPanjang) * 100;
-                                    // Berikan toleransi jarak minimal (50m) agar tidak bertabrakan dengan ujung
-                                    if (($m - $chunk['start']) >= 50 && ($chunk['end'] - $m) >= 50) {
-                                        $filteredTicks[] = [
-                                            'meter' => $m,
-                                            'pct'   => $pct
-                                        ];
-                                    }
-                                }
-
-                                if ($chunk['end'] > $chunk['start']) {
-                                    $filteredTicks[] = ['meter' => $chunk['end'], 'pct' => 100];
-                                }
-                            ?>
-
+                            <!-- Skala Penggaris STA Dinamis -->
                             <div class="relative w-full h-6">
                                 <div class="absolute top-0 left-0 right-0 h-px bg-gray-300"></div>
-                                <?php foreach ($filteredTicks as $tick): ?>
-                                    <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" style="left: <?= number_format($tick['pct'], 4, '.', '') ?>%">
+                                <template x-for="tick in getTicks(<?= $chunk['start'] ?>, <?= $chunk['end'] ?>)" :key="tick.meter">
+                                    <div class="absolute top-0 -translate-x-1/2 flex flex-col items-center" :style="'left: ' + tick.pct + '%'">
                                         <div class="w-px h-2 bg-gray-400"></div>
-                                        <span class="text-[10px] font-mono font-semibold text-gray-500 mt-0.5"><?= meter_to_sta($tick['meter']) ?></span>
+                                        <span class="text-[10px] font-mono font-semibold text-gray-500 mt-0.5" x-text="meterToSta(tick.meter)"></span>
                                     </div>
-                                <?php endforeach; ?>
+                                </template>
                             </div>
                         </div>
                     <?php endforeach; ?>
