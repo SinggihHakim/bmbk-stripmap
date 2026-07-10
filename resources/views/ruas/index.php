@@ -48,7 +48,7 @@
         
         <!-- Filters & Search Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
                 
                 <!-- Pencarian -->
                 <div class="flex-1 min-w-0">
@@ -91,7 +91,7 @@
                 </div>
 
                 <!-- Reset Button -->
-                <div>
+                <div class="w-full md:w-auto">
                     <button type="button" 
                             @click="resetFilters()" 
                             title="Reset Filter"
@@ -112,8 +112,8 @@
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16 whitespace-nowrap">No</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('kode_ruas')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Kode (Nomor)
                                     <template x-if="sortBy === 'kode_ruas'">
@@ -127,7 +127,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px] whitespace-nowrap">
                                 <button type="button" @click="sortByCol('nama_ruas')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Nama Ruas
                                     <template x-if="sortBy === 'nama_ruas'">
@@ -141,7 +141,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-44">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-44 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('koridor')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Koridor
                                     <template x-if="sortBy === 'koridor'">
@@ -155,7 +155,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-52">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-52 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('kabupaten_kota')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Kabupaten / Kota
                                     <template x-if="sortBy === 'kabupaten_kota'">
@@ -169,7 +169,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-28">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-28 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('sta_awal')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     STA Awal
                                     <template x-if="sortBy === 'sta_awal'">
@@ -183,7 +183,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-28">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-28 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('sta_akhir')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     STA Akhir
                                     <template x-if="sortBy === 'sta_akhir'">
@@ -197,7 +197,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-36">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-36 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('panjang')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Panjang (m)
                                     <template x-if="sortBy === 'panjang'">
@@ -211,23 +211,23 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-56">Aksi</th>
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-56 whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(ruas, index) in filteredRuas()" :key="ruas.id">
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 text-sm text-gray-500" x-text="index + 1"></td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap" x-text="index + 1"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold" x-text="ruas.kode_ruas"></span>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900" x-text="ruas.nama_ruas"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600" x-text="ruas.koridor || '-'"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600" x-text="ruas.kabupaten_kota || '-'"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono" x-text="ruas.sta_awal_str"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono" x-text="ruas.sta_akhir_str"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-semibold" x-text="formatNumber(ruas.panjang)"></td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 min-w-[200px]" x-text="ruas.nama_ruas"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap" x-text="ruas.koridor || '-'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap" x-text="ruas.kabupaten_kota || '-'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono whitespace-nowrap" x-text="ruas.sta_awal_str"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono whitespace-nowrap" x-text="ruas.sta_akhir_str"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-semibold whitespace-nowrap" x-text="formatNumber(ruas.panjang)"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-2">
                                         <a :href="ruas.url_stripmap"
                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"

@@ -188,6 +188,14 @@ class StripmapService
     }
 
     /**
+     * Ambil ringkasan kondisi global seluruh ruas jalan
+     */
+    public function getGlobalSummary(): array
+    {
+        return $this->model->getGlobalSummary();
+    }
+
+    /**
      * Validasi input stripmap
      */
     private function validate(array $input, int $ruasId, ?int $excludeId = null, bool $checkDbOverlap = true): array

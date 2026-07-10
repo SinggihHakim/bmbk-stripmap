@@ -182,10 +182,10 @@
                         ?>
                         <?php foreach ($legendItems as $li): ?>
                             <?php if ($li['val'] > 0): ?>
-                            <div class="flex items-center gap-1.5">
-                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?= $li['color'] ?>;"></span>
-                                <span class="text-[11px] font-medium text-gray-600"><?= $li['label'] ?></span>
-                                <span class="text-[10px] text-gray-400"><?= number_format($li['pct'], 1) ?>%</span>
+                            <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                                <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?= $li['color'] ?>; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;"><?= $li['label'] ?></span>
+                                <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($li['pct'], 1) ?>%</span>
                             </div>
                             <?php endif; ?>
                         <?php endforeach; ?>
@@ -200,15 +200,15 @@
                     </div>
                     <!-- Legend -->
                     <div class="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5">
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
-                            <span class="text-[11px] font-medium text-gray-600">Mantap</span>
-                            <span class="text-[10px] text-gray-400"><?= number_format($pctMantap, 1) ?>%</span>
+                        <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                            <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Mantap</span>
+                            <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctMantap, 1) ?>%</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
-                            <span class="text-[11px] font-medium text-gray-600">Tidak Mantap</span>
-                            <span class="text-[10px] text-gray-400"><?= number_format($pctTidakMantap, 1) ?>%</span>
+                        <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                            <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Tidak Mantap</span>
+                            <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctTidakMantap, 1) ?>%</span>
                         </div>
                     </div>
                 </div>
@@ -350,36 +350,36 @@
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <!-- Baik -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #f0fdf4; border-color: #d1fae5;">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
-                                    <span class="text-xs font-semibold text-emerald-800">Baik</span>
+                                <div class="flex items-center gap-2 mb-2" style="display: flex; align-items: center; gap: 8px; line-height: 16px;">
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                    <span class="text-xs font-semibold text-emerald-800" style="display: inline-block; vertical-align: middle;">Baik</span>
                                 </div>
                                 <p class="text-xl font-bold text-emerald-700"><?= format_number($totalBaik) ?> <span class="text-xs font-normal text-emerald-600">m</span></p>
                                 <p class="text-xs text-emerald-600 mt-1"><?= number_format($pctBaik, 1) ?>%</p>
                             </div>
                             <!-- Sedang -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fefce8; border-color: #fef08a;">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15;"></span>
-                                    <span class="text-xs font-semibold text-yellow-800">Sedang</span>
+                                <div class="flex items-center gap-2 mb-2" style="display: flex; align-items: center; gap: 8px; line-height: 16px;">
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                    <span class="text-xs font-semibold text-yellow-800" style="display: inline-block; vertical-align: middle;">Sedang</span>
                                 </div>
                                 <p class="text-xl font-bold text-yellow-700"><?= format_number($totalSedang) ?> <span class="text-xs font-normal text-yellow-600">m</span></p>
                                 <p class="text-xs text-yellow-600 mt-1"><?= number_format($pctSedang, 1) ?>%</p>
                             </div>
                             <!-- Rusak Ringan -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fff7ed; border-color: #ffedd5;">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316;"></span>
-                                    <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
+                                <div class="flex items-center gap-2 mb-2" style="display: flex; align-items: center; gap: 8px; line-height: 16px;">
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                    <span class="text-xs font-semibold text-orange-800" style="display: inline-block; vertical-align: middle;">Rusak Ringan</span>
                                 </div>
                                 <p class="text-xl font-bold text-orange-700"><?= format_number($totalRR) ?> <span class="text-xs font-normal text-orange-600">m</span></p>
                                 <p class="text-xs text-orange-600 mt-1"><?= number_format($pctRR, 1) ?>%</p>
                             </div>
                             <!-- Rusak Berat -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fef2f2; border-color: #fee2e2;">
-                                <div class="flex items-center gap-2 mb-2">
-                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
-                                    <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
+                                <div class="flex items-center gap-2 mb-2" style="display: flex; align-items: center; gap: 8px; line-height: 16px;">
+                                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                    <span class="text-xs font-semibold text-red-800" style="display: inline-block; vertical-align: middle;">Rusak Berat</span>
                                 </div>
                                 <p class="text-xl font-bold text-red-700"><?= format_number($totalRB) ?> <span class="text-xs font-normal text-red-600">m</span></p>
                                 <p class="text-xs text-red-600 mt-1"><?= number_format($pctRB, 1) ?>%</p>
@@ -393,10 +393,10 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <!-- Mantap -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #f0fdf4; border-color: #d1fae5;">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981;"></span>
-                                        <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
+                                <div class="flex items-center justify-between mb-2" style="display: flex; align-items: center; justify-content: space-between; line-height: 16px;">
+                                    <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                        <span class="text-xs font-semibold text-emerald-800" style="display: inline-block; vertical-align: middle;">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                                     </div>
                                     <span class="text-xs font-bold text-emerald-600"><?= number_format($pctMantap, 1) ?>%</span>
                                 </div>
@@ -407,10 +407,10 @@
                             </div>
                             <!-- Tidak Mantap -->
                             <div class="p-4 rounded-xl border shadow-sm" style="background-color: #fff1f2; border-color: #ffe4e6;">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-2">
-                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444;"></span>
-                                        <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(Rusak Ringan + Rusak Berat)</span></span>
+                                <div class="flex items-center justify-between mb-2" style="display: flex; align-items: center; justify-content: space-between; line-height: 16px;">
+                                    <div class="flex items-center gap-2" style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                                        <span class="text-xs font-semibold text-rose-800" style="display: inline-block; vertical-align: middle;">Tidak Mantap <span class="font-normal text-rose-600">(Rusak Ringan + Rusak Berat)</span></span>
                                     </div>
                                     <span class="text-xs font-bold text-rose-600"><?= number_format($pctTidakMantap, 1) ?>%</span>
                                 </div>

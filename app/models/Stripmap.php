@@ -141,4 +141,27 @@ class Stripmap
             'total_rusak_berat'   => 0,
         ];
     }
+
+    /**
+     * Ambil ringkasan kondisi untuk seluruh ruas jalan di database (Global)
+     */
+    public function getGlobalSummary(): array
+    {
+        $stmt = $this->db->query(
+            'SELECT
+                SUM(panjang)       as total_panjang,
+                SUM(baik)          as total_baik,
+                SUM(sedang)        as total_sedang,
+                SUM(rusak_ringan)  as total_rusak_ringan,
+                SUM(rusak_berat)   as total_rusak_berat
+             FROM stripmap'
+        );
+        return $stmt->fetch() ?: [
+            'total_panjang'       => 0,
+            'total_baik'          => 0,
+            'total_sedang'        => 0,
+            'total_rusak_ringan'  => 0,
+            'total_rusak_berat'   => 0,
+        ];
+    }
 }

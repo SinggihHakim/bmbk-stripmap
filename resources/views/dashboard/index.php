@@ -10,71 +10,207 @@
         <p class="mt-1 text-sm text-gray-500">Ringkasan data ruas jalan dan strip map.</p>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Load Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        <!-- Card 1: Total Ruas Jalan -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
+    <!-- Stats Cards & Pie Charts Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left Panel: 8 Metric Grid Cards (Takes 2 Columns on LG screens) -->
+        <div class="lg:col-span-2">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                
+                <!-- Card 1: Total Ruas Jalan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= $totalRuas ?? 0 ?> <span class="text-xs font-semibold text-gray-400">Ruas</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Ruas Jalan</p>
                 </div>
-                <span class="inline-flex items-center px-2 py-1 rounded bg-blue-50 text-blue-600 text-[10px] font-bold tracking-wide">
-                    +3 bulan ini
-                </span>
+
+                <!-- Card 2: Total Panjang Jalan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($totalPanjang ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Panjang Jalan</p>
+                </div>
+
+                <!-- Card 3: Baik -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                            <?= format_number($pctBaik ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($baikKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Baik</p>
+                </div>
+
+                <!-- Card 4: Sedang -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-yellow-50 text-yellow-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 text-[10px] font-bold">
+                            <?= format_number($pctSedang ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($sedangKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Sedang</p>
+                </div>
+
+                <!-- Card 5: Rusak Ringan -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-50 text-orange-700 text-[10px] font-bold">
+                            <?= format_number($pctRusakRingan ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($rusakRinganKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Rusak Ringan</p>
+                </div>
+
+                <!-- Card 6: Rusak Berat -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-bold">
+                            <?= format_number($pctRusakBerat ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($rusakBeratKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Rusak Berat</p>
+                </div>
+
+                <!-- Card 7: Mantap -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-cyan-50 text-cyan-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-cyan-50 text-cyan-700 text-[10px] font-bold">
+                            <?= format_number($pctMantap ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Mantap</p>
+                </div>
+
+                <!-- Card 8: Tidak Mantap -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v4m0 4h.01" />
+                            </svg>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-[10px] font-bold">
+                            <?= format_number($pctTidakMantap ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
+                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Tidak Mantap</p>
+                </div>
+
             </div>
-            <h3 class="text-3xl font-bold text-gray-900"><?= $totalRuas ?? 24 ?></h3>
-            <p class="text-[13px] font-medium text-gray-500 mt-1">Total Ruas Jalan</p>
         </div>
 
-        <!-- Card 2: Total Panjang Jalan -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-            <div class="mb-4">
-                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-                    </svg>
+        <!-- Right Panel: 2 Pie Charts (Takes 1 Column on LG screens) -->
+        <div class="space-y-6">
+            
+            <!-- Pie Chart 1: Proporsi Kondisi Jalan -->
+            <div class="flex flex-col items-center justify-center rounded-2xl p-5 border min-h-[220px]" style="background-color: rgba(249, 250, 251, 0.6); border-color: #e5e7eb;">
+                <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Proporsi Kondisi Jalan</h4>
+                <style>
+                    @keyframes pie-spin-in {
+                        from { transform: scale(0) rotate(-90deg); opacity: 0; }
+                        to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+                    }
+                    .pie-chart-container canvas {
+                        animation: pie-spin-in 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+                    }
+                    .pie-chart-container {
+                        filter: drop-shadow(0 2px 8px rgba(0,0,0,0.06));
+                    }
+                </style>
+                <div class="pie-chart-container w-full max-w-[180px] aspect-square relative">
+                    <canvas id="kondisiPieChart"></canvas>
+                </div>
+                <!-- Legend -->
+                <div class="flex flex-wrap justify-center gap-x-3 gap-y-1.5 mt-5">
+                    <?php
+                        $legendItems = [
+                            ['label' => 'Baik',         'color' => '#10b981', 'pct' => $pctBaik,   'val' => $baikKm],
+                            ['label' => 'Sedang',       'color' => '#facc15', 'pct' => $pctSedang, 'val' => $sedangKm],
+                            ['label' => 'Rusak Ringan', 'color' => '#f97316', 'pct' => $pctRusakRingan, 'val' => $rusakRinganKm],
+                            ['label' => 'Rusak Berat',  'color' => '#ef4444', 'pct' => $pctRusakBerat,  'val' => $rusakBeratKm],
+                        ];
+                    ?>
+                    <?php foreach ($legendItems as $li): ?>
+                        <?php if ($li['val'] > 0): ?>
+                        <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?= $li['color'] ?>; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                            <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;"><?= $li['label'] ?></span>
+                            <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($li['pct'], 1) ?>%</span>
+                        </div>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
             </div>
-            <h3 class="text-3xl font-bold text-gray-900"><?= format_number($totalPanjang ?? 0.0, 1) ?> <span class="text-sm font-semibold text-gray-400">km</span></h3>
 
-            <p class="text-[13px] font-medium text-gray-500 mt-1">Total Panjang Jalan</p>
-        </div>
-
-        <!-- Card 3: Kondisi Baik -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-            <div class="mb-4">
-                <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+            <!-- Pie Chart 2: Proporsi Kemantapan Jalan -->
+            <div class="flex flex-col items-center justify-center rounded-2xl p-5 border min-h-[220px]" style="background-color: rgba(249, 250, 251, 0.6); border-color: #e5e7eb;">
+                <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Kemantapan Jalan</h4>
+                <div class="pie-chart-container w-full max-w-[180px] aspect-square relative">
+                    <canvas id="kemantapanPieChart"></canvas>
+                </div>
+                <!-- Legend -->
+                <div class="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5">
+                    <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                        <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Mantap</span>
+                        <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctMantap, 1) ?>%</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
+                        <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Tidak Mantap</span>
+                        <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctTidakMantap, 1) ?>%</span>
+                    </div>
                 </div>
             </div>
-            <h3 class="text-3xl font-bold text-gray-900"><?= $kondisiBaik ?? 68 ?>%</h3>
-            <p class="text-[13px] font-medium text-gray-500 mt-1">Kondisi Baik</p>
-            <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5">
-                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: <?= $kondisiBaik ?? 68 ?>%"></div>
-            </div>
+            
         </div>
-
-        <!-- Card 4: Rusak Berat -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-            <div class="mb-4">
-                <div class="w-10 h-10 bg-red-50 text-red-500 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                    </svg>
-                </div>
-            </div>
-            <h3 class="text-3xl font-bold text-gray-900"><?= $rusakBerat ?? 12 ?>%</h3>
-            <p class="text-[13px] font-medium text-gray-500 mt-1">Rusak Berat</p>
-            <div class="mt-4 w-full bg-gray-100 rounded-full h-1.5">
-                <div class="bg-red-500 h-1.5 rounded-full" style="width: <?= $rusakBerat ?? 12 ?>%"></div>
-            </div>
-        </div>
-
+        
     </div>
 
     <!-- Recent Ruas Table & Filters -->
@@ -106,11 +242,11 @@
         
         <!-- Filters & Search Panel -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-            <div class="flex flex-col md:flex-row gap-4 items-end">
+            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
                 
                 <!-- Judul Seksi -->
-                <div class="md:mb-0 md:mr-4 self-center">
-                    <h2 class="text-lg font-semibold text-gray-900">Daftar Ruas Jalan</h2>
+                <div class="md:mb-0 md:mr-4 self-start md:self-center">
+                    <h2 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Daftar Ruas Jalan</h2>
                     <p class="text-xs text-gray-500">Filter dan cari data ruas jalan secara langsung.</p>
                 </div>
 
@@ -155,7 +291,7 @@
                 </div>
 
                 <!-- Reset Button -->
-                <div>
+                <div class="w-full md:w-auto">
                     <button type="button" 
                             @click="resetFilters()" 
                             title="Reset Filter"
@@ -176,8 +312,8 @@
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-200">
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">No</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16 whitespace-nowrap">No</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('kode_ruas')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Kode (Nomor)
                                     <template x-if="sortBy === 'kode_ruas'">
@@ -191,7 +327,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px] whitespace-nowrap">
                                 <button type="button" @click="sortByCol('nama_ruas')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Nama Ruas
                                     <template x-if="sortBy === 'nama_ruas'">
@@ -205,7 +341,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-40 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('koridor')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Koridor
                                     <template x-if="sortBy === 'koridor'">
@@ -219,7 +355,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-48">
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-48 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('kabupaten_kota')" class="flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Kabupaten / Kota
                                     <template x-if="sortBy === 'kabupaten_kota'">
@@ -233,7 +369,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('sta_awal')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     STA Awal
                                     <template x-if="sortBy === 'sta_awal'">
@@ -247,7 +383,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('sta_akhir')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     STA Akhir
                                     <template x-if="sortBy === 'sta_akhir'">
@@ -261,7 +397,7 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32">
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-32 whitespace-nowrap">
                                 <button type="button" @click="sortByCol('panjang')" class="mx-auto flex items-center gap-1 hover:text-gray-900 focus:outline-none uppercase">
                                     Panjang (m)
                                     <template x-if="sortBy === 'panjang'">
@@ -275,23 +411,23 @@
                                     </template>
                                 </button>
                             </th>
-                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-56">Aksi</th>
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-56 whitespace-nowrap">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <template x-for="(ruas, index) in filteredRuas()" :key="ruas.id">
                             <tr class="hover:bg-gray-50 transition-colors">
-                                <td class="px-6 py-4 text-sm text-gray-500" x-text="index + 1"></td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap" x-text="index + 1"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold" x-text="ruas.kode_ruas"></span>
                                 </td>
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900" x-text="ruas.nama_ruas"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600" x-text="ruas.koridor || '-'"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600" x-text="ruas.kabupaten_kota || '-'"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono" x-text="ruas.sta_awal_str"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono" x-text="ruas.sta_akhir_str"></td>
-                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-semibold" x-text="formatNumber(ruas.panjang)"></td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 min-w-[200px]" x-text="ruas.nama_ruas"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap" x-text="ruas.koridor || '-'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap" x-text="ruas.kabupaten_kota || '-'"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono whitespace-nowrap" x-text="ruas.sta_awal_str"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-mono whitespace-nowrap" x-text="ruas.sta_akhir_str"></td>
+                                <td class="px-6 py-4 text-sm text-gray-600 text-center font-semibold whitespace-nowrap" x-text="formatNumber(ruas.panjang)"></td>
+                                <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center justify-center gap-2">
                                         <a :href="ruas.url_stripmap"
                                            class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-indigo-700 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
@@ -440,5 +576,244 @@
         </a>
     </div>
     <?php endif; ?>
+
+    <!-- Inisialisasi Chart.js untuk Pie Charts -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --------------------------------------------------------
+        // Chart 1: Proporsi Kondisi Jalan (Baik, Sedang, RR, RB)
+        // --------------------------------------------------------
+        const ctx1 = document.getElementById('kondisiPieChart').getContext('2d');
+
+        const chartColors1 = ['#10b981', '#facc15', '#f97316', '#ef4444'];
+        const chartLabels1 = ['Baik', 'Sedang', 'Rusak Ringan', 'Rusak Berat'];
+        const chartData1   = [
+            <?= (float)$baikKm ?>,
+            <?= (float)$sedangKm ?>,
+            <?= (float)$rusakRinganKm ?>,
+            <?= (float)$rusakBeratKm ?>
+        ];
+
+        // Filter out zero values
+        const filtered1 = chartLabels1.reduce((acc, label, i) => {
+            if (chartData1[i] > 0) {
+                acc.labels.push(label);
+                acc.data.push(chartData1[i]);
+                acc.colors.push(chartColors1[i]);
+            }
+            return acc;
+        }, { labels: [], data: [], colors: [] });
+
+        new Chart(ctx1, {
+            type: 'pie',
+            data: {
+                labels: filtered1.labels,
+                datasets: [{
+                    data: filtered1.data,
+                    backgroundColor: filtered1.colors,
+                    borderWidth: 2.5,
+                    borderColor: '#ffffff',
+                    hoverBorderWidth: 3,
+                    hoverBorderColor: '#ffffff',
+                    hoverOffset: 12
+                }]
+            },
+            plugins: [{
+                id: 'modernLabels1',
+                afterDraw: (chart) => {
+                    const ctxDraw = chart.ctx;
+                    const dataset = chart.data.datasets[0];
+                    const meta = chart.getDatasetMeta(0);
+                    const total = dataset.data.reduce((a, b) => a + b, 0);
+                    if (total <= 0) return;
+
+                    meta.data.forEach((element, index) => {
+                        const dataVal = dataset.data[index];
+                        if (dataVal <= 0) return;
+
+                        const pct = ((dataVal / total) * 100).toFixed(1);
+                        const midAngle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+
+                        const innerPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 4),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 4)
+                        };
+                        const outerPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 16),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 16)
+                        };
+
+                        ctxDraw.save();
+                        ctxDraw.strokeStyle = 'rgba(156,163,175,0.4)';
+                        ctxDraw.lineWidth = 0.8;
+                        ctxDraw.beginPath();
+                        ctxDraw.moveTo(innerPt.x, innerPt.y);
+                        ctxDraw.lineTo(outerPt.x, outerPt.y);
+                        ctxDraw.stroke();
+
+                        const labelPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 24),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 24)
+                        };
+
+                        ctxDraw.fillStyle = '#374151';
+                        ctxDraw.font = '600 10px Inter, system-ui, sans-serif';
+                        ctxDraw.textAlign = 'center';
+                        ctxDraw.textBaseline = 'middle';
+                        ctxDraw.fillText(pct + '%', labelPt.x, labelPt.y);
+
+                        ctxDraw.restore();
+                    });
+                }
+            }],
+            options: {
+                layout: { padding: 40 },
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '600' },
+                        bodyFont: { family: 'Inter, system-ui, sans-serif', size: 11 },
+                        padding: { top: 10, bottom: 10, left: 14, right: 14 },
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        boxPadding: 4,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return ` ${context.label}: ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} km (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --------------------------------------------------------
+        // Chart 2: Kemantapan Jalan (Mantap vs Tidak Mantap)
+        // --------------------------------------------------------
+        const ctx2 = document.getElementById('kemantapanPieChart').getContext('2d');
+        const chartData2 = [
+            <?= (float)$mantapKm ?>,
+            <?= (float)$tidakMantapKm ?>
+        ];
+        const chartLabels2 = ['Mantap', 'Tidak Mantap'];
+        const chartColors2 = ['#10b981', '#ef4444']; // Hijau & Merah
+
+        const filtered2 = chartLabels2.reduce((acc, label, i) => {
+            if (chartData2[i] > 0) {
+                acc.labels.push(label);
+                acc.data.push(chartData2[i]);
+                acc.colors.push(chartColors2[i]);
+            }
+            return acc;
+        }, { labels: [], data: [], colors: [] });
+
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: filtered2.labels,
+                datasets: [{
+                    data: filtered2.data,
+                    backgroundColor: filtered2.colors,
+                    borderWidth: 2.5,
+                    borderColor: '#ffffff',
+                    hoverBorderWidth: 3,
+                    hoverBorderColor: '#ffffff',
+                    hoverOffset: 12
+                }]
+            },
+            plugins: [{
+                id: 'modernLabels2',
+                afterDraw: (chart) => {
+                    const ctxDraw = chart.ctx;
+                    const dataset = chart.data.datasets[0];
+                    const meta = chart.getDatasetMeta(0);
+                    const total = dataset.data.reduce((a, b) => a + b, 0);
+                    if (total <= 0) return;
+
+                    meta.data.forEach((element, index) => {
+                        const dataVal = dataset.data[index];
+                        if (dataVal <= 0) return;
+
+                        const pct = ((dataVal / total) * 100).toFixed(1);
+                        const midAngle = element.startAngle + (element.endAngle - element.startAngle) / 2;
+
+                        const innerPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 4),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 4)
+                        };
+                        const outerPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 16),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 16)
+                        };
+
+                        ctxDraw.save();
+                        ctxDraw.strokeStyle = 'rgba(156,163,175,0.4)';
+                        ctxDraw.lineWidth = 0.8;
+                        ctxDraw.beginPath();
+                        ctxDraw.moveTo(innerPt.x, innerPt.y);
+                        ctxDraw.lineTo(outerPt.x, outerPt.y);
+                        ctxDraw.stroke();
+
+                        const labelPt = {
+                            x: element.x + Math.cos(midAngle) * (element.outerRadius + 24),
+                            y: element.y + Math.sin(midAngle) * (element.outerRadius + 24)
+                        };
+
+                        ctxDraw.fillStyle = '#374151';
+                        ctxDraw.font = '600 10px Inter, system-ui, sans-serif';
+                        ctxDraw.textAlign = 'center';
+                        ctxDraw.textBaseline = 'middle';
+                        ctxDraw.fillText(pct + '%', labelPt.x, labelPt.y);
+
+                        ctxDraw.restore();
+                    });
+                }
+            }],
+            options: {
+                layout: { padding: 40 },
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(31,41,55,0.95)',
+                        titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '600' },
+                        bodyFont: { family: 'Inter, system-ui, sans-serif', size: 11 },
+                        padding: { top: 10, bottom: 10, left: 14, right: 14 },
+                        cornerRadius: 10,
+                        displayColors: true,
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        boxPadding: 4,
+                        callbacks: {
+                            label: function(context) {
+                                const value = context.raw;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return ` ${context.label}: ${new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} km (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+    </script>
 
 </div>

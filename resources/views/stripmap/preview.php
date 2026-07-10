@@ -139,6 +139,56 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+/**
+ * Salin computed style elemen ke inline style agar html2canvas bisa membacanya.
+ * Ini mengatasi masalah Tailwind CSS yang tidak terbaca oleh html2canvas.
+ */
+function cloneComputedStyles(sourceEl, targetEl) {
+    const computed = window.getComputedStyle(sourceEl);
+    for (let prop of computed) {
+        try {
+            targetEl.style[prop] = computed.getPropertyValue(prop);
+        } catch(e) { /* skip read-only props */ }
+    }
+    for (let i = 0; i < sourceEl.children.length; i++) {
+        cloneComputedStyles(sourceEl.children[i], targetEl.children[i]);
+    }
+}
+
+/**
+ * Konversi semua elemen <canvas> di dalam container menjadi <img>
+ * sehingga html2canvas bisa menangkapnya dengan benar.
+ * Mengembalikan fungsi restore untuk mengembalikan ke keadaan semula.
+ */
+function convertCanvasesToImages(container) {
+    const canvases = Array.from(container.querySelectorAll('canvas'));
+    const replacements = [];
+
+    canvases.forEach(canvas => {
+        const dataUrl = canvas.toDataURL('image/png');
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.width  = canvas.offsetWidth;
+        img.height = canvas.offsetHeight;
+        img.style.cssText = `
+            display: block;
+            width: ${canvas.offsetWidth}px;
+            height: ${canvas.offsetHeight}px;
+        `;
+        canvas.parentNode.insertBefore(img, canvas);
+        canvas.style.display = 'none';
+        replacements.push({ canvas, img });
+    });
+
+    // Kembalikan fungsi restore
+    return function restore() {
+        replacements.forEach(({ canvas, img }) => {
+            canvas.style.display = '';
+            img.remove();
+        });
+    };
+}
+
 function exportDocument(type) {
     Swal.fire({
         title: 'Mempersiapkan dokumen...',
@@ -150,63 +200,191 @@ function exportDocument(type) {
     });
 
     const element = document.getElementById('capture-area');
-    const options = {
-        scale: 2, // High resolution
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        logging: false
-    };
 
-    html2canvas(element, options).then(canvas => {
-        const imgData = canvas.toDataURL(type === 'jpeg' ? 'image/jpeg' : 'image/png', 0.95);
-        const fileName = 'StripMap_' + '<?= e($ruas['kode_ruas']) ?>_' + new Date().toISOString().slice(0,10);
+    // ─── LANGKAH 1: Konversi semua Chart.js <canvas> → <img> ───────────────────
+    // html2canvas tidak bisa membaca isi canvas yang digambar library lain (Chart.js).
+    // Solusi: tangkap isi canvas sebagai dataURL, buat <img>, lalu sembunyikan canvas asli.
+    const restoreCanvases = convertCanvasesToImages(element);
 
-        if (type === 'pdf') {
-            const { jsPDF } = window.jspdf;
-            
-            // Calculate dimensions in mm
-            const imgWidth = 210; // A4 width
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            const orientation = canvas.width > canvas.height ? 'l' : 'p';
-            const pdf = new jsPDF({
-                orientation: orientation,
-                unit: 'mm',
-                format: orientation === 'p' ? [imgWidth, imgHeight] : [imgHeight, imgWidth]
-            });
-            
-            pdf.addImage(imgData, type === 'jpeg' ? 'JPEG' : 'PNG', 0, 0, orientation === 'p' ? imgWidth : imgHeight, orientation === 'p' ? imgHeight : imgWidth);
-            pdf.save(fileName + '.pdf');
-            
+    // ─── LANGKAH 2: Beri jeda singkat agar img src ter-load ─────────────────────
+    setTimeout(() => {
+        const fileName = 'StripMap_<?= e($ruas['kode_ruas']) ?>_' + new Date().toISOString().slice(0, 10);
+
+        html2canvas(element, {
+            scale: 3,                           // 3x resolusi → gambar tajam
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: '#ffffff',
+            logging: false,
+            // Gunakan lebar elemen yang sesungguhnya agar layout tidak berubah
+            width: element.scrollWidth,
+            height: element.scrollHeight,
+            windowWidth: document.documentElement.scrollWidth,
+            windowHeight: document.documentElement.scrollHeight,
+            // Scroll ke atas agar html2canvas menangkap dari posisi 0
+            scrollX: -window.scrollX,
+            scrollY: -window.scrollY,
+            imageTimeout: 15000,
+            onclone: (clonedDoc) => {
+                const clonedEl = clonedDoc.getElementById('capture-area');
+                if (!clonedEl) return;
+
+                clonedEl.style.borderRadius = '0';
+                clonedEl.style.overflow    = 'visible';
+
+                // ── Fix: Flex containers (Tailwind tidak terbaca html2canvas) ───
+                clonedEl.querySelectorAll('.flex').forEach(el => {
+                    el.style.display = 'flex';
+                });
+                clonedEl.querySelectorAll('.flex-col').forEach(el => {
+                    el.style.flexDirection = 'column';
+                });
+                clonedEl.querySelectorAll('.flex-wrap').forEach(el => {
+                    el.style.flexWrap = 'wrap';
+                });
+                clonedEl.querySelectorAll('.items-center').forEach(el => {
+                    el.style.alignItems = 'center';
+                });
+                clonedEl.querySelectorAll('.items-start').forEach(el => {
+                    el.style.alignItems = 'flex-start';
+                });
+                clonedEl.querySelectorAll('.justify-between').forEach(el => {
+                    el.style.justifyContent = 'space-between';
+                });
+                clonedEl.querySelectorAll('.justify-center').forEach(el => {
+                    el.style.justifyContent = 'center';
+                });
+
+                // ── Fix: gap utilities ────────────────────────────────────────
+                const gapMap = {
+                    'gap-1':   '4px',  'gap-1\\.5': '6px', 'gap-2':   '8px',
+                    'gap-3':  '12px',  'gap-4':     '16px', 'gap-5':  '20px',
+                    'gap-6':  '24px',  'gap-8':     '32px',
+                    'gap-x-3': null,   'gap-x-4':   null,  'gap-y-1\\.5': null,
+                };
+                // Query via classList check (lebih aman untuk class dengan titik)
+                clonedEl.querySelectorAll('[class]').forEach(el => {
+                    const cls = el.className || '';
+                    // gap-X
+                    const gapMatch = cls.match(/\bgap-(\d+(?:\.\d+)?)\b/);
+                    if (gapMatch) {
+                        const val = parseFloat(gapMatch[1]) * 4;
+                        el.style.gap = val + 'px';
+                    }
+                    // gap-x-X
+                    const gapXMatch = cls.match(/\bgap-x-(\d+(?:\.\d+)?)\b/);
+                    if (gapXMatch) {
+                        const val = parseFloat(gapXMatch[1]) * 4;
+                        el.style.columnGap = val + 'px';
+                    }
+                    // gap-y-X
+                    const gapYMatch = cls.match(/\bgap-y-(\d+(?:\.\d+)?)\b/);
+                    if (gapYMatch) {
+                        const val = parseFloat(gapYMatch[1]) * 4;
+                        el.style.rowGap = val + 'px';
+                    }
+                });
+
+                // ── Fix: DOT/CIRCLE (penyebab bulatan tidak center dengan text) ─
+                // Tailwind: w-2.5 h-2.5 rounded-full → 10px × 10px, border-radius 50%
+                // html2canvas tidak bisa membaca class ini, jadi perlu inline style eksplisit
+                clonedEl.querySelectorAll('span.rounded-full').forEach(dot => {
+                    dot.style.display    = 'inline-block';
+                    dot.style.flexShrink = '0';
+                    dot.style.alignSelf  = 'center';   // ← Ini kunci: sejajar vertikal dengan text
+                    dot.style.borderRadius = '50%';
+
+                    // Tentukan ukuran dari class Tailwind yang ada
+                    const cls = dot.className || '';
+                    if (cls.includes('w-2.5') || cls.includes('h-2.5')) {
+                        dot.style.width     = '10px';
+                        dot.style.height    = '10px';
+                        dot.style.minWidth  = '10px';
+                        dot.style.minHeight = '10px';
+                    } else if (cls.includes('w-3') || cls.includes('h-3')) {
+                        dot.style.width     = '12px';
+                        dot.style.height    = '12px';
+                        dot.style.minWidth  = '12px';
+                        dot.style.minHeight = '12px';
+                    } else {
+                        // Fallback: baca dari DOM asli
+                        const origDot = document.querySelector(
+                            `span.rounded-full[style="${dot.getAttribute('style')}"]`
+                        );
+                        if (origDot) {
+                            const w = origDot.offsetWidth;
+                            const h = origDot.offsetHeight;
+                            if (w > 0) { dot.style.width = w + 'px'; dot.style.minWidth = w + 'px'; }
+                            if (h > 0) { dot.style.height = h + 'px'; dot.style.minHeight = h + 'px'; }
+                        }
+                    }
+
+                    // ── Geser dot 1px ke bawah di export ─────────────────────
+                    // scale:3 → 1px CSS = 3px di gambar output
+                    // Ini mengkompensasi offset 2-3px yang muncul di hasil cetak
+                    dot.style.position = 'relative';
+                    dot.style.top      = '6px';
+                });
+            }
+        }).then(canvas => {
+            // ─── Restore canvas Chart.js ─────────────────────────────────────────
+            restoreCanvases();
+
+            const mimeType = type === 'jpeg' ? 'image/jpeg' : 'image/png';
+            const quality  = type === 'jpeg' ? 0.95 : 1.0;
+            const imgData  = canvas.toDataURL(mimeType, quality);
+
+            if (type === 'pdf') {
+                const { jsPDF } = window.jspdf;
+
+                // Dimensi PDF disesuaikan dengan rasio gambar (bukan paksa A4 saja)
+                // Agar isi tidak terpotong dan sama persis dengan tampilan web
+                const PX_PER_MM = 3.7795275591; // 1mm = 3.78px pada 96dpi
+                const pdfW_mm   = canvas.width  / (3 * PX_PER_MM); // kompensasi scale 3x
+                const pdfH_mm   = canvas.height / (3 * PX_PER_MM);
+                const orientation = pdfW_mm > pdfH_mm ? 'l' : 'p';
+
+                const pdf = new jsPDF({
+                    orientation: orientation,
+                    unit: 'mm',
+                    format: [pdfW_mm, pdfH_mm]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfW_mm, pdfH_mm, '', 'FAST');
+                pdf.save(fileName + '.pdf');
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Berhasil!',
+                    text: 'Dokumen PDF telah diunduh.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = fileName + '.' + (type === 'jpeg' ? 'jpg' : 'png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Berhasil!',
+                    text: 'Gambar telah diunduh.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }).catch(err => {
+            restoreCanvases();
+            console.error('html2canvas error:', err);
             Swal.fire({
-                icon: 'success',
-                title: 'Export Berhasil!',
-                text: 'Dokumen PDF telah diunduh.',
-                timer: 2000,
-                showConfirmButton: false
+                icon: 'error',
+                title: 'Export Gagal',
+                text: 'Terjadi kesalahan saat memproses ekspor. Silakan coba lagi.'
             });
-        } else {
-            const link = document.createElement('a');
-            link.href = imgData;
-            link.download = fileName + '.' + (type === 'jpeg' ? 'jpg' : 'png');
-            link.click();
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Export Berhasil!',
-                text: 'Gambar telah diunduh.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-    }).catch(err => {
-        console.error(err);
-        Swal.fire({
-            icon: 'error',
-            title: 'Export Gagal',
-            text: 'Terjadi kesalahan saat memproses ekspor dokumen.'
         });
-    });
+    }, 300); // Jeda 300ms untuk memastikan img sudah ter-render
 }
 </script>
