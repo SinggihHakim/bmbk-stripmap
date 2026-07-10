@@ -229,6 +229,11 @@ function exportDocument(type) {
                 const clonedEl = clonedDoc.getElementById('capture-area');
                 if (!clonedEl) return;
 
+                // Hapus elemen dengan kelas .no-export agar tidak muncul di hasil cetak
+                clonedEl.querySelectorAll('.no-export').forEach(el => {
+                    el.remove();
+                });
+
                 clonedEl.style.borderRadius = '0';
                 clonedEl.style.overflow    = 'visible';
 
