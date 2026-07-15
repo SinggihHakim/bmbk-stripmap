@@ -10,7 +10,51 @@
             <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
             <p class="mt-1 text-sm text-gray-500">Ringkasan data ruas jalan, strip map, dan jenis perkerasan.</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2" x-data="{ openExport: false }">
+            <!-- Export Dropdown -->
+            <div class="relative">
+                <button @click="openExport = !openExport" @click.away="openExport = false"
+                        class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Export / Cetak
+                    <svg class="w-3.5 h-3.5 ml-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                
+                <!-- Dropdown Menu -->
+                <div x-show="openExport"
+                     x-transition:enter="transition ease-out duration-100"
+                     x-transition:enter-start="transform opacity-0 scale-95"
+                     x-transition:enter-end="transform opacity-100 scale-100"
+                     x-transition:leave="transition ease-in duration-75"
+                     x-transition:leave-start="transform opacity-100 scale-100"
+                     x-transition:leave-end="transform opacity-0 scale-95"
+                     class="absolute right-0 mt-2 w-48 rounded-xl bg-white border border-gray-200 shadow-lg py-1 z-50 overflow-hidden"
+                     style="display: none;">
+                    <button @click="exportDocument('pdf'); openExport = false" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                        </svg>
+                        Dokumen PDF (.pdf)
+                    </button>
+                    <button @click="exportDocument('jpeg'); openExport = false" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Gambar JPEG (.jpg)
+                    </button>
+                    <button @click="exportDocument('png'); openExport = false" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Gambar PNG (.png)
+                    </button>
+                </div>
+            </div>
+
             <a href="<?= base_url('ruas/import') ?>"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -31,6 +75,8 @@
     <!-- Load Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Capture Area -->
+    <div id="capture-area" class="space-y-8 bg-transparent pb-4">
     <!-- Stats Cards & Pie Charts Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
@@ -325,7 +371,7 @@
     <div x-data="dashboardRuasTable(<?= htmlspecialchars(json_encode($ruasJsonData), ENT_QUOTES, 'UTF-8') ?>)" class="space-y-6">
         
         <!-- Filters & Search Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 no-export">
             <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
                 
                 <!-- Judul Seksi -->
@@ -660,6 +706,7 @@
         </a>
     </div>
     <?php endif; ?>
+    </div> <!-- End of capture-area -->
 
     <!-- Inisialisasi Chart.js untuk Pie Charts -->
     <script>
@@ -898,6 +945,210 @@
             }
         });
     });
+    </script>
+
+    <!-- html2canvas & jsPDF CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+    function convertCanvasesToImages(container) {
+        const canvases = Array.from(container.querySelectorAll('canvas'));
+        const replacements = [];
+
+        canvases.forEach(canvas => {
+            const dataUrl = canvas.toDataURL('image/png');
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.width  = canvas.offsetWidth;
+            img.height = canvas.offsetHeight;
+            img.style.cssText = `
+                display: block;
+                width: ${canvas.offsetWidth}px;
+                height: ${canvas.offsetHeight}px;
+            `;
+            canvas.parentNode.insertBefore(img, canvas);
+            canvas.style.display = 'none';
+            replacements.push({ canvas, img });
+        });
+
+        return function restore() {
+            replacements.forEach(({ canvas, img }) => {
+                canvas.style.display = '';
+                img.remove();
+            });
+        };
+    }
+
+    function exportDocument(type) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Mempersiapkan dokumen...',
+                text: 'Mohon tunggu sebentar.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        const element = document.getElementById('capture-area');
+        const restoreCanvases = convertCanvasesToImages(element);
+
+        setTimeout(() => {
+            const fileName = 'Dashboard_' + new Date().toISOString().slice(0, 10);
+
+            html2canvas(element, {
+                scale: 2, // Menggunakan scale 2 untuk dashboard agar performa terjaga
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: '#f9fafb',
+                logging: false,
+                width: element.scrollWidth,
+                height: element.scrollHeight,
+                windowWidth: document.documentElement.scrollWidth,
+                windowHeight: document.documentElement.scrollHeight,
+                scrollX: -window.scrollX,
+                scrollY: -window.scrollY,
+                imageTimeout: 15000,
+                onclone: (clonedDoc) => {
+                    const clonedEl = clonedDoc.getElementById('capture-area');
+                    if (!clonedEl) return;
+
+                    clonedEl.querySelectorAll('.no-export, template, script').forEach(el => {
+                        el.remove();
+                    });
+
+                    clonedEl.style.borderRadius = '0';
+                    clonedEl.style.overflow    = 'visible';
+
+                    clonedEl.querySelectorAll('.flex').forEach(el => {
+                        el.style.display = 'flex';
+                    });
+                    clonedEl.querySelectorAll('.flex-col').forEach(el => {
+                        el.style.flexDirection = 'column';
+                    });
+                    clonedEl.querySelectorAll('.flex-wrap').forEach(el => {
+                        el.style.flexWrap = 'wrap';
+                    });
+                    clonedEl.querySelectorAll('.items-center').forEach(el => {
+                        el.style.alignItems = 'center';
+                    });
+                    clonedEl.querySelectorAll('.items-start').forEach(el => {
+                        el.style.alignItems = 'flex-start';
+                    });
+                    clonedEl.querySelectorAll('.justify-between').forEach(el => {
+                        el.style.justifyContent = 'space-between';
+                    });
+                    clonedEl.querySelectorAll('.justify-center').forEach(el => {
+                        el.style.justifyContent = 'center';
+                    });
+
+                    clonedEl.querySelectorAll('[class]').forEach(el => {
+                        const cls = typeof el.className === 'string' ? el.className : (el.getAttribute('class') || '');
+                        const gapMatch = cls.match(/\bgap-(\d+(?:\.\d+)?)\b/);
+                        if (gapMatch) {
+                            const val = parseFloat(gapMatch[1]) * 4;
+                            el.style.gap = val + 'px';
+                        }
+                        const gapXMatch = cls.match(/\bgap-x-(\d+(?:\.\d+)?)\b/);
+                        if (gapXMatch) {
+                            const val = parseFloat(gapXMatch[1]) * 4;
+                            el.style.columnGap = val + 'px';
+                        }
+                        const gapYMatch = cls.match(/\bgap-y-(\d+(?:\.\d+)?)\b/);
+                        if (gapYMatch) {
+                            const val = parseFloat(gapYMatch[1]) * 4;
+                            el.style.rowGap = val + 'px';
+                        }
+                    });
+
+                    clonedEl.querySelectorAll('span.rounded-full').forEach(dot => {
+                        dot.style.display    = 'inline-block';
+                        dot.style.flexShrink = '0';
+                        dot.style.alignSelf  = 'center';
+                        dot.style.borderRadius = '50%';
+
+                        const cls = dot.className || '';
+                        if (cls.includes('w-2.5') || cls.includes('h-2.5')) {
+                            dot.style.width     = '10px';
+                            dot.style.height    = '10px';
+                            dot.style.minWidth  = '10px';
+                            dot.style.minHeight = '10px';
+                        } else if (cls.includes('w-3') || cls.includes('h-3')) {
+                            dot.style.width     = '12px';
+                            dot.style.height    = '12px';
+                            dot.style.minWidth  = '12px';
+                            dot.style.minHeight = '12px';
+                        }
+
+                        dot.style.position = 'relative';
+                        dot.style.top      = '6px';
+                    });
+                }
+            }).then(canvas => {
+                restoreCanvases();
+
+                const mimeType = type === 'jpeg' ? 'image/jpeg' : 'image/png';
+                const quality  = type === 'jpeg' ? 0.95 : 1.0;
+                const imgData  = canvas.toDataURL(mimeType, quality);
+
+                if (type === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const PX_PER_MM = 3.7795275591;
+                    const pdfW_mm   = canvas.width  / (2 * PX_PER_MM);
+                    const pdfH_mm   = canvas.height / (2 * PX_PER_MM);
+                    const orientation = pdfW_mm > pdfH_mm ? 'l' : 'p';
+
+                    const pdf = new jsPDF({
+                        orientation: orientation,
+                        unit: 'mm',
+                        format: [pdfW_mm, pdfH_mm]
+                    });
+
+                    pdf.addImage(imgData, 'PNG', 0, 0, pdfW_mm, pdfH_mm, '', 'FAST');
+                    pdf.save(fileName + '.pdf');
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Export Berhasil!',
+                            text: 'Dokumen PDF telah diunduh.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                } else {
+                    const link = document.createElement('a');
+                    link.href = imgData;
+                    link.download = fileName + '.' + (type === 'jpeg' ? 'jpg' : 'png');
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Export Berhasil!',
+                            text: 'Gambar telah diunduh.',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    }
+                }
+            }).catch(err => {
+                restoreCanvases();
+                console.error('html2canvas error:', err);
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Export Gagal',
+                        text: 'Terjadi kesalahan saat memproses ekspor. Silakan coba lagi. Error: ' + (err.message || err)
+                    });
+                }
+            });
+        }, 300);
+    }
     </script>
 
 </div>
