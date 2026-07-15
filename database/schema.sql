@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `ruas_jalan` (
 
 -- ------------------------------------------------------------
 -- Tabel: stripmap
--- Menyimpan data strip map per segmen untuk setiap ruas
+-- Menyimpan data strip map per segmen untuk setiap ruas (Kondisi Jalan)
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `stripmap` (
     `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
@@ -55,12 +55,57 @@ CREATE TABLE IF NOT EXISTS `stripmap` (
         ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ==================
---  DATABASE 
--- ==================
--- Jalankan query SQL di bawah ini di tab SQL database `stripmap_db` Anda
--- untuk memperbarui tabel ruas_jalan dengan kolom baru:
+-- ------------------------------------------------------------
+-- Tabel: perkerasan
+-- Menyimpan data jenis perkerasan per segmen untuk setiap ruas
+-- (Rigid: Abu-abu, Aspal: Hitam, Agregat/Tanah: Coklat, Belum Tembus: Ungu)
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `perkerasan` (
+    `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `ruas_id`       INT UNSIGNED    NOT NULL,
+    `sta_awal`      DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'STA Awal segmen dalam meter',
+    `sta_akhir`     DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'STA Akhir segmen dalam meter',
+    `panjang`       DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang segmen dalam meter',
+    `rigid`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang Rigid (meter)',
+    `aspal`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang Aspal (meter)',
+    `agregat_tanah` DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang Agregat / Tanah (meter)',
+    `belum_tembus`  DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang Belum Tembus (meter)',
+    `created_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-ALTER TABLE `ruas_jalan` ADD COLUMN `koridor` VARCHAR(100) NULL AFTER `panjang`;
-ALTER TABLE `ruas_jalan` ADD COLUMN `kabupaten_kota` VARCHAR(100) NULL AFTER `koridor`;
+    PRIMARY KEY (`id`),
+    KEY `idx_ruas_id` (`ruas_id`),
 
+    CONSTRAINT `fk_perkerasan_ruas`
+        FOREIGN KEY (`ruas_id`)
+        REFERENCES `ruas_jalan` (`id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================================
+-- QUERY MIGRASI MANUAL (Jika tabel sudah ada di phpMyAdmin)
+-- ============================================================
+-- Copas query di bawah ini ke tab SQL database `stripmap_db` Anda:
+
+-- 1. Tambah kolom baru di ruas_jalan (jika belum):
+-- ALTER TABLE `ruas_jalan` ADD COLUMN `koridor` VARCHAR(100) NULL AFTER `panjang`;
+-- ALTER TABLE `ruas_jalan` ADD COLUMN `kabupaten_kota` VARCHAR(100) NULL AFTER `koridor`;
+
+-- 2. Buat tabel perkerasan:
+-- CREATE TABLE IF NOT EXISTS `perkerasan` (
+--     `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+--     `ruas_id`       INT UNSIGNED    NOT NULL,
+--     `sta_awal`      DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `sta_akhir`     DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `panjang`       DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `rigid`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `aspal`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `agregat_tanah` DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `belum_tembus`  DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+--     `created_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     `updated_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     PRIMARY KEY (`id`),
+--     KEY `idx_ruas_id` (`ruas_id`),
+--     CONSTRAINT `fk_perkerasan_ruas` FOREIGN KEY (`ruas_id`) REFERENCES `ruas_jalan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

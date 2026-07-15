@@ -5,9 +5,27 @@
 <div class="space-y-8">
 
     <!-- Header -->
-    <div>
-        <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p class="mt-1 text-sm text-gray-500">Ringkasan data ruas jalan dan strip map.</p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p class="mt-1 text-sm text-gray-500">Ringkasan data ruas jalan, strip map, dan jenis perkerasan.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="<?= base_url('ruas/import') ?>"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                </svg>
+                Import Excel
+            </a>
+            <a href="<?= base_url('ruas/create') ?>"
+               class="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah Ruas
+            </a>
+        </div>
     </div>
 
     <!-- Load Chart.js CDN -->
@@ -146,14 +164,77 @@
                 </div>
             </div>
 
+            <!-- Row 4: 4 Grid (Detail Jenis Perkerasan Jalan: Rigid, Aspal, Agregat/Tanah, Belum Tembus) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <!-- Card 9: Rigid -->
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-gray-50 border-gray-200">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #6b7280; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-gray-800">Rigid</span>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-200 text-gray-800 text-[10px] font-bold">
+                            <?= format_number($pctRigid ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700"><?= format_number($rigidKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-gray-600">km</span></h3>
+                    <p class="text-[11px] font-medium text-gray-600 mt-0.5">Rigid / Beton</p>
+                </div>
+
+                <!-- Card 10: Aspal -->
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-slate-900 border-slate-950 text-white">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #38bdf8; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-slate-100">Aspal</span>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-800 text-slate-200 text-[10px] font-bold">
+                            <?= format_number($pctAspal ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white"><?= format_number($aspalKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-slate-300">km</span></h3>
+                    <p class="text-[11px] font-medium text-slate-300 mt-0.5">Flexible / Aspal</p>
+                </div>
+
+                <!-- Card 11: Agregat / Tanah -->
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fefce8; border-color: #fef08a;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #854d0e; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-amber-900">Agregat/Tanah</span>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold">
+                            <?= format_number($pctAgregatTanah ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-amber-800"><?= format_number($agregatTanahKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-amber-700">km</span></h3>
+                    <p class="text-[11px] font-medium text-amber-700 mt-0.5">Kerikil / Tanah</p>
+                </div>
+
+                <!-- Card 12: Belum Tembus -->
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #faf5ff; border-color: #e9d5ff;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #a855f7; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-purple-900">Belum Tembus</span>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-100 text-purple-900 text-[10px] font-bold">
+                            <?= format_number($pctBelumTembus ?? 0.0, 1) ?>%
+                        </span>
+                    </div>
+                    <h3 class="text-xl font-bold text-purple-800"><?= format_number($belumTembusKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-purple-700">km</span></h3>
+                    <p class="text-[11px] font-medium text-purple-700 mt-0.5">Hutan / Belum Tembus</p>
+                </div>
+            </div>
+
         </div>
 
         <!-- Right Panel: 2 Pie Charts (Takes 1 Column on LG screens) -->
         <div class="space-y-6">
             
-            <!-- Pie Chart 1: Proporsi Kondisi Jalan -->
+            <!-- Pie Chart 1: Kondisi Jalan -->
             <div class="flex flex-col items-center justify-center rounded-2xl p-5 border min-h-[220px]" style="background-color: rgba(249, 250, 251, 0.6); border-color: #e5e7eb;">
-                <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Proporsi Kondisi Jalan</h4>
+                <h4 class="text-[13px] font-semibold text-gray-500 uppercase tracking-wider mb-4">Kondisi Jalan</h4>
                 <style>
                     @keyframes pie-spin-in {
                         from { transform: scale(0) rotate(-90deg); opacity: 0; }

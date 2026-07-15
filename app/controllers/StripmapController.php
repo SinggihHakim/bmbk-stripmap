@@ -9,13 +9,15 @@
 
 class StripmapController
 {
-    private StripmapService $service;
-    private RuasService     $ruasService;
+    private StripmapService   $service;
+    private RuasService       $ruasService;
+    private PerkerasanService $perkerasanService;
 
     public function __construct()
     {
-        $this->service     = new StripmapService();
-        $this->ruasService = new RuasService();
+        $this->service           = new StripmapService();
+        $this->ruasService       = new RuasService();
+        $this->perkerasanService = new PerkerasanService();
     }
 
     /**
@@ -31,10 +33,12 @@ class StripmapController
         }
 
         $data = [
-            'title'     => 'Strip Map: ' . $ruas['nama_ruas'],
-            'ruas'      => $ruas,
-            'stripmaps' => $this->service->getByRuasId($ruasId),
-            'summary'   => $this->service->getSummary($ruasId),
+            'title'             => 'Strip Map: ' . $ruas['nama_ruas'],
+            'ruas'              => $ruas,
+            'stripmaps'         => $this->service->getByRuasId($ruasId),
+            'summary'           => $this->service->getSummary($ruasId),
+            'perkerasans'       => $this->perkerasanService->getByRuasId($ruasId),
+            'summaryPerkerasan' => $this->perkerasanService->getSummary($ruasId),
         ];
         view('layouts.app', array_merge($data, ['content' => 'stripmap.index']));
     }
@@ -51,17 +55,14 @@ class StripmapController
             return;
         }
 
-        // Handle insert_after parameter untuk fitur "Sisipkan Segmen"
+        // Handle insert_after parameter untuk fitur "Sisipkan Segmen Stripmap"
         $prefillData = null;
         if (isset($_GET['insert_after']) && is_numeric($_GET['insert_after'])) {
             $afterSegmentId = (int) $_GET['insert_after'];
             $afterSegment = $this->service->findById($afterSegmentId);
 
             if ($afterSegment && $afterSegment['ruas_id'] == $ruasId) {
-                // Ambil semua segmen untuk ruas ini, diurutkan by sta_awal
                 $allSegments = $this->service->getByRuasId($ruasId);
-
-                // Cari segmen berikutnya (segmen dengan sta_awal terkecil yang lebih besar dari sta_akhir afterSegment)
                 $nextSegment = null;
                 foreach ($allSegments as $seg) {
                     if ($seg['sta_awal'] > $afterSegment['sta_akhir']) {
@@ -70,18 +71,42 @@ class StripmapController
                     }
                 }
 
-                // Pre-fill data untuk segmen baru
                 $prefillData = [
-                    'sta_awal' => meter_to_sta($afterSegment['sta_akhir']),
+                    'sta_awal'  => meter_to_sta($afterSegment['sta_akhir']),
                     'sta_akhir' => $nextSegment ? meter_to_sta($nextSegment['sta_awal']) : '',
                 ];
             }
         }
 
+        // Handle insert_after_perkerasan parameter untuk perkerasan
+        $prefillPerkerasanData = null;
+        if (isset($_GET['insert_after_perkerasan']) && is_numeric($_GET['insert_after_perkerasan'])) {
+            $afterId = (int) $_GET['insert_after_perkerasan'];
+            $afterSeg = $this->perkerasanService->findById($afterId);
+
+            if ($afterSeg && $afterSeg['ruas_id'] == $ruasId) {
+                $allSegs = $this->perkerasanService->getByRuasId($ruasId);
+                $nextSeg = null;
+                foreach ($allSegs as $seg) {
+                    if ($seg['sta_awal'] > $afterSeg['sta_akhir']) {
+                        $nextSeg = $seg;
+                        break;
+                    }
+                }
+
+                $prefillPerkerasanData = [
+                    'sta_awal'  => meter_to_sta($afterSeg['sta_akhir']),
+                    'sta_akhir' => $nextSeg ? meter_to_sta($nextSeg['sta_awal']) : '',
+                ];
+            }
+        }
+
         $data = [
-            'title' => 'Tambah Strip Map',
-            'ruas'  => $ruas,
-            'prefillData' => $prefillData,
+            'title'                 => 'Tambah Segmen Jalan',
+            'ruas'                  => $ruas,
+            'prefillData'           => $prefillData,
+            'prefillPerkerasanData' => $prefillPerkerasanData,
+            'perkerasans'           => $this->perkerasanService->getByRuasId($ruasId),
         ];
         view('layouts.app', array_merge($data, ['content' => 'stripmap.form']));
     }
@@ -106,12 +131,66 @@ class StripmapController
             redirect(base_url('stripmap/' . $ruasId));
         } else {
             flash('error', $result['message']);
-            // Redirect back with old input
             if (isset($_POST['rows'])) {
                 $_SESSION['old_input'] = $_POST['rows'];
             }
             redirect(base_url('stripmap/create/' . $ruasId));
         }
+    }
+
+    /**
+     * Proses simpan gabungan segmen strip map & perkerasan baru (1 tombol simpan)
+     */
+    public function batch(int $ruasId): void
+    {
+        $ruas = $this->ruasService->findById($ruasId);
+        if (!$ruas) {
+            flash('error', 'Ruas jalan tidak ditemukan.');
+            redirect(base_url('ruas'));
+            return;
+        }
+
+        $smSaved = false;
+        $pkSaved = false;
+
+        // 1. Simpan Segmen Strip Map (Kondisi)
+        if (isset($_POST['rows']) && is_array($_POST['rows'])) {
+            $rows = array_filter($_POST['rows'], function($row) {
+                return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
+            });
+
+            if (!empty($rows)) {
+                $smResult = $this->service->batchCreate($ruasId, array_values($rows));
+                if ($smResult['success']) {
+                    $smSaved = true;
+                } else {
+                    flash('error', 'Gagal menyimpan strip map: ' . $smResult['message']);
+                }
+            }
+        }
+
+        // 2. Simpan Segmen Perkerasan
+        if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows'])) {
+            $pkRows = array_filter($_POST['perkerasan_rows'], function($row) {
+                return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
+            });
+
+            if (!empty($pkRows)) {
+                $pkResult = $this->perkerasanService->batchCreate($ruasId, array_values($pkRows));
+                if ($pkResult['success']) {
+                    $pkSaved = true;
+                } else {
+                    flash('error', 'Gagal menyimpan perkerasan: ' . $pkResult['message']);
+                }
+            }
+        }
+
+        if ($smSaved || $pkSaved) {
+            $this->ruasService->syncStaFromStripmap($ruasId);
+            flash('success', 'Data segmen strip map dan perkerasan berhasil disimpan.');
+        }
+
+        redirect(base_url('stripmap/' . $ruasId));
     }
 
     /**
@@ -148,7 +227,6 @@ class StripmapController
         $result = $this->service->update($id, $input);
 
         if ($result['success']) {
-            // Sinkronisasi STA ruas dari data stripmap
             $this->ruasService->syncStaFromStripmap($result['ruas_id']);
             flash('success', $result['message']);
             redirect(base_url('stripmap/' . $result['ruas_id']));
@@ -166,7 +244,6 @@ class StripmapController
         $result = $this->service->delete($id);
 
         if ($result['success']) {
-            // Sinkronisasi STA ruas dari data stripmap
             $this->ruasService->syncStaFromStripmap($result['ruas_id']);
             flash('success', $result['message']);
             redirect(base_url('stripmap/' . $result['ruas_id']));
@@ -177,7 +254,7 @@ class StripmapController
     }
 
     /**
-     * Preview strip map visual untuk sebuah ruas
+     * Preview strip map & perkerasan visual untuk sebuah ruas
      */
     public function preview(int $ruasId): void
     {
@@ -189,11 +266,98 @@ class StripmapController
         }
 
         $data = [
-            'title'     => 'Preview Strip Map: ' . $ruas['nama_ruas'],
-            'ruas'      => $ruas,
-            'stripmaps' => $this->service->getByRuasId($ruasId),
-            'summary'   => $this->service->getSummary($ruasId),
+            'title'             => 'Preview Strip Map: ' . $ruas['nama_ruas'],
+            'ruas'              => $ruas,
+            'stripmaps'         => $this->service->getByRuasId($ruasId),
+            'summary'           => $this->service->getSummary($ruasId),
+            'perkerasans'       => $this->perkerasanService->getByRuasId($ruasId),
+            'summaryPerkerasan' => $this->perkerasanService->getSummary($ruasId),
         ];
         view('layouts.app', array_merge($data, ['content' => 'stripmap.preview']));
+    }
+
+    // ──────────────────────────────────────────────
+    // PERKERASAN HANDLERS
+    // ──────────────────────────────────────────────
+
+    /**
+     * Simpan segmen perkerasan (single/batch)
+     */
+    public function perkerasanStore(int $ruasId): void
+    {
+        if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows'])) {
+            $result = $this->perkerasanService->batchCreate($ruasId, $_POST['perkerasan_rows']);
+        } else {
+            $result = $this->perkerasanService->create($ruasId, $_POST);
+        }
+
+        if ($result['success']) {
+            flash('success', $result['message']);
+            redirect(base_url('stripmap/' . $ruasId));
+        } else {
+            flash('error', $result['message']);
+            if (isset($_POST['perkerasan_rows'])) {
+                $_SESSION['old_perkerasan_input'] = $_POST['perkerasan_rows'];
+            }
+            redirect(base_url('stripmap/create/' . $ruasId));
+        }
+    }
+
+    /**
+     * Form edit perkerasan
+     */
+    public function perkerasanEdit(int $id): void
+    {
+        $perkerasan = $this->perkerasanService->findById($id);
+        if (!$perkerasan) {
+            flash('error', 'Data perkerasan tidak ditemukan.');
+            redirect(base_url('ruas'));
+            return;
+        }
+
+        $ruas = $this->ruasService->findById($perkerasan['ruas_id']);
+
+        $data = [
+            'title'      => 'Edit Segmen Perkerasan',
+            'ruas'       => $ruas,
+            'perkerasan' => $perkerasan,
+        ];
+        view('layouts.app', array_merge($data, ['content' => 'stripmap.form']));
+    }
+
+    /**
+     * Update perkerasan
+     */
+    public function perkerasanUpdate(int $id): void
+    {
+        $input = $_POST;
+        if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows']) && isset($_POST['perkerasan_rows'][0])) {
+            $input = $_POST['perkerasan_rows'][0];
+        }
+        $result = $this->perkerasanService->update($id, $input);
+
+        if ($result['success']) {
+            flash('success', $result['message']);
+            redirect(base_url('stripmap/' . $result['ruas_id']));
+        } else {
+            flash('error', $result['message']);
+            redirect(base_url('perkerasan/edit/' . $id));
+        }
+    }
+
+    /**
+     * Hapus perkerasan
+     */
+    public function perkerasanDelete(int $id): void
+    {
+        $result = $this->perkerasanService->delete($id);
+
+        if ($result['success']) {
+            flash('success', $result['message']);
+            redirect(base_url('stripmap/' . $result['ruas_id']));
+        } else {
+            flash('error', $result['message']);
+            redirect(base_url('ruas'));
+        }
     }
 }

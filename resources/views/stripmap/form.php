@@ -1,17 +1,27 @@
 <!-- ============================================================ -->
-<!-- Form Tambah / Edit Strip Map (Batch Insert Support) -->
+<!-- Form Tambah / Edit Segmen Strip Map & Perkerasan              -->
 <!-- ============================================================ -->
 
 <?php
-    $isEdit  = isset($stripmap);
-    $action  = $isEdit ? base_url('stripmap/update/' . $stripmap['id']) : base_url('stripmap/store/' . $ruas['id']);
-    $heading = $isEdit ? 'Edit Segmen Strip Map' : 'Tambah Segmen Strip Map';
+    $isEditStripmap  = isset($stripmap);
+    $isEditPerkerasan= isset($perkerasan);
 
-    // Ambil old input jika ada error validasi
-    $oldInput = $_SESSION['old_input'] ?? null;
-    if ($oldInput) {
-        unset($_SESSION['old_input']);
+    if ($isEditStripmap) {
+        $heading = 'Edit Segmen Strip Map (Kondisi Jalan)';
+        $action  = base_url('stripmap/update/' . $stripmap['id']);
+    } elseif ($isEditPerkerasan) {
+        $heading = 'Edit Segmen Perkerasan Jalan';
+        $action  = base_url('perkerasan/update/' . $perkerasan['id']);
+    } else {
+        $heading = 'Input Segmen Jalan (Strip Map & Perkerasan)';
+        $actionStripmap  = base_url('stripmap/store/' . $ruas['id']);
+        $actionPerkerasan = base_url('perkerasan/store/' . $ruas['id']);
     }
+
+    $oldInput           = $_SESSION['old_input'] ?? null;
+    $oldPerkerasanInput = $_SESSION['old_perkerasan_input'] ?? null;
+    if ($oldInput) unset($_SESSION['old_input']);
+    if ($oldPerkerasanInput) unset($_SESSION['old_perkerasan_input']);
 ?>
 
 <div class="space-y-6">
@@ -27,112 +37,299 @@
         <div>
             <h1 class="text-2xl font-bold text-gray-900"><?= $heading ?></h1>
             <p class="mt-1 text-sm text-gray-500">
-                Ruas: <span class="font-semibold"><?= e($ruas['nama_ruas']) ?></span>
-                (<span class="font-mono"><?= e($ruas['kode_ruas']) ?></span>)
+                Ruas: <span class="font-semibold text-gray-800"><?= e($ruas['nama_ruas']) ?></span>
+                (<span class="font-mono text-gray-600"><?= e($ruas['kode_ruas']) ?></span>)
             </p>
         </div>
     </div>
 
-    <!-- Form Card + Realtime Preview -->
-    <div x-data="stripmapForm()" class="space-y-6">
-
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <form action="<?= $action ?>" method="POST" class="p-6 space-y-6" @submit="validateForm($event)">
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-700 bg-gray-50 border-b">
-                            <tr>
-                                <th class="px-3 py-3 w-32">STA Awal</th>
-                                <th class="px-3 py-3 w-32">STA Akhir</th>
-                                <th class="px-3 py-3 w-24">Panjang</th>
-                                <th class="px-3 py-3">Baik (m)</th>
-                                <th class="px-3 py-3">Sedang (m)</th>
-                                <th class="px-3 py-3">R. Ringan (m)</th>
-                                <th class="px-3 py-3">R. Berat (m)</th>
-                                <th class="px-3 py-3 w-16 text-center">Status</th>
-                                <?php if (!$isEdit): ?>
-                                <th class="px-3 py-3 w-16 text-center">Aksi</th>
-                                <?php endif; ?>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-for="(row, index) in rows" :key="row.id">
-                                <tr class="border-b hover:bg-gray-50">
-                                    <td class="p-2">
-                                        <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow(row)" @input="onStaInput($event, row, 'awal')" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    </td>
-                                    <td class="p-2">
-                                        <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow(row)" @input="onStaInput($event, row, 'akhir')" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
-                                    </td>
-                                    <td class="p-2">
-                                        <div class="font-mono font-semibold px-2" :class="row.error ? 'text-red-600' : 'text-gray-700'" x-text="row.panjang > 0 ? formatNumber(row.panjang) : '-'"></div>
-                                    </td>
-                                    <td class="p-2">
-                                        <input type="number" :name="`rows[${index}][baik]`" x-model.number="row.baik" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500" required>
-                                    </td>
-                                    <td class="p-2">
-                                        <input type="number" :name="`rows[${index}][sedang]`" x-model.number="row.sedang" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" required>
-                                    </td>
-                                    <td class="p-2">
-                                        <input type="number" :name="`rows[${index}][rusak_ringan]`" x-model.number="row.rusakRingan" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
-                                    </td>
-                                    <td class="p-2">
-                                        <input type="number" :name="`rows[${index}][rusak_berat]`" x-model.number="row.rusakBerat" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500" required>
-                                    </td>
-                                    <td class="p-2 text-center">
-                                        <div class="flex justify-center" :title="row.error || 'Valid'">
-                                            <svg x-show="row.isValid" class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                            </svg>
-                                            <svg x-show="!row.isValid && (row.panjang > 0 || row.error)" class="w-5 h-5 text-red-500 cursor-help" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                            </svg>
-                                        </div>
-                                    </td>
-                                    <?php if (!$isEdit): ?>
-                                    <td class="p-2 text-center">
-                                        <button type="button" @click="removeRow(index)" x-show="rows.length > 1" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </td>
-                                    <?php endif; ?>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+    <!-- Mode 1: Edit Single Stripmap -->
+    <?php if ($isEditStripmap): ?>
+        <div x-data="singleStripmapForm()" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+            <form action="<?= $action ?>" method="POST" class="space-y-6" @submit="validateForm($event)">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-3">Form Edit Kondisi Strip Map</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">STA Awal</label>
+                        <input type="text" name="rows[0][sta_awal]" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow()" @input="onStaInput($event, 'awal')" class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">STA Akhir</label>
+                        <input type="text" name="rows[0][sta_akhir]" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow()" @input="onStaInput($event, 'akhir')" class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Panjang Segmen</label>
+                        <div class="px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 font-mono font-bold text-gray-700 text-sm" x-text="row.panjang > 0 ? formatNumber(row.panjang) + ' m' : '-'"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-emerald-700 mb-1">Kondisi Baik (m)</label>
+                        <input type="number" name="rows[0][baik]" x-model.number="row.baik" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-yellow-700 mb-1">Kondisi Sedang (m)</label>
+                        <input type="number" name="rows[0][sedang]" x-model.number="row.sedang" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-yellow-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-orange-700 mb-1">Rusak Ringan (m)</label>
+                        <input type="number" name="rows[0][rusak_ringan]" x-model.number="row.rusakRingan" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-orange-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-red-700 mb-1">Rusak Berat (m)</label>
+                        <input type="number" name="rows[0][rusak_berat]" x-model.number="row.rusakBerat" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-red-500" required>
+                    </div>
                 </div>
 
-                <?php if (!$isEdit): ?>
-                <div class="flex justify-start">
-                    <button type="button" @click="addRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Tambah Baris
+                <div x-show="row.error" class="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium" x-text="row.error"></div>
+
+                <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
+                    <button type="submit" :disabled="!row.isValid" :class="row.isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'" class="px-6 py-2.5 text-white text-sm font-medium rounded-xl transition-colors shadow-sm">
+                        Perbarui Kondisi
                     </button>
+                    <a href="<?= base_url('stripmap/' . $ruas['id']) ?>" class="px-6 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">Batal</a>
                 </div>
-                <?php endif; ?>
+            </form>
+        </div>
 
-                <!-- Error Messages Summary -->
-                <div x-show="formErrors.length > 0" class="p-4 rounded-xl bg-red-50 border border-red-200">
-                    <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                        <div>
-                            <h4 class="text-sm font-medium text-red-800">Terdapat error pada input:</h4>
-                            <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
-                                <template x-for="err in formErrors" :key="err">
-                                    <li x-text="err"></li>
-                                </template>
-                            </ul>
+    <!-- Mode 2: Edit Single Perkerasan -->
+    <?php elseif ($isEditPerkerasan): ?>
+        <div x-data="singlePerkerasanForm()" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden p-6">
+            <form action="<?= $action ?>" method="POST" class="space-y-6" @submit="validateForm($event)">
+                <h2 class="text-lg font-bold text-gray-800 border-b pb-3">Form Edit Jenis Perkerasan</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">STA Awal</label>
+                        <input type="text" name="perkerasan_rows[0][sta_awal]" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow()" @input="onStaInput($event, 'awal')" class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">STA Akhir</label>
+                        <input type="text" name="perkerasan_rows[0][sta_akhir]" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow()" @input="onStaInput($event, 'akhir')" class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1">Panjang Segmen</label>
+                        <div class="px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 font-mono font-bold text-gray-700 text-sm" x-text="row.panjang > 0 ? formatNumber(row.panjang) + ' m' : '-'"></div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-700 mb-1 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block bg-gray-500"></span> Rigid (m)</label>
+                        <input type="number" name="perkerasan_rows[0][rigid]" x-model.number="row.rigid" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-gray-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-900 mb-1 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block bg-slate-900"></span> Aspal (m)</label>
+                        <input type="number" name="perkerasan_rows[0][aspal]" x-model.number="row.aspal" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-slate-900" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-amber-800 mb-1 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block" style="background:#92400e"></span> Agregat / Tanah (m)</label>
+                        <input type="number" name="perkerasan_rows[0][agregat_tanah]" x-model.number="row.agregatTanah" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-amber-700" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-purple-700 mb-1 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full inline-block bg-purple-600"></span> Belum Tembus (m)</label>
+                        <input type="number" name="perkerasan_rows[0][belum_tembus]" x-model.number="row.belumTembus" @input="calculateRow()" min="0" step="0.01" class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-purple-600" required>
+                    </div>
+                </div>
+
+                <div x-show="row.error" class="p-3 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700 font-medium" x-text="row.error"></div>
+
+                <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
+                    <button type="submit" :disabled="!row.isValid" :class="row.isValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'" class="px-6 py-2.5 text-white text-sm font-medium rounded-xl transition-colors shadow-sm">
+                        Perbarui Perkerasan
+                    </button>
+                    <a href="<?= base_url('stripmap/' . $ruas['id']) ?>" class="px-6 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">Batal</a>
+                </div>
+            </form>
+        </div>
+
+    <!-- Mode 3: Add New Segments (Form Kondisi + Form Perkerasan dalam 1 Form) -->
+    <?php else: ?>
+        <div x-data="batchCombinedForm()">
+            <form action="<?= base_url('stripmap/batch/' . $ruas['id']) ?>" method="POST" class="space-y-8" @submit="validateForm($event)">
+
+                <!-- SECTION 1: FORM STRIP MAP (Kondisi Jalan) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between cursor-pointer select-none" @click="isOpenSm = !isOpenSm">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold">1</span>
+                            Form Input Kondisi Jalan (Strip Map)
+                        </h2>
+                        <button type="button" class="text-gray-500 hover:text-gray-700 transition-transform duration-200" :class="isOpenSm ? 'rotate-90' : 'rotate-0'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <div x-show="isOpenSm" x-collapse class="p-6 space-y-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 bg-gray-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-3 w-32">STA Awal</th>
+                                        <th class="px-3 py-3 w-32">STA Akhir</th>
+                                        <th class="px-3 py-3 w-24">Panjang</th>
+                                        <th class="px-3 py-3 text-emerald-800">Baik (m)</th>
+                                        <th class="px-3 py-3 text-yellow-800">Sedang (m)</th>
+                                        <th class="px-3 py-3 text-orange-800">R. Ringan (m)</th>
+                                        <th class="px-3 py-3 text-red-800">R. Berat (m)</th>
+                                        <th class="px-3 py-3 w-16 text-center">Status</th>
+                                        <th class="px-3 py-3 w-16 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(row, index) in rows" :key="row.id">
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="p-2">
+                                                <input type="text" :name="`rows[${index}][sta_awal]`" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculateRow(row)" @input="onStaInput($event, row, 'awal')" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" :name="`rows[${index}][sta_akhir]`" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculateRow(row)" @input="onStaInput($event, row, 'akhir')" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-blue-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <div class="font-mono font-semibold px-2 text-gray-700" x-text="row.panjang > 0 ? formatNumber(row.panjang) : '-'"></div>
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`rows[${index}][baik]`" x-model.number="row.baik" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-emerald-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`rows[${index}][sedang]`" x-model.number="row.sedang" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-yellow-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`rows[${index}][rusak_ringan]`" x-model.number="row.rusakRingan" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-orange-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`rows[${index}][rusak_berat]`" x-model.number="row.rusakBerat" @input="calculateRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-red-500">
+                                            </td>
+                                            <td class="p-2 text-center">
+                                                <div class="flex justify-center" :title="row.error || 'Valid'">
+                                                    <svg x-show="row.isValid" class="w-5 h-5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                                    <svg x-show="!row.isValid && !isRowEmpty(row)" class="w-5 h-5 text-red-500 cursor-help" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                                </div>
+                                            </td>
+                                            <td class="p-2 text-center">
+                                                <button type="button" @click="removeRow(index)" x-show="rows.length > 1" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <button type="button" @click="addRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                Tambah Baris Kondisi
+                            </button>
+                        </div>
+
+                        <!-- Error List (Strip Map) -->
+                        <div x-show="formErrors.length > 0" class="p-4 rounded-xl bg-red-50 border border-red-200">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                <div>
+                                    <h4 class="text-sm font-medium text-red-800">Terdapat error pada input Strip Map:</h4>
+                                    <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
+                                        <template x-for="err in formErrors" :key="err"><li x-text="err"></li></template>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Buttons -->
-                <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
+                <!-- SECTION 2: FORM PERKERASAN JALAN -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-200 bg-gray-50/50 flex items-center justify-between cursor-pointer select-none" @click="isOpenPk = !isOpenPk">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-gray-200 text-gray-700 flex items-center justify-center text-xs font-bold">2</span>
+                            Form Input Jenis Perkerasan Jalan
+                        </h2>
+                        <button type="button" class="text-gray-500 hover:text-gray-700 transition-transform duration-200" :class="isOpenPk ? 'rotate-90' : 'rotate-0'">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+
+                    <div x-show="isOpenPk" x-collapse class="p-6 space-y-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-gray-700 bg-gray-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-3 w-32">STA Awal</th>
+                                        <th class="px-3 py-3 w-32">STA Akhir</th>
+                                        <th class="px-3 py-3 w-24">Panjang</th>
+                                        <th class="px-3 py-3 text-gray-700">Rigid (m)</th>
+                                        <th class="px-3 py-3 text-slate-900">Aspal (m)</th>
+                                        <th class="px-3 py-3 text-amber-800">Agregat / Tanah (m)</th>
+                                        <th class="px-3 py-3 text-purple-700">Belum Tembus (m)</th>
+                                        <th class="px-3 py-3 w-16 text-center">Status</th>
+                                        <th class="px-3 py-3 w-16 text-center">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template x-for="(row, index) in pkRows" :key="row.id">
+                                        <tr class="border-b hover:bg-gray-50">
+                                            <td class="p-2">
+                                                <input type="text" :name="`perkerasan_rows[${index}][sta_awal]`" x-model="row.staAwal" @blur="row.staAwal = formatStaValue(row.staAwal); calculatePkRow(row)" @input="onStaInput($event, row, 'awal')" placeholder="0+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-amber-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="text" :name="`perkerasan_rows[${index}][sta_akhir]`" x-model="row.staAkhir" @blur="row.staAkhir = formatStaValue(row.staAkhir); calculatePkRow(row)" @input="onStaInput($event, row, 'akhir')" placeholder="1+000" class="w-full px-2 py-1.5 rounded border border-gray-300 font-mono text-sm focus:ring-2 focus:ring-amber-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <div class="font-mono font-semibold px-2 text-gray-700" x-text="row.panjang > 0 ? formatNumber(row.panjang) : '-'"></div>
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`perkerasan_rows[${index}][rigid]`" x-model.number="row.rigid" @input="calculatePkRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-gray-500">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`perkerasan_rows[${index}][aspal]`" x-model.number="row.aspal" @input="calculatePkRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-slate-900">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`perkerasan_rows[${index}][agregat_tanah]`" x-model.number="row.agregatTanah" @input="calculatePkRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-amber-700">
+                                            </td>
+                                            <td class="p-2">
+                                                <input type="number" :name="`perkerasan_rows[${index}][belum_tembus]`" x-model.number="row.belumTembus" @input="calculatePkRow(row)" min="0" step="0.01" class="w-full px-2 py-1.5 rounded border border-gray-300 text-sm focus:ring-2 focus:ring-purple-600">
+                                            </td>
+                                            <td class="p-2 text-center">
+                                                <div class="flex justify-center" :title="row.error || 'Valid'">
+                                                    <svg x-show="row.isValid" class="w-5 h-5 text-amber-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                                                    <svg x-show="!row.isValid && !isPkRowEmpty(row)" class="w-5 h-5 text-red-500 cursor-help" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                                </div>
+                                            </td>
+                                            <td class="p-2 text-center">
+                                                <button type="button" @click="removePkRow(index)" x-show="pkRows.length > 1" class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="flex justify-start">
+                            <button type="button" @click="addPkRow()" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-amber-800 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                                Tambah Baris Perkerasan
+                            </button>
+                        </div>
+
+                        <!-- Error List (Perkerasan) -->
+                        <div x-show="pkFormErrors.length > 0" class="p-4 rounded-xl bg-red-50 border border-red-200">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                                <div>
+                                    <h4 class="text-sm font-medium text-red-800">Terdapat error pada input Perkerasan:</h4>
+                                    <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
+                                        <template x-for="err in pkFormErrors" :key="err"><li x-text="err"></li></template>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SINGLE SUBMIT BUTTON BAR -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex items-center justify-end gap-3 sticky bottom-4 z-10">
+                    <a href="<?= base_url('stripmap/' . $ruas['id']) ?>"
+                       class="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors">
+                        Batal
+                    </a>
                     <button type="submit"
                             :disabled="!isFormValid"
                             :class="isFormValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-300 cursor-not-allowed'"
@@ -140,380 +337,282 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                         </svg>
-                        <?= $isEdit ? 'Perbarui' : 'Simpan Semua' ?>
+                        Simpan Semua Data Segmen
                     </button>
-                    <a href="<?= base_url('stripmap/' . $ruas['id']) ?>"
-                       class="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">
-                        Batal
-                    </a>
                 </div>
 
             </form>
         </div>
-
-        <!-- Realtime Strip Map Preview for All Rows -->
-        <div x-show="validRows.length > 0" x-cloak
-             class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-900">Preview Strip Map (Realtime)</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Hover atau klik segmen warna untuk lihat detail kondisi.</p>
-            </div>
-            <div class="p-6 space-y-6">
-                <template x-for="(row, rIdx) in validRows" :key="row.id">
-                    <div x-data="{ activeLabel: null, activePct: 0 }">
-                        <div class="flex justify-between items-center mb-1 text-sm">
-                            <span class="font-medium text-gray-700">STA <span x-text="row.staAwal"></span> - <span x-text="row.staAkhir"></span></span>
-                            <span class="text-gray-500" x-text="formatNumber(row.panjang) + ' m'"></span>
-                        </div>
-                        <!-- Strip Bar -->
-                        <div class="flex h-10 rounded-lg overflow-hidden shadow-sm">
-                            <template x-for="(segment, idx) in getSegments(row)" :key="segment.key">
-                                <div class="relative transition-all duration-300 ease-out cursor-pointer"
-                                     :style="'width:' + segment.percent + '%; ' + segment.bgStyle"
-                                     x-show="segment.value > 0"
-                                     @mouseenter="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct"
-                                     @mouseleave="activeLabel = null"
-                                     @click="activeLabel = { panjang: formatNumber(segment.value), kondisi: segment.label, color: segment.color }; activePct = segment.midPct">
-                                    <!-- Highlight ring -->
-                                    <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 hover:opacity-100 transition-opacity"></div>
-                                </div>
-                            </template>
-                        </div>
-                        <!-- Label di Bawah Bar -->
-                        <div class="relative w-full h-0 z-20">
-                            <template x-if="activeLabel">
-                                <div class="absolute top-1 flex flex-col items-center -translate-x-1/2 transition-all duration-150 ease-out"
-                                     :style="'left:' + activePct + '%'">
-                                    <div class="w-px h-2.5" :style="'background-color:' + activeLabel.color"></div>
-                                    <div class="mt-0.5 px-2 py-1 rounded-md border shadow-sm text-center whitespace-nowrap backdrop-blur-sm"
-                                         :style="'border-color:' + activeLabel.color + '40; background-color:' + activeLabel.color + '15'">
-                                        <p class="text-xs font-bold" :style="'color:' + activeLabel.color" x-text="activeLabel.panjang + ' m'"></p>
-                                        <p class="text-[10px] font-semibold text-gray-600" x-text="activeLabel.kondisi"></p>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </template>
-
-                <!-- Legend -->
-                <div class="flex flex-wrap gap-4 pt-4 border-t border-gray-100 justify-center">
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#10b981"></span><span class="text-xs text-gray-600">Baik</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#eab308"></span><span class="text-xs text-gray-600">Sedang</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#f97316"></span><span class="text-xs text-gray-600">Rusak Ringan</span></div>
-                    <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full" style="background:#ef4444"></span><span class="text-xs text-gray-600">Rusak Berat</span></div>
-                </div>
-            </div>
-        </div>
-
-    </div>
+    <?php endif; ?>
 
 </div>
 
 <script>
-function stripmapForm() {
+// --- Helper Functions ---
+function staToMeter(sta) {
+    if(!sta) return 0;
+    sta = sta.toString().trim();
+    if (sta.includes('+')) {
+        const parts = sta.split('+');
+        return parseFloat(parts[0]) * 1000 + parseFloat(parts[1] || 0);
+    }
+    return parseFloat(sta) || 0;
+}
 
-    // Inisialisasi data form (mendukung old input jika ada, atau data edit, atau 3 baris kosong)
-    const isEdit = <?= $isEdit ? 'true' : 'false' ?>;
-    let initialRows = [];
+function formatStaValue(val) {
+    if (!val) return '';
+    val = val.toString().trim().replace(',', '.');
+    let totalMeters = 0;
+    if (val.includes('+')) {
+        const parts = val.split('+');
+        const km = parseFloat(parts[0]) || 0;
+        const m = parseFloat(parts[1]) || 0;
+        totalMeters = km * 1000 + m;
+    } else {
+        const num = parseFloat(val);
+        if (isNaN(num)) return val;
+        totalMeters = num < 10 || val.includes('.') ? num * 1000 : num;
+    }
+    const km = Math.floor(totalMeters / 1000);
+    const m = Math.round(totalMeters % 1000);
+    return `${km}+${String(m).padStart(3, '0')}`;
+}
 
-    <?php if ($oldInput): ?>
-        initialRows = <?= json_encode(array_values($oldInput)) ?>;
-        // Transform the format slightly for JS
-        initialRows = initialRows.map((r, idx) => ({
-            id: Date.now() + idx,
-            staAwal: r.sta_awal,
-            staAkhir: r.sta_akhir,
-            panjang: 0,
-            baik: parseFloat(r.baik) || 0,
-            sedang: parseFloat(r.sedang) || 0,
-            rusakRingan: parseFloat(r.rusak_ringan) || 0,
-            rusakBerat: parseFloat(r.rusak_berat) || 0,
-            error: '',
-            isValid: false
-        }));
-    <?php elseif ($isEdit): ?>
-        initialRows = [{
-            id: Date.now(),
-            staAwal: '<?= meter_to_sta($stripmap['sta_awal']) ?>',
-            staAkhir: '<?= meter_to_sta($stripmap['sta_akhir']) ?>',
-            panjang: <?= $stripmap['panjang'] ?>,
-            baik: <?= $stripmap['baik'] ?>,
-            sedang: <?= $stripmap['sedang'] ?>,
-            rusakRingan: <?= $stripmap['rusak_ringan'] ?>,
-            rusakBerat: <?= $stripmap['rusak_berat'] ?>,
+function formatNumber(num) {
+    return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num);
+}
+
+// -------------------------------------------------------------
+// 1. Single Edit Stripmap Form Component
+// -------------------------------------------------------------
+function singleStripmapForm() {
+    return {
+        row: {
+            staAwal: '<?= isset($stripmap) ? meter_to_sta($stripmap['sta_awal']) : '' ?>',
+            staAkhir: '<?= isset($stripmap) ? meter_to_sta($stripmap['sta_akhir']) : '' ?>',
+            panjang: <?= isset($stripmap) ? $stripmap['panjang'] : 0 ?>,
+            baik: <?= isset($stripmap) ? $stripmap['baik'] : 0 ?>,
+            sedang: <?= isset($stripmap) ? $stripmap['sedang'] : 0 ?>,
+            rusakRingan: <?= isset($stripmap) ? $stripmap['rusak_ringan'] : 0 ?>,
+            rusakBerat: <?= isset($stripmap) ? $stripmap['rusak_berat'] : 0 ?>,
             error: '',
             isValid: true
-        }];
-    <?php elseif (isset($prefillData)): ?>
-        // Pre-fill untuk fitur "Sisipkan Segmen"
-        initialRows = [{
-            id: Date.now(),
-            staAwal: '<?= $prefillData['sta_awal'] ?? '' ?>',
-            staAkhir: '<?= $prefillData['sta_akhir'] ?? '' ?>',
-            panjang: 0,
-            baik: 0,
-            sedang: 0,
-            rusakRingan: 0,
-            rusakBerat: 0,
+        },
+        calculateRow() {
+            this.row.error = '';
+            this.row.isValid = false;
+            const baik = parseFloat(this.row.baik) || 0;
+            const sedang = parseFloat(this.row.sedang) || 0;
+            const rRingan = parseFloat(this.row.rusakRingan) || 0;
+            const rBerat = parseFloat(this.row.rusakBerat) || 0;
+            const total = baik + sedang + rRingan + rBerat;
+
+            if (this.row.staAwal && this.row.staAkhir) {
+                const awal = staToMeter(this.row.staAwal);
+                const akhir = staToMeter(this.row.staAkhir);
+                if (akhir <= awal) {
+                    this.row.error = 'STA Akhir harus > STA Awal.';
+                    this.row.panjang = 0;
+                } else {
+                    this.row.panjang = akhir - awal;
+                    if (Math.abs(total - this.row.panjang) > 0.01) {
+                        this.row.error = `Selisih kondisi (${total}m) dengan panjang segmen (${this.row.panjang}m).`;
+                    } else {
+                        this.row.isValid = true;
+                    }
+                }
+            }
+        },
+        onStaInput(e, field) {
+            let val = e.target.value.replace(/[^0-9+]/g, '');
+            if (val.length === 1 && /^\d$/.test(val)) val += '+';
+            if (field === 'awal') this.row.staAwal = val;
+            else this.row.staAkhir = val;
+            this.calculateRow();
+        },
+        validateForm(e) {
+            if (!this.row.isValid) e.preventDefault();
+        }
+    };
+}
+
+// -------------------------------------------------------------
+// 2. Single Edit Perkerasan Form Component
+// -------------------------------------------------------------
+function singlePerkerasanForm() {
+    return {
+        row: {
+            staAwal: '<?= isset($perkerasan) ? meter_to_sta($perkerasan['sta_awal']) : '' ?>',
+            staAkhir: '<?= isset($perkerasan) ? meter_to_sta($perkerasan['sta_akhir']) : '' ?>',
+            panjang: <?= isset($perkerasan) ? $perkerasan['panjang'] : 0 ?>,
+            rigid: <?= isset($perkerasan) ? $perkerasan['rigid'] : 0 ?>,
+            aspal: <?= isset($perkerasan) ? $perkerasan['aspal'] : 0 ?>,
+            agregatTanah: <?= isset($perkerasan) ? $perkerasan['agregat_tanah'] : 0 ?>,
+            belumTembus: <?= isset($perkerasan) ? $perkerasan['belum_tembus'] : 0 ?>,
             error: '',
-            isValid: false
-        }];
+            isValid: true
+        },
+        calculateRow() {
+            this.row.error = '';
+            this.row.isValid = false;
+            const rigid = parseFloat(this.row.rigid) || 0;
+            const aspal = parseFloat(this.row.aspal) || 0;
+            const agregat = parseFloat(this.row.agregatTanah) || 0;
+            const belum = parseFloat(this.row.belumTembus) || 0;
+            const total = rigid + aspal + agregat + belum;
+
+            if (this.row.staAwal && this.row.staAkhir) {
+                const awal = staToMeter(this.row.staAwal);
+                const akhir = staToMeter(this.row.staAkhir);
+                if (akhir <= awal) {
+                    this.row.error = 'STA Akhir harus > STA Awal.';
+                    this.row.panjang = 0;
+                } else {
+                    this.row.panjang = akhir - awal;
+                    if (Math.abs(total - this.row.panjang) > 0.01) {
+                        this.row.error = `Selisih perkerasan (${total}m) dengan panjang segmen (${this.row.panjang}m).`;
+                    } else {
+                        this.row.isValid = true;
+                    }
+                }
+            }
+        },
+        onStaInput(e, field) {
+            let val = e.target.value.replace(/[^0-9+]/g, '');
+            if (val.length === 1 && /^\d$/.test(val)) val += '+';
+            if (field === 'awal') this.row.staAwal = val;
+            else this.row.staAkhir = val;
+            this.calculateRow();
+        },
+        validateForm(e) {
+            if (!this.row.isValid) e.preventDefault();
+        }
+    };
+}
+
+// -------------------------------------------------------------
+// 3. Combined Batch Form Component (Kondisi + Perkerasan)
+// -------------------------------------------------------------
+function batchCombinedForm() {
+    let initialRows = [];
+    <?php if (isset($prefillData)): ?>
+        initialRows = [{ id: Date.now(), staAwal: '<?= $prefillData['sta_awal'] ?>', staAkhir: '<?= $prefillData['sta_akhir'] ?>', panjang: 0, baik: '', sedang: '', rusakRingan: '', rusakBerat: '', error: '', isValid: false }];
     <?php else: ?>
-        // Default 3 baris kosong
         for(let i=0; i<3; i++) {
-            initialRows.push({
-                id: Date.now() + i,
-                staAwal: '',
-                staAkhir: '',
-                panjang: 0,
-                baik: 0,
-                sedang: 0,
-                rusakRingan: 0,
-                rusakBerat: 0,
-                error: '',
-                isValid: false
-            });
+            initialRows.push({ id: Date.now() + i, staAwal: '', staAkhir: '', panjang: 0, baik: '', sedang: '', rusakRingan: '', rusakBerat: '', error: '', isValid: false });
+        }
+    <?php endif; ?>
+
+    let initialPkRows = [];
+    <?php if (isset($prefillPerkerasanData)): ?>
+        initialPkRows = [{ id: Date.now() + 100, staAwal: '<?= $prefillPerkerasanData['sta_awal'] ?>', staAkhir: '<?= $prefillPerkerasanData['sta_akhir'] ?>', panjang: 0, rigid: '', aspal: '', agregatTanah: '', belumTembus: '', error: '', isValid: false }];
+    <?php else: ?>
+        for(let i=0; i<3; i++) {
+            initialPkRows.push({ id: Date.now() + 100 + i, staAwal: '', staAkhir: '', panjang: 0, rigid: '', aspal: '', agregatTanah: '', belumTembus: '', error: '', isValid: false });
         }
     <?php endif; ?>
 
     return {
+        isOpenSm: true,
+        isOpenPk: true,
         rows: initialRows,
+        pkRows: initialPkRows,
 
         init() {
-            // Kalkulasi ulang semua baris saat inisialisasi
-            this.rows.forEach(row => this.calculateRow(row));
+            this.rows.forEach(r => this.calculateRow(r));
+            this.pkRows.forEach(r => this.calculatePkRow(r));
         },
 
+        // --- Strip Map Methods ---
         addRow() {
-            // Salin STA Akhir baris terakhir sebagai STA Awal baris baru (Fitur kenyamanan)
-            let lastStaAkhir = '';
-            if (this.rows.length > 0) {
-                lastStaAkhir = this.rows[this.rows.length - 1].staAkhir;
-            }
-
-            this.rows.push({
-                id: Date.now(),
-                staAwal: lastStaAkhir,
-                staAkhir: '',
-                panjang: 0,
-                baik: 0,
-                sedang: 0,
-                rusakRingan: 0,
-                rusakBerat: 0,
-                error: '',
-                isValid: false
-            });
+            let lastSta = this.rows.length > 0 ? this.rows[this.rows.length - 1].staAkhir : '';
+            this.rows.push({ id: Date.now(), staAwal: lastSta, staAkhir: '', panjang: 0, baik: '', sedang: '', rusakRingan: '', rusakBerat: '', error: '', isValid: false });
         },
-
-        removeRow(index) {
-            this.rows.splice(index, 1);
-        },
-
-        staToMeter(sta) {
-            if(!sta) return 0;
-            sta = sta.trim();
-            if (sta.includes('+')) {
-                const parts = sta.split('+');
-                return parseFloat(parts[0]) * 1000 + parseFloat(parts[1] || 0);
-            }
-            return parseFloat(sta) || 0;
-        },
-
+        removeRow(idx) { this.rows.splice(idx, 1); },
+        isRowEmpty(row) { return !row.staAwal && !row.staAkhir && row.baik==='' && row.sedang==='' && row.rusakRingan==='' && row.rusakBerat===''; },
         calculateRow(row) {
-            row.error = '';
-            row.isValid = false;
-
-            // Konversi nilai input ke float agar aman untuk kalkulasi
-            const baik = parseFloat(row.baik) || 0;
-            const sedang = parseFloat(row.sedang) || 0;
-            const rRingan = parseFloat(row.rusakRingan) || 0;
-            const rBerat = parseFloat(row.rusakBerat) || 0;
-            const totalKondisi = baik + sedang + rRingan + rBerat;
-
+            row.error = ''; row.isValid = false;
+            if (this.isRowEmpty(row)) { row.panjang = 0; return; }
+            const total = (parseFloat(row.baik)||0) + (parseFloat(row.sedang)||0) + (parseFloat(row.rusakRingan)||0) + (parseFloat(row.rusakBerat)||0);
             if (row.staAwal && row.staAkhir) {
-                const awal  = this.staToMeter(row.staAwal);
-                const akhir = this.staToMeter(row.staAkhir);
-
-                if (awal < 0 || akhir < 0) {
-                    row.error = 'STA tidak boleh negatif.';
-                    row.panjang = 0;
-                } else if (akhir <= awal) {
-                    row.error = 'STA Akhir harus > STA Awal.';
-                    row.panjang = 0;
-                } else {
+                const awal = staToMeter(row.staAwal);
+                const akhir = staToMeter(row.staAkhir);
+                if (akhir <= awal) { row.error = 'STA Akhir harus > STA Awal.'; row.panjang = 0; }
+                else {
                     row.panjang = akhir - awal;
-
-                    // Validasi kondisi
-                    if (row.panjang > 0) {
-                        const selisih = Math.abs(totalKondisi - row.panjang);
-                        if (selisih > 0.01) {
-                            row.error = `Selisih kondisi: ${this.formatNumber(selisih)} m`;
-                        } else {
-                            row.isValid = true;
-                        }
-                    }
+                    if (Math.abs(total - row.panjang) > 0.01) row.error = `Selisih kondisi (${total}m) vs segmen (${row.panjang}m).`;
+                    else row.isValid = true;
                 }
-            } else {
-                row.panjang = 0;
-                if(row.staAwal || row.staAkhir || totalKondisi > 0) {
-                    row.error = 'STA harus diisi lengkap.';
-                }
-            }
+            } else { row.error = 'STA harus diisi lengkap.'; }
         },
 
+        // --- Perkerasan Methods ---
+        addPkRow() {
+            let lastSta = this.pkRows.length > 0 ? this.pkRows[this.pkRows.length - 1].staAkhir : '';
+            this.pkRows.push({ id: Date.now() + 100, staAwal: lastSta, staAkhir: '', panjang: 0, rigid: '', aspal: '', agregatTanah: '', belumTembus: '', error: '', isValid: false });
+        },
+        removePkRow(idx) { this.pkRows.splice(idx, 1); },
+        isPkRowEmpty(row) { return !row.staAwal && !row.staAkhir && row.rigid==='' && row.aspal==='' && row.agregatTanah==='' && row.belumTembus===''; },
+        calculatePkRow(row) {
+            row.error = ''; row.isValid = false;
+            if (this.isPkRowEmpty(row)) { row.panjang = 0; return; }
+            const total = (parseFloat(row.rigid)||0) + (parseFloat(row.aspal)||0) + (parseFloat(row.agregatTanah)||0) + (parseFloat(row.belumTembus)||0);
+            if (row.staAwal && row.staAkhir) {
+                const awal = staToMeter(row.staAwal);
+                const akhir = staToMeter(row.staAkhir);
+                if (akhir <= awal) { row.error = 'STA Akhir harus > STA Awal.'; row.panjang = 0; }
+                else {
+                    row.panjang = akhir - awal;
+                    if (Math.abs(total - row.panjang) > 0.01) row.error = `Selisih perkerasan (${total}m) vs segmen (${row.panjang}m).`;
+                    else row.isValid = true;
+                }
+            } else { row.error = 'STA harus diisi lengkap.'; }
+        },
+
+        // --- Helpers ---
+        onStaInput(e, row, field) {
+            let val = e.target.value.replace(/[^0-9+]/g, '');
+            if (val.length === 1 && /^\d$/.test(val)) val += '+';
+            if (field === 'awal') row.staAwal = val; else row.staAkhir = val;
+            if ('baik' in row) this.calculateRow(row);
+            else this.calculatePkRow(row);
+        },
+
+        // --- Validation & Readiness ---
         get formErrors() {
-            let errors = [];
-            let validSegments = [];
-
-            this.rows.forEach((row, idx) => {
-                // Abaikan baris kosong sepenuhnya (kecuali form isEdit)
-                const isTotallyEmpty = !row.staAwal && !row.staAkhir && !row.baik && !row.sedang && !row.rusakRingan && !row.rusakBerat;
-
-                if (!isTotallyEmpty) {
-                    if (row.error) {
-                        errors.push(`Baris ${idx + 1}: ${row.error}`);
-                    } else if (!row.isValid) {
-                        errors.push(`Baris ${idx + 1}: Data belum valid.`);
-                    } else {
-                        validSegments.push({
-                            index: idx + 1,
-                            awal: this.staToMeter(row.staAwal),
-                            akhir: this.staToMeter(row.staAkhir),
-                            staAwalStr: row.staAwal,
-                            staAkhirStr: row.staAkhir
-                        });
-                    }
+            let errs = [];
+            this.rows.forEach((r, idx) => {
+                if (!this.isRowEmpty(r)) {
+                    if (r.error) errs.push(`Baris ${idx+1}: ${r.error}`);
+                    else if (!r.isValid) errs.push(`Baris ${idx+1}: Input belum valid.`);
                 }
             });
-
-            // Deteksi Tumpang Tindih (Overlapping) Segmen
-            validSegments.sort((a, b) => a.awal - b.awal);
-            for (let i = 1; i < validSegments.length; i++) {
-                if (validSegments[i].awal < validSegments[i-1].akhir) {
-                    errors.push(`Tumpang tindih terdeteksi antara Baris ${validSegments[i-1].index} (${validSegments[i-1].staAwalStr} s/d ${validSegments[i-1].staAkhirStr}) dan Baris ${validSegments[i].index} (${validSegments[i].staAwalStr} s/d ${validSegments[i].staAkhirStr}).`);
+            return errs;
+        },
+        get pkFormErrors() {
+            let errs = [];
+            this.pkRows.forEach((r, idx) => {
+                if (!this.isPkRowEmpty(r)) {
+                    if (r.error) errs.push(`Baris ${idx+1}: ${r.error}`);
+                    else if (!r.isValid) errs.push(`Baris ${idx+1}: Input belum valid.`);
                 }
-            }
-
-            return errors;
+            });
+            return errs;
         },
-
-        get activeRows() {
-            return this.rows.filter(row => row.staAwal || row.staAkhir || row.baik || row.sedang || row.rusakRingan || row.rusakBerat);
-        },
-
-        get validRows() {
-            return this.rows.filter(row => row.isValid);
-        },
-
         get isFormValid() {
-            if (this.formErrors.length > 0) return false;
-            const active = this.activeRows;
-            return active.length > 0 && active.every(row => row.isValid);
+            if (this.formErrors.length > 0 || this.pkFormErrors.length > 0) return false;
+            const activeSm = this.rows.filter(r => !this.isRowEmpty(r));
+            const activePk = this.pkRows.filter(r => !this.isPkRowEmpty(r));
+            if (activeSm.length === 0 && activePk.length === 0) return false;
+            return (activeSm.length === 0 || activeSm.every(r => r.isValid)) &&
+                   (activePk.length === 0 || activePk.every(r => r.isValid));
         },
-
-        formatStaValue(val) {
-            if (!val) return '';
-            val = val.toString().trim().replace(',', '.');
-            
-            let totalMeters = 0;
-            if (val.includes('+')) {
-                const parts = val.split('+');
-                const km = parseFloat(parts[0]) || 0;
-                const m = parseFloat(parts[1]) || 0;
-                totalMeters = km * 1000 + m;
-            } else {
-                const num = parseFloat(val);
-                if (isNaN(num)) return val;
-                
-                if (val.includes('.')) {
-                    totalMeters = num * 1000;
-                } else {
-                    if (num < 10) {
-                        totalMeters = num * 1000;
-                    } else {
-                        totalMeters = num;
-                    }
-                }
-            }
-            
-            const km = Math.floor(totalMeters / 1000);
-            const m = Math.round(totalMeters % 1000);
-            const mStr = String(m).padStart(3, '0');
-            return `${km}+${mStr}`;
-        },
-
-        onStaInput(event, row, field) {
-            let val = event.target.value;
-            
-            if (event.inputType && event.inputType.startsWith('delete')) {
-                if (field === 'awal') {
-                    row.staAwal = val;
-                } else {
-                    row.staAkhir = val;
-                }
-                this.calculateRow(row);
-                return;
-            }
-            
-            val = val.replace(/[^0-9+]/g, '');
-            
-            if (val.length === 1 && /^\d$/.test(val)) {
-                val = val + '+';
-            }
-            
-            if (field === 'awal') {
-                row.staAwal = val;
-            } else {
-                row.staAkhir = val;
-            }
-            this.calculateRow(row);
-        },
-
-        formatNumber(num) {
-            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num);
-        },
-
-        getSegments(row) {
-            const baik = parseFloat(row.baik) || 0;
-            const sedang = parseFloat(row.sedang) || 0;
-            const rRingan = parseFloat(row.rusakRingan) || 0;
-            const rBerat = parseFloat(row.rusakBerat) || 0;
-            const total = baik + sedang + rRingan + rBerat || 1;
-
-            const conditions = [
-                { key: 'baik', label: 'Baik', value: baik, percent: (baik / total) * 100, color: '#10b981' },
-                { key: 'sedang', label: 'Sedang', value: sedang, percent: (sedang / total) * 100, color: '#eab308' },
-                { key: 'rusak_ringan', label: 'Rusak Ringan', value: rRingan, percent: (rRingan / total) * 100, color: '#f97316' },
-                { key: 'rusak_berat', label: 'Rusak Berat', value: rBerat, percent: (rBerat / total) * 100, color: '#ef4444' }
-            ];
-
-            const active = conditions.filter(c => c.value > 0);
-
-            // Hitung posisi tengah kumulatif untuk label pointer
-            let cumulative = 0;
-            return active.map((c, idx) => {
-                const nextColor = idx < active.length - 1 ? active[idx + 1].color : c.color;
-                c.bgStyle = `background: linear-gradient(to right, ${c.color} 60%, ${nextColor} 100%)`;
-                c.midPct = cumulative + (c.percent / 2);
-                cumulative += c.percent;
-                return c;
-            });
-        },
-
-        validateForm(event) {
-            // Hapus baris yang kosong sebelum submit
-            if (!this.isEdit) {
-                this.rows = this.rows.filter(row => row.staAwal || row.staAkhir || row.baik || row.sedang || row.rusakRingan || row.rusakBerat);
-            }
-
+        validateForm(e) {
             if (!this.isFormValid) {
-                event.preventDefault();
-                showAlert('Terdapat data yang tidak valid. Periksa pesan error!', 'warning', 'Validasi Gagal');
-                return false;
+                e.preventDefault();
+                showAlert('Terdapat input segmen yang belum valid!', 'warning', 'Validasi Gagal');
             }
-            return true;
         }
-    }
+    };
 }
 </script>

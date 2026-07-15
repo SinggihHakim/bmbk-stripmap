@@ -201,14 +201,17 @@ class StripmapService
         $errors = [];
 
         // Validasi STA
-        if (empty(trim($input['sta_awal'] ?? ''))) {
+        $staAwalRaw  = trim((string)($input['sta_awal'] ?? ''));
+        $staAkhirRaw = trim((string)($input['sta_akhir'] ?? ''));
+
+        if ($staAwalRaw === '') {
             $errors[] = 'STA Awal wajib diisi.';
         }
-        if (empty(trim($input['sta_akhir'] ?? ''))) {
+        if ($staAkhirRaw === '') {
             $errors[] = 'STA Akhir wajib diisi.';
         }
 
-        if (!empty($input['sta_awal']) && !empty($input['sta_akhir'])) {
+        if ($staAwalRaw !== '' && $staAkhirRaw !== '') {
             $staAwal  = sta_to_meter($input['sta_awal']);
             $staAkhir = sta_to_meter($input['sta_akhir']);
             $panjang  = $staAkhir - $staAwal;

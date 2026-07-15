@@ -34,6 +34,14 @@ class RuasService
     }
 
     /**
+     * Ambil satu ruas berdasarkan kode
+     */
+    public function findByKode(string $kodeRuas): ?array
+    {
+        return $this->model->findByKode($kodeRuas);
+    }
+
+    /**
      * Validasi & simpan ruas baru
      * @return array ['success' => bool, 'message' => string, 'id' => ?int]
      */
@@ -72,13 +80,18 @@ class RuasService
             return ['success' => false, 'message' => implode('<br>', $errors)];
         }
 
-        // Update tidak menyentuh STA dan Panjang (akan disinkronisasi ketika stripmap di update)
-        $this->model->update($id, [
+        $updateData = [
             'kode_ruas' => trim($input['kode_ruas']),
             'nama_ruas' => trim($input['nama_ruas']),
             'koridor'   => !empty(trim($input['koridor'] ?? '')) ? trim($input['koridor']) : null,
             'kabupaten_kota' => !empty(trim($input['kabupaten_kota'] ?? '')) ? trim($input['kabupaten_kota']) : null,
-        ]);
+        ];
+
+        if (isset($input['sta_awal']))  $updateData['sta_awal']  = (float)$input['sta_awal'];
+        if (isset($input['sta_akhir'])) $updateData['sta_akhir'] = (float)$input['sta_akhir'];
+        if (isset($input['panjang']))   $updateData['panjang']   = (float)$input['panjang'];
+
+        $this->model->update($id, $updateData);
 
         return ['success' => true, 'message' => 'Ruas jalan berhasil diperbarui.'];
     }

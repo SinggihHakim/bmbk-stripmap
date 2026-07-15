@@ -4,7 +4,7 @@
  * ============================================================
  * Controller: RuasController
  * ============================================================
- * CRUD untuk data ruas jalan.
+ * CRUD untuk data ruas jalan (termasuk strip map & perkerasan).
  */
 
 class RuasController
@@ -40,45 +40,59 @@ class RuasController
     }
 
     /**
-     * Proses simpan ruas baru beserta stripmap nya
+     * Proses simpan ruas baru beserta stripmap & perkerasan
      */
     public function store(): void
     {
-        // Mulai proses penyimpanan ruas
         $result = $this->service->create($_POST);
 
         if ($result['success']) {
-            // Jika berhasil simpan ruas, cek apakah ada input array baris stripmap (batch input)
+            $ruasId = $result['id'];
+
+            // 1. Simpan Data Strip Map (Kondisi Jalan)
             if (isset($_POST['rows']) && is_array($_POST['rows'])) {
-                // Filter baris kosong
                 $rows = array_filter($_POST['rows'], function($row) {
                     return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
                 });
 
                 if (!empty($rows)) {
                     $stripmapService = new StripmapService();
-
-                    // Gunakan fungsi batchCreate dari StripmapService
-                    $stripmapResult = $stripmapService->batchCreate($result['id'], array_values($rows));
+                    $stripmapResult = $stripmapService->batchCreate($ruasId, array_values($rows));
 
                     if (!$stripmapResult['success']) {
                         flash('error', "Ruas berhasil dibuat, tapi gagal menyimpan strip map: " . $stripmapResult['message']);
-                        redirect(base_url('ruas'));
-                        return;
                     }
-
-                    // Sinkronisasi STA & panjang ruas dari data stripmap
-                    $this->service->syncStaFromStripmap($result['id']);
                 }
             }
+
+            // 2. Simpan Data Jenis Perkerasan Jalan
+            if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows'])) {
+                $pkRows = array_filter($_POST['perkerasan_rows'], function($row) {
+                    return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
+                });
+
+                if (!empty($pkRows)) {
+                    $perkerasanService = new PerkerasanService();
+                    $pkResult = $perkerasanService->batchCreate($ruasId, array_values($pkRows));
+
+                    if (!$pkResult['success']) {
+                        flash('error', "Ruas berhasil dibuat, tapi gagal menyimpan perkerasan: " . $pkResult['message']);
+                    }
+                }
+            }
+
+            // Sinkronisasi STA & panjang ruas dari data stripmap
+            $this->service->syncStaFromStripmap($ruasId);
 
             flash('success', $result['message']);
             redirect(base_url('ruas'));
         } else {
             flash('error', $result['message']);
-            // Simpan old input baris stripmap kalau form gagal
             if (isset($_POST['rows'])) {
                 $_SESSION['old_rows'] = $_POST['rows'];
+            }
+            if (isset($_POST['perkerasan_rows'])) {
+                $_SESSION['old_perkerasan_rows'] = $_POST['perkerasan_rows'];
             }
             redirect(base_url('ruas/create'));
         }
@@ -96,13 +110,17 @@ class RuasController
             return;
         }
 
-        $stripmapService = new StripmapService();
-        $stripmaps = $stripmapService->getByRuasId($id);
+        $stripmapService   = new StripmapService();
+        $perkerasanService = new PerkerasanService();
+
+        $stripmaps   = $stripmapService->getByRuasId($id);
+        $perkerasans = $perkerasanService->getByRuasId($id);
 
         $data = [
-            'title'     => 'Edit Ruas Jalan',
-            'ruas'      => $ruas,
-            'stripmaps' => $stripmaps,
+            'title'       => 'Edit Ruas Jalan',
+            'ruas'        => $ruas,
+            'stripmaps'   => $stripmaps,
+            'perkerasans' => $perkerasans,
         ];
         view('layouts.app', array_merge($data, ['content' => 'ruas.form']));
     }
@@ -115,38 +133,46 @@ class RuasController
         $result = $this->service->update($id, $_POST);
 
         if ($result['success']) {
+            // 1. Update Data Strip Map
             $stripmapService = new StripmapService();
-
-            // Hapus segmen lama terlebih dahulu untuk digantikan dengan baris yang baru disubmit
             $stripmapService->deleteByRuasId($id);
 
             if (isset($_POST['rows']) && is_array($_POST['rows'])) {
-                // Filter baris kosong
                 $rows = array_filter($_POST['rows'], function($row) {
                     return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
                 });
 
                 if (!empty($rows)) {
-                    $stripmapResult = $stripmapService->batchCreate($id, array_values($rows));
-
-                    if (!$stripmapResult['success']) {
-                        flash('error', "Ruas berhasil diperbarui, tetapi gagal menyimpan strip map: " . $stripmapResult['message']);
-                        $_SESSION['old_rows'] = $_POST['rows'];
-                        redirect(base_url('ruas/edit/' . $id));
-                        return;
-                    }
+                    $stripmapService->batchCreate($id, array_values($rows));
                 }
             }
 
-            // Sinkronisasi STA & panjang ruas dari data stripmap
+            // 2. Update Data Jenis Perkerasan
+            $perkerasanService = new PerkerasanService();
+            $perkerasanService->deleteByRuasId($id);
+
+            if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows'])) {
+                $pkRows = array_filter($_POST['perkerasan_rows'], function($row) {
+                    return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
+                });
+
+                if (!empty($pkRows)) {
+                    $perkerasanService->batchCreate($id, array_values($pkRows));
+                }
+            }
+
+            // Sinkronisasi STA & panjang ruas
             $this->service->syncStaFromStripmap($id);
 
-            flash('success', 'Data ruas jalan dan strip map berhasil diperbarui.');
+            flash('success', 'Data ruas jalan, strip map, dan perkerasan berhasil diperbarui.');
             redirect(base_url('ruas'));
         } else {
             flash('error', $result['message']);
             if (isset($_POST['rows'])) {
                 $_SESSION['old_rows'] = $_POST['rows'];
+            }
+            if (isset($_POST['perkerasan_rows'])) {
+                $_SESSION['old_perkerasan_rows'] = $_POST['perkerasan_rows'];
             }
             redirect(base_url('ruas/edit/' . $id));
         }
@@ -168,7 +194,7 @@ class RuasController
     }
 
     /**
-     * Tampilkan detail ruas (dengan strip map)
+     * Tampilkan detail ruas jalan
      */
     public function show(int $id): void
     {
@@ -179,14 +205,59 @@ class RuasController
             return;
         }
 
-        $stripmapService = new StripmapService();
+        $stripmapService   = new StripmapService();
+        $perkerasanService = new PerkerasanService();
+
+        $stripmaps         = $stripmapService->getByRuasId($id);
+        $summary           = $stripmapService->getSummary($id);
+        $perkerasans       = $perkerasanService->getByRuasId($id);
+        $summaryPerkerasan = $perkerasanService->getSummary($id);
 
         $data = [
-            'title'     => 'Detail Ruas: ' . $ruas['nama_ruas'],
-            'ruas'      => $ruas,
-            'stripmaps' => $stripmapService->getByRuasId($id),
-            'summary'   => $stripmapService->getSummary($id),
+            'title'             => 'Detail Ruas Jalan - ' . $ruas['nama_ruas'],
+            'ruas'              => $ruas,
+            'stripmaps'         => $stripmaps,
+            'summary'           => $summary,
+            'perkerasans'       => $perkerasans,
+            'summaryPerkerasan' => $summaryPerkerasan,
         ];
         view('layouts.app', array_merge($data, ['content' => 'ruas.show']));
+    }
+
+    /**
+     * Tampilkan form upload import file Excel / CSV
+     */
+    public function importForm(): void
+    {
+        $data = [
+            'title' => 'Import Data Rekapitulasi (Excel / CSV)',
+        ];
+        view('layouts.app', array_merge($data, ['content' => 'ruas.import']));
+    }
+
+    /**
+     * Proses file upload import Excel / CSV
+     */
+    public function importProcess(): void
+    {
+        if (!isset($_FILES['file_excel']) || $_FILES['file_excel']['error'] !== UPLOAD_ERR_OK) {
+            flash('error', 'Silakan pilih file Excel (.xlsx) atau CSV (.csv) yang valid.');
+            redirect(base_url('ruas/import'));
+            return;
+        }
+
+        $fileTmp  = $_FILES['file_excel']['tmp_name'];
+        $fileName = $_FILES['file_excel']['name'];
+
+        $importer = new ExcelImporter();
+        $result   = $importer->import($fileTmp, $fileName);
+
+        if ($result['success']) {
+            flash('success', $result['message']);
+            redirect(base_url('ruas'));
+        } else {
+            flash('error', $result['message']);
+            redirect(base_url('ruas/import'));
+        }
     }
 }

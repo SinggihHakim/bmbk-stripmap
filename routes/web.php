@@ -20,6 +20,8 @@ $router->get('', 'DashboardController', 'index');
 $router->get('ruas',              'RuasController', 'index');
 $router->get('ruas/create',      'RuasController', 'create');
 $router->post('ruas/store',      'RuasController', 'store');
+$router->get('ruas/import',      'RuasController', 'importForm');
+$router->post('ruas/import',     'RuasController', 'importProcess');
 $router->get('ruas/edit/{id}',   'RuasController', 'edit');
 $router->post('ruas/update/{id}','RuasController', 'update');
 $router->get('ruas/delete/{id}', 'RuasController', 'delete');
@@ -37,6 +39,15 @@ $router->get('stripmap/edit/{id}',        'StripmapController', 'edit');
 $router->post('stripmap/update/{id}',     'StripmapController', 'update');
 $router->get('stripmap/delete/{id}',      'StripmapController', 'delete');
 $router->get('stripmap/preview/{id}',     'StripmapController', 'preview');
+
+// ──────────────────────────────────────────────
+// CRUD Perkerasan Jalan
+// ──────────────────────────────────────────────
+$router->post('perkerasan/store/{id}',    'StripmapController', 'perkerasanStore');
+$router->get('perkerasan/edit/{id}',      'StripmapController', 'perkerasanEdit');
+$router->post('perkerasan/update/{id}',   'StripmapController', 'perkerasanUpdate');
+$router->get('perkerasan/delete/{id}',    'StripmapController', 'perkerasanDelete');
+
 
 // Jalankan router
 $router->dispatch();

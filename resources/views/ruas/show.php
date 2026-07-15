@@ -1,5 +1,5 @@
 <!-- ============================================================ -->
-<!-- Detail Ruas Jalan + Strip Map Preview -->
+<!-- Detail Ruas Jalan + Strip Map & Perkerasan Preview          -->
 <!-- ============================================================ -->
 
 <div class="space-y-6">
@@ -14,7 +14,7 @@
         </a>
         <div>
             <h1 class="text-2xl font-bold text-gray-900">Detail Ruas Jalan</h1>
-            <p class="text-sm text-gray-500">Visualisasi kondisi strip map dan informasi data teknis.</p>
+            <p class="text-sm text-gray-500">Visualisasi kondisi strip map, perkerasan, dan informasi data teknis.</p>
         </div>
     </div>
 
@@ -51,16 +51,22 @@
         </div>
     </div>
 
-    <!-- Strip Map Visual -->
-    <?php if (!empty($stripmaps)): ?>
-        <?php view('stripmap._visual', ['stripmaps' => $stripmaps, 'summary' => $summary, 'ruas' => $ruas]); ?>
+    <!-- Strip Map & Perkerasan Visual -->
+    <?php if (!empty($stripmaps) || !empty($perkerasans)): ?>
+        <?php view('stripmap._visual', [
+            'stripmaps'         => $stripmaps,
+            'summary'           => $summary,
+            'ruas'              => $ruas,
+            'perkerasans'       => $perkerasans ?? [],
+            'summaryPerkerasan' => $summaryPerkerasan ?? []
+        ]); ?>
     <?php endif; ?>
 
     <!-- Aksi -->
     <div class="flex gap-3">
         <a href="<?= base_url('stripmap/' . $ruas['id']) ?>"
            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
-            Kelola Strip Map
+            Kelola Strip Map & Perkerasan
         </a>
         <a href="<?= base_url('ruas/edit/' . $ruas['id']) ?>"
            class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-gray-700 text-sm font-medium rounded-xl border border-gray-300 hover:bg-gray-50 transition-colors">

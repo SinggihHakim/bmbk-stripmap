@@ -1,5 +1,5 @@
 <!-- ============================================================ -->
-<!-- Halaman Daftar Strip Map per Ruas -->
+<!-- Halaman Daftar Strip Map & Perkerasan per Ruas               -->
 <!-- ============================================================ -->
 
 <div class="space-y-6">
@@ -14,19 +14,19 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Strip Map Ruas Jalan</h1>
-                <p class="text-sm text-gray-500">Manajemen segmen kondisi dan data teknis jalan.</p>
+                <h1 class="text-2xl font-bold text-gray-900">Strip Map & Perkerasan Ruas Jalan</h1>
+                <p class="text-sm text-gray-500">Manajemen segmen kondisi dan jenis perkerasan jalan.</p>
             </div>
         </div>
         <div class="flex gap-2">
-            <?php if (!empty($stripmaps)): ?>
+            <?php if (!empty($stripmaps) || !empty($perkerasans)): ?>
             <a href="<?= base_url('stripmap/preview/' . $ruas['id']) ?>"
                class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                 </svg>
-                Preview
+                Preview Mode
             </a>
             <?php endif; ?>
             <a href="<?= base_url('stripmap/create/' . $ruas['id']) ?>"
@@ -34,7 +34,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                 </svg>
-                Tambah Segmen
+                Tambah Segmen Data
             </a>
         </div>
     </div>
@@ -72,20 +72,27 @@
         </div>
     </div>
 
-    <!-- Strip Map Visual Preview -->
-    <?php if (!empty($stripmaps)): ?>
-        <?php view('stripmap._visual', ['stripmaps' => $stripmaps, 'summary' => $summary, 'ruas' => $ruas]); ?>
+    <!-- Strip Map & Perkerasan Visual Preview Partial -->
+    <?php if (!empty($stripmaps) || !empty($perkerasans)): ?>
+        <?php view('stripmap._visual', [
+            'stripmaps'         => $stripmaps,
+            'summary'           => $summary,
+            'ruas'              => $ruas,
+            'perkerasans'       => $perkerasans ?? [],
+            'summaryPerkerasan' => $summaryPerkerasan ?? []
+        ]); ?>
     <?php endif; ?>
 
-    <!-- Table Card -->
+    <!-- Table 1: Kondisi Jalan (Strip Map) -->
     <?php if (!empty($stripmaps)): ?>
     <div x-data="{ isOpen: true }" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer select-none" @click="isOpen = !isOpen">
-            <h2 class="text-lg font-semibold text-gray-900">Data Segmen Strip Map</h2>
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer select-none bg-gray-50/60" @click="isOpen = !isOpen">
+            <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2 h-4 rounded bg-blue-600 inline-block"></span>
+                Data Segmen Kondisi Jalan (Strip Map)
+            </h2>
             <button class="text-gray-500 hover:text-gray-700 focus:outline-none transition-transform duration-200" :class="isOpen ? 'rotate-90' : 'rotate-0'">
-                <svg class="w-5 h-5 transform transition-transform" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                </svg>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
         </div>
         <div x-show="isOpen" x-collapse class="overflow-x-auto">
@@ -127,24 +134,18 @@
                                 <a href="<?= base_url('stripmap/create/' . $ruas['id'] . '?insert_after=' . $sm['id']) ?>"
                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                                    title="Sisipkan segmen baru setelah segmen ini">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-                                    </svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                                     Sisipkan
                                 </a>
                                 <a href="<?= base_url('stripmap/edit/' . $sm['id']) ?>"
                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     Edit
                                 </a>
                                 <a href="<?= base_url('stripmap/delete/' . $sm['id']) ?>"
                                    onclick="confirmDelete(event, this.href, 'Yakin ingin menghapus segmen ini?')"
                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     Hapus
                                 </a>
                             </div>
@@ -155,19 +156,90 @@
             </table>
         </div>
     </div>
-    <?php else: ?>
+    <?php endif; ?>
+
+    <!-- Table 2: Jenis Perkerasan Jalan -->
+    <?php if (!empty($perkerasans)): ?>
+    <div x-data="{ isOpen: true }" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between cursor-pointer select-none bg-gray-50/60" @click="isOpen = !isOpen">
+            <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2 h-4 rounded bg-amber-700 inline-block"></span>
+                Data Segmen Jenis Perkerasan Jalan
+            </h2>
+            <button class="text-gray-500 hover:text-gray-700 focus:outline-none transition-transform duration-200" :class="isOpen ? 'rotate-90' : 'rotate-0'">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+        </div>
+        <div x-show="isOpen" x-collapse class="overflow-x-auto">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">No</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">STA Awal</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">STA Akhir</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Panjang</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Rigid</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-slate-900 uppercase tracking-wider">Aspal</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-amber-800 uppercase tracking-wider">Agregat / Tanah</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-purple-700 uppercase tracking-wider">Belum Tembus</th>
+                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <?php foreach ($perkerasans as $i => $pk): ?>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 text-sm text-gray-500"><?= $i + 1 ?></td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-center font-mono"><?= meter_to_sta($pk['sta_awal']) ?></td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-center font-mono"><?= meter_to_sta($pk['sta_akhir']) ?></td>
+                        <td class="px-4 py-3 text-sm text-gray-700 text-center font-semibold"><?= format_number($pk['panjang']) ?></td>
+                        <td class="px-4 py-3 text-sm text-center">
+                            <span class="inline-flex px-2 py-0.5 rounded-md bg-gray-100 text-gray-700 text-xs font-semibold"><?= format_number($pk['rigid']) ?></span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-center">
+                            <span class="inline-flex px-2 py-0.5 rounded-md bg-slate-900 text-white text-xs font-semibold"><?= format_number($pk['aspal']) ?></span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-center">
+                            <span class="inline-flex px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 text-xs font-semibold"><?= format_number($pk['agregat_tanah']) ?></span>
+                        </td>
+                        <td class="px-4 py-3 text-sm text-center">
+                            <span class="inline-flex px-2 py-0.5 rounded-md bg-purple-100 text-purple-800 text-xs font-semibold"><?= format_number($pk['belum_tembus']) ?></span>
+                        </td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center justify-center gap-2">
+                                <a href="<?= base_url('perkerasan/edit/' . $pk['id']) ?>"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    Edit
+                                </a>
+                                <a href="<?= base_url('perkerasan/delete/' . $pk['id']) ?>"
+                                   onclick="confirmDelete(event, this.href, 'Yakin ingin menghapus data perkerasan ini?')"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-700 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Hapus
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <?php if (empty($stripmaps) && empty($perkerasans)): ?>
     <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
         <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
         </svg>
-        <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum ada data strip map</h3>
+        <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum ada data strip map & perkerasan</h3>
         <p class="text-sm text-gray-500 mb-6">Tambahkan segmen pertama untuk ruas ini.</p>
         <a href="<?= base_url('stripmap/create/' . $ruas['id']) ?>"
            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
-            Tambah Segmen
+            Tambah Segmen Data
         </a>
     </div>
     <?php endif; ?>

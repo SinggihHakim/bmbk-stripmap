@@ -38,65 +38,92 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?= base_url('assets/css/app.css') ?>">
 </head>
-<body class="h-full bg-gray-50 font-sans antialiased">
+<body class="h-full bg-gray-50 font-sans antialiased" x-data="{ sidebarOpen: false }">
 
     <div class="min-h-screen flex flex-col">
 
-        <!-- Navbar -->
-        <?php view('layouts.navbar'); ?>
+        <!-- Sidebar Navigation Left -->
+        <?php view('layouts.sidebar'); ?>
 
-        <!-- Main Content -->
-        <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Main Workspace (Shifted right on Desktop lg:pl-64) -->
+        <div class="flex-1 flex flex-col lg:pl-64 transition-all duration-300">
+            
+            <!-- Top Mobile Header / Bar (Hidden on Desktop) -->
+            <header class="lg:hidden bg-white border-b border-gray-200 sticky top-0 z-30 shadow-sm h-16 flex items-center justify-between px-4 sm:px-6">
+                <!-- Hamburger Button (Mobile) -->
+                <button type="button" 
+                        @click="sidebarOpen = true" 
+                        class="lg:hidden text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                        aria-label="Open Sidebar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
 
-            <!-- Flash Messages (SweetAlert2 Toast) -->
-            <?php $flash = get_flash(); ?>
-            <?php if ($flash): ?>
-            <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const Toast = Swal.mixin({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 5000,
-                    timerProgressBar: true,
-                    didOpen: (toast) => {
-                        toast.onmouseenter = Swal.stopTimer;
-                        toast.onmouseleave = Swal.resumeTimer;
+                <!-- Page Header Title or System Brand Badge -->
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-200">
+                        Sistem Informasi Preservasi Jalan BMBK
+                    </span>
+                </div>
+
+                <!-- Right Utility Icons (Quick Actions) -->
+                <div class="flex items-center gap-3">
+                    <a href="<?= base_url('ruas/create') ?>" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                        <span class="hidden sm:inline">Tambah Ruas</span>
+                    </a>
+                </div>
+            </header>
+
+            <!-- Main Content Container -->
+            <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+                <!-- Flash Messages (SweetAlert2 Toast) -->
+                <?php $flash = get_flash(); ?>
+                <?php if ($flash): ?>
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: (toast) => {
+                            toast.onmouseenter = Swal.stopTimer;
+                            toast.onmouseleave = Swal.resumeTimer;
+                        }
+                    });
+                    Toast.fire({
+                        icon: '<?= $flash['type'] === 'success' ? 'success' : 'error' ?>',
+                        title: '<?= addslashes($flash['message']) ?>'
+                    });
+                });
+                </script>
+                <?php endif; ?>
+
+                <!-- Page Content -->
+                <?php
+                    if (isset($content) && isset($__pageData)) {
+                        view($content, $__pageData);
+                    } elseif (isset($content)) {
+                        $__childData = array_diff_key(
+                            get_defined_vars(),
+                            array_flip(['content', 'flash', '__childData', '__pageData'])
+                        );
+                        view($content, $__childData);
                     }
-                });
-                Toast.fire({
-                    icon: '<?= $flash['type'] === 'success' ? 'success' : 'error' ?>',
-                    title: '<?= addslashes($flash['message']) ?>'
-                });
-            });
-            </script>
-            <?php endif; ?>
+                ?>
 
-            <!-- Page Content -->
-            <?php
-                // $__pageData dikirim dari controller melalui view() helper
-                // dan sudah di-inject oleh fungsi view() sebelum file ini di-require.
-                // Kita gunakan $__pageData untuk meneruskan data bersih ke child view.
-                if (isset($content) && isset($__pageData)) {
-                    view($content, $__pageData);
-                } elseif (isset($content)) {
-                    // Fallback: kumpulkan variabel yang tersedia sekarang
-                    $__childData = array_diff_key(
-                        get_defined_vars(),
-                        array_flip(['content', 'flash', '__childData', '__pageData'])
-                    );
-                    view($content, $__childData);
-                }
-            ?>
+            </main>
 
-        </main>
+            <!-- Footer -->
+            <footer class="border-t border-gray-200 bg-white mt-auto">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 text-center text-xs text-gray-500">
+                    &copy; <?= date('Y') ?> Dinas Bina Marga & Bina Konstruksi Provinsi Lampung. All rights reserved.
+                </div>
+            </footer>
 
-        <!-- Footer -->
-        <footer class="border-t border-gray-200 bg-white mt-auto">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-sm text-gray-500">
-                &copy; <?= date('Y') ?> Strip Map Ruas Jalan. All rights reserved.
-            </div>
-        </footer>
+        </div>
 
     </div>
 

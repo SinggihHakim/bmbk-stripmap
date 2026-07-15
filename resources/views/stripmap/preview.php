@@ -1,5 +1,5 @@
 <!-- ============================================================ -->
-<!-- Preview Strip Map (Full Page) -->
+<!-- Preview Strip Map & Perkerasan (Full Page Exportable)       -->
 <!-- ============================================================ -->
 
 <div class="space-y-6">
@@ -14,7 +14,7 @@
                 </svg>
             </a>
             <div>
-                <h1 class="text-2xl font-bold text-gray-900">Preview Strip Map</h1>
+                <h1 class="text-2xl font-bold text-gray-900">Preview Strip Map & Perkerasan</h1>
                 <p class="mt-1 text-sm text-gray-500">
                     <span class="font-semibold"><?= e($ruas['nama_ruas']) ?></span>
                     (<span class="font-mono"><?= e($ruas['kode_ruas']) ?></span>)
@@ -32,7 +32,7 @@
                 Kembali ke Data
             </a>
             
-            <?php if (!empty($stripmaps)): ?>
+            <?php if (!empty($stripmaps) || !empty($perkerasans)): ?>
             <div class="relative">
                 <button @click="openExport = !openExport" @click.away="openExport = false"
                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
@@ -80,7 +80,7 @@
     </div>
 
     <!-- Capture Area (Hanya area ini yang diexport) -->
-    <?php if (!empty($stripmaps)): ?>
+    <?php if (!empty($stripmaps) || !empty($perkerasans)): ?>
     <div id="capture-area" class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-6" style="background-color: #ffffff; border-color: #e5e7eb;">
         <!-- Data Umum Ruas Jalan -->
         <div class="border border-gray-200 rounded-xl overflow-hidden">
@@ -115,19 +115,25 @@
             </div>
         </div>
 
-        <!-- Visual Strip Map -->
-        <?php view('stripmap._visual', ['stripmaps' => $stripmaps, 'summary' => $summary, 'ruas' => $ruas]); ?>
+        <!-- Visual Strip Map & Perkerasan -->
+        <?php view('stripmap._visual', [
+            'stripmaps'         => $stripmaps,
+            'summary'           => $summary,
+            'ruas'              => $ruas,
+            'perkerasans'       => $perkerasans ?? [],
+            'summaryPerkerasan' => $summaryPerkerasan ?? []
+        ]); ?>
     </div>
     <?php else: ?>
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
             <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
             </svg>
-            <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum ada data strip map</h3>
+            <h3 class="text-lg font-semibold text-gray-600 mb-2">Belum ada data strip map & perkerasan</h3>
             <p class="text-sm text-gray-500 mb-6">Tambahkan segmen terlebih dahulu.</p>
             <a href="<?= base_url('stripmap/create/' . $ruas['id']) ?>"
                class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm">
-                Tambah Segmen
+                Tambah Segmen Data
             </a>
         </div>
     <?php endif; ?>
@@ -139,27 +145,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-/**
- * Salin computed style elemen ke inline style agar html2canvas bisa membacanya.
- * Ini mengatasi masalah Tailwind CSS yang tidak terbaca oleh html2canvas.
- */
-function cloneComputedStyles(sourceEl, targetEl) {
-    const computed = window.getComputedStyle(sourceEl);
-    for (let prop of computed) {
-        try {
-            targetEl.style[prop] = computed.getPropertyValue(prop);
-        } catch(e) { /* skip read-only props */ }
-    }
-    for (let i = 0; i < sourceEl.children.length; i++) {
-        cloneComputedStyles(sourceEl.children[i], targetEl.children[i]);
-    }
-}
-
-/**
- * Konversi semua elemen <canvas> di dalam container menjadi <img>
- * sehingga html2canvas bisa menangkapnya dengan benar.
- * Mengembalikan fungsi restore untuk mengembalikan ke keadaan semula.
- */
 function convertCanvasesToImages(container) {
     const canvases = Array.from(container.querySelectorAll('canvas'));
     const replacements = [];
@@ -180,7 +165,6 @@ function convertCanvasesToImages(container) {
         replacements.push({ canvas, img });
     });
 
-    // Kembalikan fungsi restore
     return function restore() {
         replacements.forEach(({ canvas, img }) => {
             canvas.style.display = '';
@@ -200,28 +184,21 @@ function exportDocument(type) {
     });
 
     const element = document.getElementById('capture-area');
-
-    // ─── LANGKAH 1: Konversi semua Chart.js <canvas> → <img> ───────────────────
-    // html2canvas tidak bisa membaca isi canvas yang digambar library lain (Chart.js).
-    // Solusi: tangkap isi canvas sebagai dataURL, buat <img>, lalu sembunyikan canvas asli.
     const restoreCanvases = convertCanvasesToImages(element);
 
-    // ─── LANGKAH 2: Beri jeda singkat agar img src ter-load ─────────────────────
     setTimeout(() => {
         const fileName = 'StripMap_<?= e($ruas['kode_ruas']) ?>_' + new Date().toISOString().slice(0, 10);
 
         html2canvas(element, {
-            scale: 3,                           // 3x resolusi → gambar tajam
+            scale: 3,
             useCORS: true,
             allowTaint: false,
             backgroundColor: '#ffffff',
             logging: false,
-            // Gunakan lebar elemen yang sesungguhnya agar layout tidak berubah
             width: element.scrollWidth,
             height: element.scrollHeight,
             windowWidth: document.documentElement.scrollWidth,
             windowHeight: document.documentElement.scrollHeight,
-            // Scroll ke atas agar html2canvas menangkap dari posisi 0
             scrollX: -window.scrollX,
             scrollY: -window.scrollY,
             imageTimeout: 15000,
@@ -229,7 +206,6 @@ function exportDocument(type) {
                 const clonedEl = clonedDoc.getElementById('capture-area');
                 if (!clonedEl) return;
 
-                // Hapus elemen dengan kelas .no-export agar tidak muncul di hasil cetak
                 clonedEl.querySelectorAll('.no-export').forEach(el => {
                     el.remove();
                 });
@@ -237,7 +213,6 @@ function exportDocument(type) {
                 clonedEl.style.borderRadius = '0';
                 clonedEl.style.overflow    = 'visible';
 
-                // ── Fix: Flex containers (Tailwind tidak terbaca html2canvas) ───
                 clonedEl.querySelectorAll('.flex').forEach(el => {
                     el.style.display = 'flex';
                 });
@@ -260,29 +235,18 @@ function exportDocument(type) {
                     el.style.justifyContent = 'center';
                 });
 
-                // ── Fix: gap utilities ────────────────────────────────────────
-                const gapMap = {
-                    'gap-1':   '4px',  'gap-1\\.5': '6px', 'gap-2':   '8px',
-                    'gap-3':  '12px',  'gap-4':     '16px', 'gap-5':  '20px',
-                    'gap-6':  '24px',  'gap-8':     '32px',
-                    'gap-x-3': null,   'gap-x-4':   null,  'gap-y-1\\.5': null,
-                };
-                // Query via classList check (lebih aman untuk class dengan titik)
                 clonedEl.querySelectorAll('[class]').forEach(el => {
                     const cls = el.className || '';
-                    // gap-X
                     const gapMatch = cls.match(/\bgap-(\d+(?:\.\d+)?)\b/);
                     if (gapMatch) {
                         const val = parseFloat(gapMatch[1]) * 4;
                         el.style.gap = val + 'px';
                     }
-                    // gap-x-X
                     const gapXMatch = cls.match(/\bgap-x-(\d+(?:\.\d+)?)\b/);
                     if (gapXMatch) {
                         const val = parseFloat(gapXMatch[1]) * 4;
                         el.style.columnGap = val + 'px';
                     }
-                    // gap-y-X
                     const gapYMatch = cls.match(/\bgap-y-(\d+(?:\.\d+)?)\b/);
                     if (gapYMatch) {
                         const val = parseFloat(gapYMatch[1]) * 4;
@@ -290,16 +254,12 @@ function exportDocument(type) {
                     }
                 });
 
-                // ── Fix: DOT/CIRCLE (penyebab bulatan tidak center dengan text) ─
-                // Tailwind: w-2.5 h-2.5 rounded-full → 10px × 10px, border-radius 50%
-                // html2canvas tidak bisa membaca class ini, jadi perlu inline style eksplisit
                 clonedEl.querySelectorAll('span.rounded-full').forEach(dot => {
                     dot.style.display    = 'inline-block';
                     dot.style.flexShrink = '0';
-                    dot.style.alignSelf  = 'center';   // ← Ini kunci: sejajar vertikal dengan text
+                    dot.style.alignSelf  = 'center';
                     dot.style.borderRadius = '50%';
 
-                    // Tentukan ukuran dari class Tailwind yang ada
                     const cls = dot.className || '';
                     if (cls.includes('w-2.5') || cls.includes('h-2.5')) {
                         dot.style.width     = '10px';
@@ -311,28 +271,13 @@ function exportDocument(type) {
                         dot.style.height    = '12px';
                         dot.style.minWidth  = '12px';
                         dot.style.minHeight = '12px';
-                    } else {
-                        // Fallback: baca dari DOM asli
-                        const origDot = document.querySelector(
-                            `span.rounded-full[style="${dot.getAttribute('style')}"]`
-                        );
-                        if (origDot) {
-                            const w = origDot.offsetWidth;
-                            const h = origDot.offsetHeight;
-                            if (w > 0) { dot.style.width = w + 'px'; dot.style.minWidth = w + 'px'; }
-                            if (h > 0) { dot.style.height = h + 'px'; dot.style.minHeight = h + 'px'; }
-                        }
                     }
 
-                    // ── Geser dot 1px ke bawah di export ─────────────────────
-                    // scale:3 → 1px CSS = 3px di gambar output
-                    // Ini mengkompensasi offset 2-3px yang muncul di hasil cetak
                     dot.style.position = 'relative';
                     dot.style.top      = '6px';
                 });
             }
         }).then(canvas => {
-            // ─── Restore canvas Chart.js ─────────────────────────────────────────
             restoreCanvases();
 
             const mimeType = type === 'jpeg' ? 'image/jpeg' : 'image/png';
@@ -341,11 +286,8 @@ function exportDocument(type) {
 
             if (type === 'pdf') {
                 const { jsPDF } = window.jspdf;
-
-                // Dimensi PDF disesuaikan dengan rasio gambar (bukan paksa A4 saja)
-                // Agar isi tidak terpotong dan sama persis dengan tampilan web
-                const PX_PER_MM = 3.7795275591; // 1mm = 3.78px pada 96dpi
-                const pdfW_mm   = canvas.width  / (3 * PX_PER_MM); // kompensasi scale 3x
+                const PX_PER_MM = 3.7795275591;
+                const pdfW_mm   = canvas.width  / (3 * PX_PER_MM);
                 const pdfH_mm   = canvas.height / (3 * PX_PER_MM);
                 const orientation = pdfW_mm > pdfH_mm ? 'l' : 'p';
 
@@ -390,6 +332,6 @@ function exportDocument(type) {
                 text: 'Terjadi kesalahan saat memproses ekspor. Silakan coba lagi.'
             });
         });
-    }, 300); // Jeda 300ms untuk memastikan img sudah ter-render
+    }, 300);
 }
 </script>

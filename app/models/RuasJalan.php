@@ -37,6 +37,17 @@ class RuasJalan
     }
 
     /**
+     * Ambil satu ruas berdasarkan kode_ruas
+     */
+    public function findByKode(string $kodeRuas): ?array
+    {
+        $stmt = $this->db->prepare('SELECT * FROM ruas_jalan WHERE kode_ruas = :kode_ruas');
+        $stmt->execute(['kode_ruas' => $kodeRuas]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
+    /**
      * Simpan ruas baru
      */
     public function create(array $data): int

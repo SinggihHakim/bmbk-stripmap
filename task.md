@@ -23,7 +23,7 @@ task: 9 Juli 2026
 
 task: 10 juli 2026 
 1. update fitur print pada preview ✅
-2. perbaiki layout dashboard ✅
+2.perkerasan perbaiki layout dashboard ✅
 3. perbaikan pada hasil export tidak sesuai dengan preview ✅
 
 task : 13 juli 2026 
@@ -38,5 +38,20 @@ task 15 juli 2026
 1. update layout dasboard dan jadi layout gridnya 2 grid, dibawahnya 4 grid, kemudian 2 grid lagi, mirip seperti di stripmap, warna dipertegas seperti stripmap detil kondisi segmen ✅
 2. garis penggaris sta fix menjadi peritu jadi kalo 7000 tapi baru terisi 5000 jaid sisa 2000 tetap kosong atau putih ✅
 
-3. 
+3. tambah fitur perkerasan, maksud dari fitur ini adalah untuk kondisi jalan itu nanti misal: 
+- Rigid = Abu-abu
+- Aspal = Hitam
+- Agregat / Tanah = Coklat
+- Belum Tembus = Ungu
+Jadi nanti kita memiliki 2 form penginputan dan pengedita, dibawah form strirp map ada form input , isi input form sama dengan strip map tapi bagian jenis kondisi di ganti menjadi jenis perkerasan.
+Kemudian Datanya akan tampil di bawah pas line chart tiap 5000 sta jadi nanti line chart strip map kemudian dibawahnya line chart penegerasan, lalu dibawahnya line chart perkerasan baru lanjutan line chart strip map, kan dia pindah line tiap 5000 sta, kemudian tambahkan fitur dropdown di samping line chart yang bisa hide dan unhide line perkerasan ✅
+
+4. Menu di navbar dipindahkan ke side bar sebelah kiri dan tiap menu jika perlu memiliki sub menu ✅
+
+5. Berarti Nambah grid lagi untuk perkerasan kan perkerasan memiliki 4 jenis berarti menghasilkan 4 grid baru yang nanti akan muncul dibawah grid mantap dan tidak mantap di dashboard ✅
+
+6. tambah fitur import dan export data di sidebar ini coming soon fiturnya karena kita belum tau data itu apa? ✅
+
+7. menambah export untuk visual dashboard, dan migrate database
+
 
