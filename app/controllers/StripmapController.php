@@ -51,9 +51,37 @@ class StripmapController
             return;
         }
 
+        // Handle insert_after parameter untuk fitur "Sisipkan Segmen"
+        $prefillData = null;
+        if (isset($_GET['insert_after']) && is_numeric($_GET['insert_after'])) {
+            $afterSegmentId = (int) $_GET['insert_after'];
+            $afterSegment = $this->service->findById($afterSegmentId);
+
+            if ($afterSegment && $afterSegment['ruas_id'] == $ruasId) {
+                // Ambil semua segmen untuk ruas ini, diurutkan by sta_awal
+                $allSegments = $this->service->getByRuasId($ruasId);
+
+                // Cari segmen berikutnya (segmen dengan sta_awal terkecil yang lebih besar dari sta_akhir afterSegment)
+                $nextSegment = null;
+                foreach ($allSegments as $seg) {
+                    if ($seg['sta_awal'] > $afterSegment['sta_akhir']) {
+                        $nextSegment = $seg;
+                        break;
+                    }
+                }
+
+                // Pre-fill data untuk segmen baru
+                $prefillData = [
+                    'sta_awal' => meter_to_sta($afterSegment['sta_akhir']),
+                    'sta_akhir' => $nextSegment ? meter_to_sta($nextSegment['sta_awal']) : '',
+                ];
+            }
+        }
+
         $data = [
             'title' => 'Tambah Strip Map',
             'ruas'  => $ruas,
+            'prefillData' => $prefillData,
         ];
         view('layouts.app', array_merge($data, ['content' => 'stripmap.form']));
     }
