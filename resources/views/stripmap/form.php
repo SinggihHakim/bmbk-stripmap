@@ -245,6 +245,20 @@ function stripmapForm() {
             error: '',
             isValid: true
         }];
+    <?php elseif (isset($prefillData)): ?>
+        // Pre-fill untuk fitur "Sisipkan Segmen"
+        initialRows = [{
+            id: Date.now(),
+            staAwal: '<?= $prefillData['sta_awal'] ?? '' ?>',
+            staAkhir: '<?= $prefillData['sta_akhir'] ?? '' ?>',
+            panjang: 0,
+            baik: 0,
+            sedang: 0,
+            rusakRingan: 0,
+            rusakBerat: 0,
+            error: '',
+            isValid: false
+        }];
     <?php else: ?>
         // Default 3 baris kosong
         for(let i=0; i<3; i++) {

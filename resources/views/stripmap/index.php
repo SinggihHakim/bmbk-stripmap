@@ -124,6 +124,14 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center justify-center gap-2">
+                                <a href="<?= base_url('stripmap/create/' . $ruas['id'] . '?insert_after=' . $sm['id']) ?>"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                                   title="Sisipkan segmen baru setelah segmen ini">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                                    </svg>
+                                    Sisipkan
+                                </a>
                                 <a href="<?= base_url('stripmap/edit/' . $sm['id']) ?>"
                                    class="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-amber-700 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
