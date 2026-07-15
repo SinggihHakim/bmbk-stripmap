@@ -97,9 +97,9 @@ class RuasJalan
                     FROM stripmap
                     WHERE ruas_id = :ruas_id
                 ) s
-                SET r.sta_awal  = s.min_awal,
-                    r.sta_akhir = s.max_akhir,
-                    r.panjang   = s.total_panjang
+                SET r.sta_awal  = LEAST(r.sta_awal, s.min_awal),
+                    r.sta_akhir = GREATEST(r.sta_akhir, s.max_akhir),
+                    r.panjang   = GREATEST(r.panjang, s.max_akhir - s.min_awal)
                 WHERE r.id = :id';
 
         $stmt = $this->db->prepare($sql);

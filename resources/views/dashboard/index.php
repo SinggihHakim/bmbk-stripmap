@@ -16,133 +16,136 @@
     <!-- Stats Cards & Pie Charts Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        <!-- Left Panel: 8 Metric Grid Cards (Takes 2 Columns on LG screens) -->
-        <div class="lg:col-span-2">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                
+        <!-- Left Panel: Metric Cards (2 - 4 - 2 Grid Layout) -->
+        <div class="lg:col-span-2 space-y-4">
+            
+            <!-- Row 1: 2 Grid (Total Ruas & Total Panjang) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Card 1: Total Ruas Jalan -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
                         <div class="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                         </div>
+                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">General</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900"><?= $totalRuas ?? 0 ?> <span class="text-xs font-semibold text-gray-400">Ruas</span></h3>
                     <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Ruas Jalan</p>
                 </div>
 
                 <!-- Card 2: Total Panjang Jalan -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
+                    <div class="flex items-center justify-between mb-3">
                         <div class="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                             </svg>
                         </div>
+                        <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Panjang</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900"><?= format_number($totalPanjang ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
                     <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Panjang Jalan</p>
                 </div>
+            </div>
 
+            <!-- Row 2: 4 Grid (Detail Kondisi Segmen: Baik, Sedang, Rusak Ringan, Rusak Berat) -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <!-- Card 3: Baik -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f0fdf4; border-color: #d1fae5;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-emerald-800">Baik</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                             <?= format_number($pctBaik ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($baikKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Baik</p>
+                    <h3 class="text-xl font-bold text-emerald-700"><?= format_number($baikKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-emerald-600">km</span></h3>
+                    <p class="text-[11px] font-medium text-emerald-600 mt-0.5">Kondisi Baik</p>
                 </div>
 
                 <!-- Card 4: Sedang -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-yellow-50 text-yellow-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fefce8; border-color: #fef08a;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-yellow-800">Sedang</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-50 text-yellow-700 text-[10px] font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold">
                             <?= format_number($pctSedang ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($sedangKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Sedang</p>
+                    <h3 class="text-xl font-bold text-yellow-700"><?= format_number($sedangKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-yellow-600">km</span></h3>
+                    <p class="text-[11px] font-medium text-yellow-600 mt-0.5">Kondisi Sedang</p>
                 </div>
 
                 <!-- Card 5: Rusak Ringan -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fff7ed; border-color: #ffedd5;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-50 text-orange-700 text-[10px] font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-bold">
                             <?= format_number($pctRusakRingan ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($rusakRinganKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Rusak Ringan</p>
+                    <h3 class="text-xl font-bold text-orange-700"><?= format_number($rusakRinganKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-orange-600">km</span></h3>
+                    <p class="text-[11px] font-medium text-orange-600 mt-0.5">Rusak Ringan</p>
                 </div>
 
                 <!-- Card 6: Rusak Berat -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-red-50 text-red-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fef2f2; border-color: #fee2e2;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-50 text-red-700 text-[10px] font-bold">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
                             <?= format_number($pctRusakBerat ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($rusakBeratKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Rusak Berat</p>
+                    <h3 class="text-xl font-bold text-red-700"><?= format_number($rusakBeratKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-red-600">km</span></h3>
+                    <p class="text-[11px] font-medium text-red-600 mt-0.5">Rusak Berat</p>
                 </div>
+            </div>
 
+            <!-- Row 3: 2 Grid (Kemantapan Jalan: Mantap vs Tidak Mantap) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Card 7: Mantap -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-cyan-50 text-cyan-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f0fdf4; border-color: #d1fae5;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-cyan-50 text-cyan-700 text-[10px] font-bold">
-                            <?= format_number($pctMantap ?? 0.0, 1) ?>%
-                        </span>
+                        <span class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Kondisi Mantap</p>
+                    <h3 class="text-2xl font-bold text-emerald-700"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-emerald-600">km</span></h3>
+                    <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(16, 185, 129, 0.2);">
+                        <div class="h-2 rounded-full" style="width: <?= number_format($pctMantap ?? 0.0, 4, '.', '') ?>%; background-color: #10b981;"></div>
+                    </div>
                 </div>
 
                 <!-- Card 8: Tidak Mantap -->
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-10 h-10 bg-rose-50 text-rose-600 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016zM12 9v4m0 4h.01" />
-                            </svg>
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fff1f2; border-color: #ffe4e6;">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-[10px] font-bold">
-                            <?= format_number($pctTidakMantap ?? 0.0, 1) ?>%
-                        </span>
+                        <span class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
                     </div>
-                    <h3 class="text-2xl font-bold text-gray-900"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
-                    <p class="text-[13px] font-semibold text-gray-500 mt-1">Tidak Mantap</p>
+                    <h3 class="text-2xl font-bold text-rose-700"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-rose-600">km</span></h3>
+                    <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(239, 68, 68, 0.2);">
+                        <div class="h-2 rounded-full" style="width: <?= number_format($pctTidakMantap ?? 0.0, 4, '.', '') ?>%; background-color: #ef4444;"></div>
+                    </div>
                 </div>
-
             </div>
+
         </div>
 
         <!-- Right Panel: 2 Pie Charts (Takes 1 Column on LG screens) -->

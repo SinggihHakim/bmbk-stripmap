@@ -26,6 +26,11 @@
     // -----------------------------------------------------------------
     $staBase = (float)$ruas['sta_awal'];
     $staEnd  = (float)$ruas['sta_akhir'];
+    foreach ($stripmaps as $sm) {
+        if ((float)$sm['sta_akhir'] > $staEnd) {
+            $staEnd = (float)$sm['sta_akhir'];
+        }
+    }
     
     // 1. Ekstrak data segmen database menjadi condition runs kontinu
     $runs = [];
@@ -61,7 +66,7 @@
     $current = $staBase;
     
     while ($current < $staEnd) {
-        $chunkEnd = min($current + $chunkSize, $staEnd);
+        $chunkEnd = $current + $chunkSize;
         
         // Distribusikan runs ke dalam chunk ini
         $overlappingRuns = [];
@@ -307,14 +312,13 @@
                                                 $cumulativePct += $subWidthGlobal;
                                                 $staLabelStr = meter_to_sta($sm['sta_awal']) . ' — ' . meter_to_sta($sm['sta_akhir']);
                                             ?>
-                                            <div class="h-full w-full flex-shrink-0 relative group transition-all duration-300 cursor-pointer bg-gray-50"
+                                            <div class="h-full w-full flex-shrink-0 relative group transition-all duration-300 cursor-pointer bg-white"
                                                  @mouseenter="if (window.matchMedia('(hover: hover)').matches) { activeLabel = { panjang: '<?= format_number($sm['panjang']) ?>', kondisi: 'Belum Ada Data', sta: '<?= $staLabelStr ?>', color: '#9ca3af' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?> }"
                                                  @mouseleave="if (window.matchMedia('(hover: hover)').matches) { activeLabel = null; activeChunk = null }"
-                                                 @click.stop="activeLabel = (activeLabel && activeLabel.sta === '<?= $staLabelStr ?>' && activeLabel.kondisi === 'Belum Ada Data') ? null : { panjang: '<?= format_number($sm['panjang']) ?>', kondisi: 'Belum Ada Data', sta: '<?= $staLabelStr ?>', color: '#9ca3af' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?>"`,StartLine:254,TargetContent:>
+                                                 @click.stop="activeLabel = (activeLabel && activeLabel.sta === '<?= $staLabelStr ?>' && activeLabel.kondisi === 'Belum Ada Data') ? null : { panjang: '<?= format_number($sm['panjang']) ?>', kondisi: 'Belum Ada Data', sta: '<?= $staLabelStr ?>', color: '#9ca3af' }; activePct = <?= round($subMidPct, 2) ?>; activeChunk = <?= $chunkIdx ?>">
                                                  
-                                                 <!-- Diagonal stripes for gap block -->
-                                                 <div class="absolute inset-0 bg-[linear-gradient(45deg,#e5e7eb_25%,transparent_25%,transparent_50%,#e5e7eb_50%,#e5e7eb_75%,transparent_75%,transparent)] bg-[length:10px_10px] opacity-40"></div>
-                                                 <div class="absolute inset-0 ring-2 ring-white/60 ring-inset opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                                 <!-- Hover ring for gap block -->
+                                                 <div class="absolute inset-0 ring-2 ring-gray-300 ring-inset opacity-0 group-hover:opacity-100 transition-opacity"></div>
                                             </div>
                                         <?php else: ?>
                                             <?php
