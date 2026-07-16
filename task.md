@@ -55,3 +55,10 @@ Kemudian Datanya akan tampil di bawah pas line chart tiap 5000 sta jadi nanti li
 7. menambah export untuk visual dashboard, dan migrate database
 
 
+task: 16 juli 2026
+1. update bagian daftar ruas di dashboard agar bisa dilihat tanpa scroll ke samping ✅
+
+task: 20 juli 2026
+1. membuat fitur detail di dashboard, jadi ketika di klik tidak mantap akan muncul daftar dimana jalan yang tidak mantap ini akan menampilkan STA awal - STA akhir, panjang, baik, sedang, rusak ringan, rusak berat, dan ada nama daerahnya ini disorting ascending dan descending nya juga ✅ berdasarkan panjang jalan, ini juga berlaku untuk kondisi baik, sedang dan rusak ringan ✅
+
+task: 21 juli 2026
