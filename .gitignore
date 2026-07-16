@@ -8,4 +8,5 @@ config/database.php
 *.log
 .vscode/
 .idea/
+activities.md
 
