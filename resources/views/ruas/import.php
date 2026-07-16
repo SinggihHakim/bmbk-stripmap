@@ -23,6 +23,46 @@
          x-data="{ 
             isDragging: false, 
             selectedFile: null,
+            isProcessing: false,
+            progress: 0,
+            async handleSubmit(e) {
+                this.isProcessing = true;
+                this.progress = 0;
+                
+                const interval = setInterval(() => {
+                    if (this.progress < 30) {
+                        this.progress += Math.floor(Math.random() * 8) + 4;
+                    } else if (this.progress < 70) {
+                        this.progress += Math.floor(Math.random() * 4) + 2;
+                    } else if (this.progress < 92) {
+                        this.progress += Math.floor(Math.random() * 2) + 1;
+                    }
+                }, 200);
+                
+                const formData = new FormData(e.target);
+                try {
+                    const response = await fetch(e.target.action, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    clearInterval(interval);
+                    
+                    if (response.ok) {
+                        this.progress = 100;
+                        setTimeout(() => {
+                            window.location.href = response.url;
+                        }, 800);
+                    } else {
+                        alert('Terjadi kesalahan pada server saat memproses data.');
+                        this.isProcessing = false;
+                    }
+                } catch (error) {
+                    clearInterval(interval);
+                    alert('Gagal mengirim data. Silakan periksa koneksi internet Anda.');
+                    this.isProcessing = false;
+                }
+            },
             handleFileSelect(e) {
                 const files = e.target.files || e.dataTransfer.files;
                 if (files.length > 0) {
@@ -31,7 +71,7 @@
             }
          }">
         
-        <form action="<?= base_url('ruas/import') ?>" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <form action="<?= base_url('ruas/import') ?>" method="POST" enctype="multipart/form-data" class="space-y-6" @submit.prevent="handleSubmit($event)">
 
             <!-- Drag & Drop Zone -->
             <div class="relative border-2 border-dashed rounded-2xl p-8 text-center transition-all duration-200"
@@ -120,6 +160,47 @@
             </div>
 
         </form>
+
+        <!-- Fullscreen Loading Overlay (Clean & Elegant Dinas Style) -->
+        <div x-show="isProcessing" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm"
+             style="display: none;">
+            
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full mx-4 border border-gray-100 flex flex-col items-center text-center space-y-5">
+                
+                <!-- Title & Subtitle -->
+                <div class="space-y-1">
+                    <h3 class="text-base font-semibold text-gray-900">Mengimpor Data Rekapitulasi</h3>
+                    <p class="text-xs text-gray-500">
+                        Mohon tunggu sebentar, data sedang dimasukkan ke sistem.
+                    </p>
+                </div>
+                
+                <!-- Progress Percentage (Clean, Large, Elegant) -->
+                <div class="text-4xl font-bold text-blue-600 tracking-tight font-mono" x-text="progress + '%'">0%</div>
+                
+                <!-- Real Progress Bar (Clean Solid Blue) -->
+                <div class="h-2 w-full bg-gray-100 rounded-full border border-gray-200/60 p-0.5 shadow-inner">
+                    <div class="h-full bg-blue-600 rounded-full transition-all duration-300 ease-out"
+                         :style="'width: ' + progress + '%'"></div>
+                </div>
+                
+                <!-- Professional Dinas Info Box (Subtle Blue) -->
+                <div class="bg-blue-50/50 border border-blue-100 p-3.5 rounded-xl text-left w-full">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <p class="text-[11px] text-blue-800 leading-normal font-medium">
+                            <span class="font-semibold text-blue-900">Catatan:</span> Hindari menutup atau memuat ulang (refresh) halaman ini sampai proses impor selesai untuk mencegah duplikasi data.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
