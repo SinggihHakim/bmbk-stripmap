@@ -49,5 +49,10 @@ $router->post('perkerasan/update/{id}',   'StripmapController', 'perkerasanUpdat
 $router->get('perkerasan/delete/{id}',    'StripmapController', 'perkerasanDelete');
 
 
+// ──────────────────────────────────────────────
+// Pusat Export & Cetak
+// ──────────────────────────────────────────────
+$router->get('export', 'ExportController', 'index');
+
 // Jalankan router
 $router->dispatch();

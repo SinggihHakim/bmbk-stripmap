@@ -55,13 +55,18 @@ $menuGroups = [
         'title' => 'INTEGRASI DATA',
         'items' => [
             [
-                'label' => 'Import & Export',
-                'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>',
-                'match' => ['io'],
-                'sub'   => [
-                    ['label' => 'Import Data Excel', 'url' => '#', 'match' => [], 'badge' => 'Soon'],
-                    ['label' => 'Export Data Excel', 'url' => '#', 'match' => [], 'badge' => 'Soon'],
-                ]
+                'label' => 'Import Excel',
+                'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>',
+                'url'   => 'ruas/import',
+                'match' => ['ruas/import'],
+                'sub'   => []
+            ],
+            [
+                'label' => 'Export & Cetak',
+                'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>',
+                'url'   => 'export',
+                'match' => ['export'],
+                'sub'   => []
             ]
         ]
     ]
@@ -163,7 +168,8 @@ $menuGroups = [
                                             }
                                         }
                                         ?>
-                                        <a href="<?= base_url($sub['url']) ?>" 
+                                        <a href="<?= str_starts_with($sub['url'], '?') ? base_url() . $sub['url'] : base_url($sub['url']) ?>" 
+                                           <?php if (!empty($sub['onclick'])): ?>onclick="<?= $sub['onclick'] ?>"<?php endif; ?>
                                            class="flex items-center justify-between gap-2.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all duration-200 <?= $isSubActive ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20' : 'text-gray-600 hover:text-blue-700 hover:bg-blue-50/60' ?>">
                                             <div class="flex items-center gap-2.5">
                                                 <span class="w-1.5 h-1.5 rounded-full <?= $isSubActive ? 'bg-white' : 'bg-blue-400' ?>"></span>
