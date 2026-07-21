@@ -10,9 +10,10 @@
 $router = new Router();
 
 // ──────────────────────────────────────────────
-// Halaman Utama (Dashboard)
+// Halaman Utama (Dashboard) & Detail
 // ──────────────────────────────────────────────
-$router->get('', 'DashboardController', 'index');
+$router->get('',                 'DashboardController', 'index');
+$router->get('dashboard/detail', 'DashboardController', 'detail');
 
 // ──────────────────────────────────────────────
 // CRUD Ruas Jalan

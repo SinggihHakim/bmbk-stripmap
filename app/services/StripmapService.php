@@ -194,6 +194,14 @@ class StripmapService
     }
 
     /**
+     * Ambil ringkasan kondisi per ruas jalan
+     */
+    public function getConditionSummaryPerRuas(): array
+    {
+        return $this->model->getConditionSummaryPerRuas();
+    }
+
+    /**
      * Validasi input stripmap
      */
     private function validate(array $input, int $ruasId, ?int $excludeId = null, bool $checkDbOverlap = true): array

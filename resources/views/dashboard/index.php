@@ -57,97 +57,133 @@
             <!-- Row 2: 4 Grid (Detail Kondisi Segmen: Baik, Sedang, Rusak Ringan, Rusak Berat) -->
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <!-- Card 3: Baik -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f0fdf4; border-color: #d1fae5;">
+                <a href="<?= base_url('dashboard/detail?kondisi=baik') ?>" 
+                   title="Klik untuk melihat detail ruas jalan kondisi Baik"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block" 
+                   style="background-color: #f0fdf4; border-color: #d1fae5;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800">Baik</span>
+                            <span class="text-xs font-semibold text-emerald-800 group-hover:underline">Baik</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                             <?= format_number($pctBaik ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-emerald-700"><?= format_number($baikKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-emerald-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-emerald-600 mt-0.5">Kondisi Baik</p>
-                </div>
+                    <p class="text-[11px] font-medium text-emerald-600 mt-0.5 flex items-center justify-between">
+                        <span>Kondisi Baik</span>
+                        <span class="text-[10px] font-semibold opacity-70 group-hover:opacity-100">Detail &rarr;</span>
+                    </p>
+                </a>
 
                 <!-- Card 4: Sedang -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fefce8; border-color: #fef08a;">
+                <a href="<?= base_url('dashboard/detail?kondisi=sedang') ?>" 
+                   title="Klik untuk melihat detail ruas jalan kondisi Sedang"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block" 
+                   style="background-color: #fefce8; border-color: #fef08a;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-yellow-800">Sedang</span>
+                            <span class="text-xs font-semibold text-yellow-800 group-hover:underline">Sedang</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold">
                             <?= format_number($pctSedang ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-yellow-700"><?= format_number($sedangKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-yellow-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-yellow-600 mt-0.5">Kondisi Sedang</p>
-                </div>
+                    <p class="text-[11px] font-medium text-yellow-600 mt-0.5 flex items-center justify-between">
+                        <span>Kondisi Sedang</span>
+                        <span class="text-[10px] font-semibold opacity-70 group-hover:opacity-100">Detail &rarr;</span>
+                    </p>
+                </a>
 
                 <!-- Card 5: Rusak Ringan -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fff7ed; border-color: #ffedd5;">
+                <a href="<?= base_url('dashboard/detail?kondisi=rusak_ringan') ?>" 
+                   title="Klik untuk melihat detail ruas jalan kondisi Rusak Ringan (Terpanjang ke Terpendek)"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block ring-2 ring-orange-400/40" 
+                   style="background-color: #fff7ed; border-color: #ffedd5;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-orange-800">Rusak Ringan</span>
+                            <span class="text-xs font-bold text-orange-900 group-hover:underline">Rusak Ringan</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-bold">
                             <?= format_number($pctRusakRingan ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-orange-700"><?= format_number($rusakRinganKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-orange-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-orange-600 mt-0.5">Rusak Ringan</p>
-                </div>
+                    <p class="text-[11px] font-semibold text-orange-600 mt-0.5 flex items-center justify-between">
+                        <span>Rusak Ringan</span>
+                        <span class="text-[10px] font-bold underline opacity-80 group-hover:opacity-100">Detail &rarr;</span>
+                    </p>
+                </a>
 
                 <!-- Card 6: Rusak Berat -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fef2f2; border-color: #fee2e2;">
+                <a href="<?= base_url('dashboard/detail?kondisi=rusak_berat') ?>" 
+                   title="Klik untuk melihat detail ruas jalan kondisi Rusak Berat (Terpanjang ke Terpendek)"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block ring-2 ring-red-400/40" 
+                   style="background-color: #fef2f2; border-color: #fee2e2;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-red-800">Rusak Berat</span>
+                            <span class="text-xs font-bold text-red-900 group-hover:underline">Rusak Berat</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
                             <?= format_number($pctRusakBerat ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-red-700"><?= format_number($rusakBeratKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-red-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-red-600 mt-0.5">Rusak Berat</p>
-                </div>
+                    <p class="text-[11px] font-semibold text-red-600 mt-0.5 flex items-center justify-between">
+                        <span>Rusak Berat</span>
+                        <span class="text-[10px] font-bold underline opacity-80 group-hover:opacity-100">Detail &rarr;</span>
+                    </p>
+                </a>
             </div>
 
             <!-- Row 3: 2 Grid (Kemantapan Jalan: Mantap vs Tidak Mantap) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Card 7: Mantap -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f0fdf4; border-color: #d1fae5;">
+                <a href="<?= base_url('dashboard/detail?kondisi=mantap') ?>" 
+                   title="Klik untuk melihat detail ruas jalan Mantap"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block" 
+                   style="background-color: #f0fdf4; border-color: #d1fae5;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
+                            <span class="text-xs font-semibold text-emerald-800 group-hover:underline">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                         </div>
-                        <span class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
+                            <span class="text-[10px] font-semibold text-emerald-600 group-hover:underline">Detail &rarr;</span>
+                        </div>
                     </div>
                     <h3 class="text-2xl font-bold text-emerald-700"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-emerald-600">km</span></h3>
                     <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(16, 185, 129, 0.2);">
                         <div class="h-2 rounded-full" style="width: <?= number_format($pctMantap ?? 0.0, 4, '.', '') ?>%; background-color: #10b981;"></div>
                     </div>
-                </div>
+                </a>
 
                 <!-- Card 8: Tidak Mantap -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fff1f2; border-color: #ffe4e6;">
+                <a href="<?= base_url('dashboard/detail?kondisi=tidak_mantap') ?>" 
+                   title="Klik untuk melihat detail ruas jalan Tidak Mantap"
+                   class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-all transform hover:-translate-y-0.5 group cursor-pointer block" 
+                   style="background-color: #fff1f2; border-color: #ffe4e6;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
+                            <span class="text-xs font-semibold text-rose-800 group-hover:underline">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
                         </div>
-                        <span class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
+                            <span class="text-[10px] font-semibold text-rose-600 group-hover:underline">Detail &rarr;</span>
+                        </div>
                     </div>
                     <h3 class="text-2xl font-bold text-rose-700"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-rose-600">km</span></h3>
                     <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(239, 68, 68, 0.2);">
                         <div class="h-2 rounded-full" style="width: <?= number_format($pctTidakMantap ?? 0.0, 4, '.', '') ?>%; background-color: #ef4444;"></div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Row 4: 4 Grid (Detail Jenis Perkerasan Jalan: Rigid, Aspal, Agregat/Tanah, Belum Tembus) -->

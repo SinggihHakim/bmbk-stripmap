@@ -84,4 +84,94 @@ class DashboardController
 
         view('layouts.app', array_merge($data, ['content' => 'dashboard.index']));
     }
+
+    public function detail(): void
+    {
+        $kondisiParam = strtolower(trim($_GET['kondisi'] ?? 'rusak_ringan'));
+        $allowedKondisi = ['baik', 'sedang', 'rusak_ringan', 'rusak_berat', 'mantap', 'tidak_mantap'];
+        if (!in_array($kondisiParam, $allowedKondisi, true)) {
+            $kondisiParam = 'rusak_ringan';
+        }
+
+        $stripmapService = new StripmapService();
+        $summaryPerRuas  = $stripmapService->getConditionSummaryPerRuas();
+        $globalSummary   = $stripmapService->getGlobalSummary();
+
+        $ruasService = new RuasService();
+        $ruasList    = $ruasService->getAll();
+
+        $kondisiMeta = [
+            'rusak_ringan' => [
+                'title'       => 'Detail Kondisi Rusak Ringan',
+                'label'       => 'Rusak Ringan',
+                'color'       => 'orange',
+                'badge_bg'    => 'bg-orange-100',
+                'badge_text'  => 'text-orange-800',
+                'card_bg'     => '#fff7ed',
+                'border'      => '#ffedd5',
+                'accent'      => '#f97316',
+            ],
+            'rusak_berat' => [
+                'title'       => 'Detail Kondisi Rusak Berat',
+                'label'       => 'Rusak Berat',
+                'color'       => 'red',
+                'badge_bg'    => 'bg-red-100',
+                'badge_text'  => 'text-red-800',
+                'card_bg'     => '#fef2f2',
+                'border'      => '#fee2e2',
+                'accent'      => '#ef4444',
+            ],
+            'baik' => [
+                'title'       => 'Detail Kondisi Baik',
+                'label'       => 'Baik',
+                'color'       => 'emerald',
+                'badge_bg'    => 'bg-emerald-100',
+                'badge_text'  => 'text-emerald-800',
+                'card_bg'     => '#f0fdf4',
+                'border'      => '#d1fae5',
+                'accent'      => '#10b981',
+            ],
+            'sedang' => [
+                'title'       => 'Detail Kondisi Sedang',
+                'label'       => 'Sedang',
+                'color'       => 'yellow',
+                'badge_bg'    => 'bg-yellow-100',
+                'badge_text'  => 'text-yellow-800',
+                'card_bg'     => '#fefce8',
+                'border'      => '#fef08a',
+                'accent'      => '#facc15',
+            ],
+            'mantap' => [
+                'title'       => 'Detail Jalan Mantap (Baik + Sedang)',
+                'label'       => 'Mantap',
+                'color'       => 'emerald',
+                'badge_bg'    => 'bg-emerald-100',
+                'badge_text'  => 'text-emerald-800',
+                'card_bg'     => '#f0fdf4',
+                'border'      => '#d1fae5',
+                'accent'      => '#10b981',
+            ],
+            'tidak_mantap' => [
+                'title'       => 'Detail Jalan Tidak Mantap (R. Ringan + R. Berat)',
+                'label'       => 'Tidak Mantap',
+                'color'       => 'rose',
+                'badge_bg'    => 'bg-rose-100',
+                'badge_text'  => 'text-rose-800',
+                'card_bg'     => '#fff1f2',
+                'border'      => '#ffe4e6',
+                'accent'      => '#f43f5e',
+            ],
+        ];
+
+        $data = [
+            'title'           => $kondisiMeta[$kondisiParam]['title'],
+            'selectedKondisi' => $kondisiParam,
+            'kondisiMeta'     => $kondisiMeta,
+            'summaryPerRuas'  => $summaryPerRuas,
+            'globalSummary'   => $globalSummary,
+            'totalRuas'       => count($ruasList),
+        ];
+
+        view('layouts.app', array_merge($data, ['content' => 'dashboard.detail']));
+    }
 }

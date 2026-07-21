@@ -125,4 +125,8 @@ task: 21 juli 2026
 4. Perbaikan icon reset filter yang terdistorsi/bug di halaman daftar ruas jalan dan dashboard. ✅
 5. pada menu dashboard, tolong kamu tambahkan fitur sorting di kanan atas agar pengguna bisa sorting Bulanan Atau Tahunan dan sediakan juga reset sorting di sebelah kanan 
 6. Daftar Ruas Jalan tolong kamu buat per page saja, misal maximal 1 page itu 10 ruas jalan, implementasikan di menu dashboard dan juga menu daftar ruas jalan ✅
-7. HAHAHAHAHAH
+
+
+
+task : 22 juli 2026
+1. perbaikan serta update

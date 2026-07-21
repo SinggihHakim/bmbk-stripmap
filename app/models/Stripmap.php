@@ -180,4 +180,33 @@ class Stripmap
             'total_rusak_berat'   => 0,
         ];
     }
+
+    /**
+     * Ambil ringkasan kondisi (baik, sedang, rusak_ringan, rusak_berat) per ruas jalan
+     */
+    public function getConditionSummaryPerRuas(): array
+    {
+        $sql = "SELECT 
+                    r.id,
+                    r.kode_ruas,
+                    r.nama_ruas,
+                    r.sta_awal,
+                    r.sta_akhir,
+                    r.panjang as total_panjang,
+                    r.koridor,
+                    r.kabupaten_kota,
+                    COALESCE(SUM(s.baik), 0) as baik,
+                    COALESCE(SUM(s.sedang), 0) as sedang,
+                    COALESCE(SUM(s.rusak_ringan), 0) as rusak_ringan,
+                    COALESCE(SUM(s.rusak_berat), 0) as rusak_berat,
+                    COALESCE(SUM(s.baik + s.sedang), 0) as mantap,
+                    COALESCE(SUM(s.rusak_ringan + s.rusak_berat), 0) as tidak_mantap,
+                    COALESCE(SUM(s.panjang), 0) as total_terisi
+                FROM ruas_jalan r
+                LEFT JOIN stripmap s ON r.id = s.ruas_id
+                GROUP BY r.id, r.kode_ruas, r.nama_ruas, r.sta_awal, r.sta_akhir, r.panjang, r.koridor, r.kabupaten_kota
+                ORDER BY r.kode_ruas ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
 }
