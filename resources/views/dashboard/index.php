@@ -367,7 +367,7 @@
                             title="Reset Filter"
                             class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors text-sm font-medium">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
                         Reset
                     </button>
@@ -406,10 +406,10 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 bg-white">
-                        <template x-for="(ruas, index) in filteredRuas()" :key="ruas.id">
+                        <template x-for="(ruas, index) in paginatedRuas()" :key="ruas.id">
                             <tr class="hover:bg-blue-50/30 transition-colors">
                                 <!-- No -->
-                                <td class="px-4 py-3.5 text-xs font-semibold text-gray-400 text-center" x-text="index + 1"></td>
+                                <td class="px-4 py-3.5 text-xs font-semibold text-gray-400 text-center" x-text="(currentPage - 1) * perPage + index + 1"></td>
                                 
                                 <!-- Ruas Jalan (Kode + Nama stacked) -->
                                 <td class="px-5 py-3.5">
@@ -493,6 +493,58 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Pagination Controls -->
+            <div x-show="totalPages() > 1" 
+                 class="bg-white border-t border-gray-200 px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-export">
+                <!-- Info Text -->
+                <div class="text-xs text-gray-500 font-medium">
+                    Menampilkan <span class="font-bold text-gray-900" x-text="(currentPage - 1) * perPage + 1"></span> sampai 
+                    <span class="font-bold text-gray-900" x-text="Math.min(currentPage * perPage, filteredRuas().length)"></span> dari 
+                    <span class="font-bold text-gray-900" x-text="filteredRuas().length"></span> ruas jalan
+                </div>
+                
+                <!-- Page buttons -->
+                <div class="flex items-center gap-1.5 self-center sm:self-auto">
+                    <!-- Previous Button -->
+                    <button type="button" 
+                            @click="currentPage > 1 ? currentPage-- : null"
+                            :disabled="currentPage === 1"
+                            :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </button>
+
+                    <!-- Page numbers -->
+                    <template x-for="p in getPagesToShow()" :key="p">
+                        <div class="flex items-center">
+                            <template x-if="p === '...'">
+                                <span class="px-2 text-gray-400 text-xs font-semibold">...</span>
+                            </template>
+                            <template x-if="p !== '...'">
+                                <button type="button"
+                                        @click="currentPage = p"
+                                        :class="currentPage === p ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white'"
+                                        class="inline-flex items-center justify-center min-w-8 h-8 px-2.5 rounded-lg border text-xs font-semibold transition-colors"
+                                        x-text="p">
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Next Button -->
+                    <button type="button" 
+                            @click="currentPage < totalPages() ? currentPage++ : null"
+                            :disabled="currentPage === totalPages()"
+                            :class="currentPage === totalPages() ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -501,11 +553,63 @@
     function dashboardRuasTable(initialRuasList) {
         return {
             ruasList: initialRuasList,
+            currentPage: 1,
+            perPage: 10,
             searchQuery: '',
             selectedKoridor: '',
             selectedKabupaten: '',
             sortBy: 'kode_ruas',
             sortOrder: 'asc',
+
+            init() {
+                this.$watch('searchQuery', () => this.currentPage = 1);
+                this.$watch('selectedKoridor', () => this.currentPage = 1);
+                this.$watch('selectedKabupaten', () => this.currentPage = 1);
+            },
+
+            totalPages() {
+                return Math.ceil(this.filteredRuas().length / this.perPage);
+            },
+
+            paginatedRuas() {
+                const start = (this.currentPage - 1) * this.perPage;
+                const end = start + this.perPage;
+                return this.filteredRuas().slice(start, end);
+            },
+
+            getPagesToShow() {
+                const total = this.totalPages();
+                const current = this.currentPage;
+                if (total <= 5) {
+                    return Array.from({ length: total }, (_, i) => i + 1);
+                }
+                const pages = [];
+                pages.push(1);
+                
+                let start = Math.max(2, current - 1);
+                let end = Math.min(total - 1, current + 1);
+                
+                if (current <= 2) {
+                    end = 3;
+                } else if (current >= total - 1) {
+                    start = total - 2;
+                }
+                
+                if (start > 2) {
+                    pages.push('...');
+                }
+                
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+                
+                if (end < total - 1) {
+                    pages.push('...');
+                }
+                
+                pages.push(total);
+                return pages;
+            },
 
             getUniqueKoridor() {
                 const list = this.ruasList.map(r => r.koridor).filter(val => val !== null && val !== '');
@@ -532,6 +636,7 @@
                 this.selectedKabupaten = '';
                 this.sortBy = 'kode_ruas';
                 this.sortOrder = 'asc';
+                this.currentPage = 1;
             },
 
             formatNumber(num) {
