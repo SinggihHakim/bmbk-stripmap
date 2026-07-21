@@ -119,6 +119,10 @@ task: 20 juli 2026
 1. membuat fitur detail di dashboard, jadi ketika di klik tidak mantap akan muncul daftar dimana jalan yang tidak mantap ini akan menampilkan STA awal - STA akhir, panjang, baik, sedang, rusak ringan, rusak berat, dan ada nama daerahnya ini disorting ascending dan descending nya juga ✅ berdasarkan panjang jalan, ini juga berlaku untuk kondisi baik, sedang dan rusak ringan ✅
 
 task: 21 juli 2026
-1. fix masalah (Tumpang Tindih Status Aktif) — Kondisi di mana lebih dari satu elemen menu navigasi dianggap aktif secara bersamaan akibat kriteria deteksi yang kurang spesifik. ✅
-2. Memisahkan fitur Import Excel & Tambah Ruas dari halaman "Daftar Ruas Jalan" ke halaman "Tambah Ruas Baru" agar halaman daftar fokus pada penampilan data saja. ✅
-3. Perbaikan icon reset filter yang terdistorsi/bug di halaman daftar ruas jalan dan dashboard. ✅
+1. Menambahkan Fitur Detail Pada Menu Dashboar jadi kan disitu ada grid rusak ringan dan rusak berat, nah nanti itu gridnya kalau di pencet dia langsung ke menu detail, nah itu nanti detailnya menampilkan daftar ruas jalan dengan rusak ringan atau rusak berat dari yang terpanjang hingga terpendek berdasarkan grid yang diklik misal grid rusak ringan maka akan menampilkan daftar ruas jalan yang kondisi rusak ringan dari yang terpanjang hingga terpendek, begitu pula sebaliknya 
+2. fix masalah (Tumpang Tindih Status Aktif) — Kondisi di mana lebih dari satu elemen menu navigasi dianggap aktif secara bersamaan akibat kriteria deteksi yang kurang spesifik. ✅
+3. Memisahkan fitur Import Excel & Tambah Ruas dari halaman "Daftar Ruas Jalan" ke halaman "Tambah Ruas Baru" agar halaman daftar fokus pada penampilan data saja. ✅
+4. Perbaikan icon reset filter yang terdistorsi/bug di halaman daftar ruas jalan dan dashboard. ✅
+5. pada menu dashboard, tolong kamu tambahkan fitur sorting di kanan atas agar pengguna bisa sorting Bulanan Atau Tahunan dan sediakan juga reset sorting di sebelah kanan 
+6. Daftar Ruas Jalan tolong kamu buat per page saja, misal maximal 1 page itu 10 ruas jalan, implementasikan di menu dashboard dan juga menu daftar ruas jalan ✅
+7. HAHAHAHAHAH
