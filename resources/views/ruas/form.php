@@ -16,19 +16,32 @@
 <div class="space-y-6">
 
     <!-- Header -->
-    <div class="flex items-center gap-4">
-        <a href="<?= base_url('ruas') ?>"
-           class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm">
-            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
-        </a>
-        <div>
-            <h1 class="text-2xl font-bold text-gray-900"><?= $heading ?></h1>
-            <p class="mt-1 text-sm text-gray-500">
-                <?= $isEdit ? 'Perbarui data ruas jalan, strip map, dan jenis perkerasan.' : 'Isi form berikut untuk menambahkan ruas jalan baru beserta kondisi strip map dan jenis perkerasan.' ?>
-            </p>
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-4">
+            <a href="<?= base_url('ruas') ?>"
+               class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm">
+                <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900"><?= $heading ?></h1>
+                <p class="mt-1 text-sm text-gray-500">
+                    <?= $isEdit ? 'Perbarui data ruas jalan, strip map, dan jenis perkerasan.' : 'Isi form berikut untuk menambahkan ruas jalan baru beserta kondisi strip map dan jenis perkerasan.' ?>
+                </p>
+            </div>
         </div>
+        <?php if (!$isEdit): ?>
+            <div>
+                <a href="<?= base_url('ruas/import') ?>"
+                   class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                    </svg>
+                    Import Excel
+                </a>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- Form Card -->

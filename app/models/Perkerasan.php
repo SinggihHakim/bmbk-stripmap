@@ -182,16 +182,32 @@ class Perkerasan
     /**
      * Ambil ringkasan perkerasan global seluruh ruas jalan
      */
-    public function getGlobalSummary(): array
+    public function getGlobalSummary(?array $ruasIds = null): array
     {
+        if ($ruasIds !== null && empty($ruasIds)) {
+            return [
+                'total_panjang'       => 0,
+                'total_rigid'         => 0,
+                'total_aspal'         => 0,
+                'total_agregat_tanah' => 0,
+                'total_belum_tembus'  => 0,
+            ];
+        }
+
+        $whereClause = '';
+        if ($ruasIds !== null) {
+            $inQuery = implode(',', array_map('intval', $ruasIds));
+            $whereClause = " WHERE ruas_id IN ($inQuery)";
+        }
+
         $stmt = $this->db->query(
-            'SELECT
+            "SELECT
                 SUM(panjang)       as total_panjang,
                 SUM(rigid)         as total_rigid,
                 SUM(aspal)         as total_aspal,
                 SUM(agregat_tanah) as total_agregat_tanah,
                 SUM(belum_tembus)  as total_belum_tembus
-             FROM perkerasan'
+             FROM perkerasan" . $whereClause
         );
         return $stmt->fetch() ?: [
             'total_panjang'       => 0,

@@ -1,6 +1,18 @@
 <?php
 $currentUrl = trim($_GET['url'] ?? '', '/');
 
+// Helper to check if the current URL matches a pattern (supports * wildcard)
+$urlMatches = function (string $pattern, string $url): bool {
+    if ($pattern === '') {
+        return $url === '';
+    }
+    if (strpos($pattern, '*') !== false) {
+        $regex = '#^' . str_replace('\*', '.*', preg_quote($pattern, '#')) . '$#';
+        return preg_match($regex, $url) === 1;
+    }
+    return $url === $pattern;
+};
+
 // Menu definition with submenus
 $menuGroups = [
     [
@@ -21,18 +33,18 @@ $menuGroups = [
             [
                 'label' => 'Ruas Jalan',
                 'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>',
-                'match' => ['ruas'],
+                'match' => ['ruas', 'ruas/*'],
                 'sub'   => [
-                    ['label' => 'Daftar Ruas Jalan', 'url' => 'ruas', 'match' => ['ruas', 'ruas/index']],
+                    ['label' => 'Daftar Ruas Jalan', 'url' => 'ruas', 'match' => ['ruas', 'ruas/index', 'ruas/edit/*', 'ruas/show/*']],
                     ['label' => 'Tambah Ruas Baru',  'url' => 'ruas/create', 'match' => ['ruas/create']],
                 ]
             ],
             [
                 'label' => 'Strip Map & Visual',
                 'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/></svg>',
-                'match' => ['stripmap'],
+                'match' => ['stripmap', 'stripmap/*'],
                 'sub'   => [
-                    ['label' => 'Visualisasi Strip Map', 'url' => 'ruas', 'match' => ['stripmap']],
+                    ['label' => 'Visualisasi Strip Map', 'url' => 'ruas', 'match' => ['stripmap', 'stripmap/*']],
                 ]
             ]
         ]
@@ -43,7 +55,7 @@ $menuGroups = [
             [
                 'label' => 'Rekapitulasi',
                 'icon'  => '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>',
-                'match' => ['rekap'],
+                'match' => ['rekap/*'],
                 'sub'   => [
                     ['label' => 'Rekap Kemantapan',  'url' => 'ruas', 'match' => ['rekap/kemantapan']],
                     ['label' => 'Rekap Perkerasan',  'url' => 'ruas', 'match' => ['rekap/perkerasan']],
@@ -117,7 +129,7 @@ $menuGroups = [
                         $isItemActive = false;
                         if (!$hasSub) {
                             foreach ($item['match'] as $m) {
-                                if (($m === '' && $currentUrl === '') || ($m !== '' && str_starts_with($currentUrl, $m))) {
+                                if ($urlMatches($m, $currentUrl)) {
                                     $isItemActive = true;
                                     break;
                                 }
@@ -125,7 +137,7 @@ $menuGroups = [
                         } else {
                             foreach ($item['sub'] as $subItem) {
                                 foreach ($subItem['match'] as $sm) {
-                                    if ($sm !== '' && str_starts_with($currentUrl, $sm)) {
+                                    if ($urlMatches($sm, $currentUrl)) {
                                         $isItemActive = true;
                                         break 2;
                                     }
@@ -162,7 +174,7 @@ $menuGroups = [
                                         <?php
                                         $isSubActive = false;
                                         foreach ($sub['match'] as $sm) {
-                                            if (($sm === '' && $currentUrl === '') || ($sm !== '' && str_starts_with($currentUrl, $sm))) {
+                                            if ($urlMatches($sm, $currentUrl)) {
                                                 $isSubActive = true;
                                                 break;
                                             }

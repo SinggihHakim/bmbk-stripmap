@@ -188,9 +188,9 @@ class StripmapService
     /**
      * Ambil ringkasan kondisi global seluruh ruas jalan
      */
-    public function getGlobalSummary(): array
+    public function getGlobalSummary(?array $ruasIds = null): array
     {
-        return $this->model->getGlobalSummary();
+        return $this->model->getGlobalSummary($ruasIds);
     }
 
     /**
