@@ -129,4 +129,9 @@ task: 21 juli 2026
 
 
 task : 22 juli 2026
-1. perbaikan serta update
+1. perbaikan serta update ✅
+
+task: 23 juli 2026
+1. update detail menjadi presentase, jadi nanti diurutkan per presentanse tertinggi ✅
+2. pencarian ada fitur hide dan unhide disearch dashboard, fiturnya mirip sama dengan yang ada di form data ruas pada saat masukkan data (tanpa teks sembunyikan, gunakan > panah) ✅
+3. tambah fitur baru didashboard, diatas search ada top presentase tiap kabupaten, ini menampilkan line chart mantap dan tidak mantap ✅

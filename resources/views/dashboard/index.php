@@ -347,238 +347,249 @@
     <div x-data="dashboardRuasTable(<?= htmlspecialchars(json_encode($ruasJsonData), ENT_QUOTES, 'UTF-8') ?>)" class="space-y-6">
         
         <!-- Filters & Search Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 no-export">
-            <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
-                
-                <!-- Judul Seksi -->
-                <div class="md:mb-0 md:mr-4 self-start md:self-center">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden no-export" x-data="{ isSearchOpen: true }">
+            <div class="px-5 py-4 border-b border-gray-200 bg-gray-50/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 cursor-pointer select-none" @click="isSearchOpen = !isSearchOpen">
+                <div>
                     <h2 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Daftar Ruas Jalan</h2>
-                    <p class="text-xs text-gray-500">Filter dan cari data ruas jalan secara langsung.</p>
+                    <p class="text-xs text-gray-500">Filter, cari, dan lihat data ruas jalan secara langsung.</p>
                 </div>
+                <button type="button"
+                        class="inline-flex items-center justify-center p-2 rounded-xl border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all shadow-sm focus:outline-none"
+                        :title="isSearchOpen ? 'Sembunyikan' : 'Tampilkan'">
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="isSearchOpen ? 'rotate-90' : 'rotate-0'" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div x-show="isSearchOpen" x-collapse>
+                <div class="p-5 border-b border-gray-200">
+                    <div class="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
+                    
+                    <!-- Pencarian -->
+                    <div class="flex-1 min-w-0">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Pencarian</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                            </span>
+                            <input type="text" 
+                                   x-model="searchQuery" 
+                                   placeholder="Cari nama atau kode ruas..." 
+                                   class="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                        </div>
+                    </div>
 
-                <!-- Pencarian -->
-                <div class="flex-1 min-w-0">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Pencarian</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    <!-- Filter Koridor -->
+                    <div class="w-full md:w-56">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Filter Koridor</label>
+                        <select x-model="selectedKoridor" 
+                                class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+                            <option value="">Semua Koridor</option>
+                            <template x-for="koridor in getUniqueKoridor()" :key="koridor">
+                                <option :value="koridor" x-text="koridor"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Filter Kabupaten / Kota -->
+                    <div class="w-full md:w-56">
+                        <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Filter Wilayah</label>
+                        <select x-model="selectedKabupaten" 
+                                class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+                            <option value="">Semua Kabupaten/Kota</option>
+                            <template x-for="kab in getUniqueKabupaten()" :key="kab">
+                                <option :value="kab" x-text="kab"></option>
+                            </template>
+                        </select>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <div class="w-full md:w-auto">
+                        <button type="button" 
+                                @click="resetFilters()" 
+                                title="Reset Filter"
+                                class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
-                        </span>
-                        <input type="text" 
-                               x-model="searchQuery" 
-                               placeholder="Cari nama atau kode ruas..." 
-                               class="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
+                            Reset
+                        </button>
+                    </div>
+
                     </div>
                 </div>
 
-                <!-- Filter Koridor -->
-                <div class="w-full md:w-56">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Filter Koridor</label>
-                    <select x-model="selectedKoridor" 
-                            class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
-                        <option value="">Semua Koridor</option>
-                        <template x-for="koridor in getUniqueKoridor()" :key="koridor">
-                            <option :value="koridor" x-text="koridor"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <!-- Filter Kabupaten / Kota -->
-                <div class="w-full md:w-56">
-                    <label class="block text-xs font-semibold text-gray-500 mb-1.5 uppercase tracking-wider">Filter Wilayah</label>
-                    <select x-model="selectedKabupaten" 
-                            class="w-full px-3 py-2 text-sm rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
-                        <option value="">Semua Kabupaten/Kota</option>
-                        <template x-for="kab in getUniqueKabupaten()" :key="kab">
-                            <option :value="kab" x-text="kab"></option>
-                        </template>
-                    </select>
-                </div>
-
-                <!-- Reset Button -->
-                <div class="w-full md:w-auto">
-                    <button type="button" 
-                            @click="resetFilters()" 
-                            title="Reset Filter"
-                            class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-gray-200 bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors text-sm font-medium">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
-                        </svg>
-                        Reset
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Table -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            <th class="px-4 py-3.5 w-12 text-center">No</th>
-                            <th class="px-5 py-3.5">
-                                <button type="button" @click="sortByCol('nama_ruas')" class="flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
-                                    Ruas Jalan
-                                    <template x-if="sortBy === 'nama_ruas' || sortBy === 'kode_ruas'">
-                                        <svg x-show="sortOrder === 'asc'" class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7l4-4m0 0l4 4m-4-4v18"/></svg>
-                                        <svg x-show="sortOrder === 'desc'" class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 17l-4 4m0 0l-4-4m4 4V3"/></svg>
-                                    </template>
-                                </button>
-                            </th>
-                            <th class="px-5 py-3.5 hidden md:table-cell">
-                                <button type="button" @click="sortByCol('kabupaten_kota')" class="flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
-                                    Lokasi & Koridor
-                                </button>
-                            </th>
-                            <th class="px-5 py-3.5 text-center">
-                                <button type="button" @click="sortByCol('panjang')" class="mx-auto flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
-                                    Segmen (STA & Panjang)
-                                </button>
-                            </th>
-                            <th class="px-5 py-3.5 text-right w-48">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 bg-white">
-                        <template x-for="(ruas, index) in paginatedRuas()" :key="ruas.id">
-                            <tr class="hover:bg-blue-50/30 transition-colors">
-                                <!-- No -->
-                                <td class="px-4 py-3.5 text-xs font-semibold text-gray-400 text-center" x-text="(currentPage - 1) * perPage + index + 1"></td>
-                                
-                                <!-- Ruas Jalan (Kode + Nama stacked) -->
-                                <td class="px-5 py-3.5">
-                                    <div class="flex flex-col gap-1">
-                                        <div class="flex items-center gap-2">
-                                            <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100" x-text="ruas.kode_ruas"></span>
-                                            <span class="text-sm font-bold text-gray-900" x-text="ruas.nama_ruas"></span>
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                <th class="px-4 py-3.5 w-12 text-center">No</th>
+                                <th class="px-5 py-3.5">
+                                    <button type="button" @click="sortByCol('nama_ruas')" class="flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
+                                        Ruas Jalan
+                                        <template x-if="sortBy === 'nama_ruas' || sortBy === 'kode_ruas'">
+                                            <svg x-show="sortOrder === 'asc'" class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7l4-4m0 0l4 4m-4-4v18"/></svg>
+                                            <svg x-show="sortOrder === 'desc'" class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 17l-4 4m0 0l-4-4m4 4V3"/></svg>
+                                        </template>
+                                    </button>
+                                </th>
+                                <th class="px-5 py-3.5 hidden md:table-cell">
+                                    <button type="button" @click="sortByCol('kabupaten_kota')" class="flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
+                                        Lokasi & Koridor
+                                    </button>
+                                </th>
+                                <th class="px-5 py-3.5 text-center">
+                                    <button type="button" @click="sortByCol('panjang')" class="mx-auto flex items-center gap-1.5 hover:text-gray-900 focus:outline-none">
+                                        Segmen (STA & Panjang)
+                                    </button>
+                                </th>
+                                <th class="px-5 py-3.5 text-right w-48">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 bg-white">
+                            <template x-for="(ruas, index) in paginatedRuas()" :key="ruas.id">
+                                <tr class="hover:bg-blue-50/30 transition-colors">
+                                    <!-- No -->
+                                    <td class="px-4 py-3.5 text-xs font-semibold text-gray-400 text-center" x-text="(currentPage - 1) * perPage + index + 1"></td>
+                                    
+                                    <!-- Ruas Jalan (Kode + Nama stacked) -->
+                                    <td class="px-5 py-3.5">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-[11px] font-bold border border-blue-100" x-text="ruas.kode_ruas"></span>
+                                                <span class="text-sm font-bold text-gray-900" x-text="ruas.nama_ruas"></span>
+                                            </div>
+                                            <!-- Mobile only location subtitle -->
+                                            <div class="text-xs text-gray-500 md:hidden flex items-center gap-1">
+                                                <span x-text="ruas.kabupaten_kota || '-'"></span>
+                                                <span>•</span>
+                                                <span x-text="ruas.koridor || '-'"></span>
+                                            </div>
                                         </div>
-                                        <!-- Mobile only location subtitle -->
-                                        <div class="text-xs text-gray-500 md:hidden flex items-center gap-1">
-                                            <span x-text="ruas.kabupaten_kota || '-'"></span>
-                                            <span>•</span>
-                                            <span x-text="ruas.koridor || '-'"></span>
+                                    </td>
+
+                                    <!-- Lokasi & Koridor (Desktop) -->
+                                    <td class="px-5 py-3.5 hidden md:table-cell">
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-medium text-gray-800" x-text="ruas.kabupaten_kota || '-'"></span>
+                                            <span class="text-xs font-medium text-gray-400" x-text="ruas.koridor ? 'Koridor: ' + ruas.koridor : '-'"></span>
                                         </div>
-                                    </div>
-                                </td>
+                                    </td>
 
-                                <!-- Lokasi & Koridor (Desktop) -->
-                                <td class="px-5 py-3.5 hidden md:table-cell">
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-medium text-gray-800" x-text="ruas.kabupaten_kota || '-'"></span>
-                                        <span class="text-xs font-medium text-gray-400" x-text="ruas.koridor ? 'Koridor: ' + ruas.koridor : '-'"></span>
-                                    </div>
-                                </td>
+                                    <!-- STA & Panjang -->
+                                    <td class="px-5 py-3.5 text-center">
+                                        <div class="flex flex-col items-center gap-0.5">
+                                            <span class="text-xs font-mono font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded" x-text="ruas.sta_awal_str + ' s/d ' + ruas.sta_akhir_str"></span>
+                                            <span class="text-[11px] font-bold text-emerald-700" x-text="formatNumber(ruas.panjang) + ' m (' + formatNumber(ruas.panjang / 1000) + ' km)'"></span>
+                                        </div>
+                                    </td>
 
-                                <!-- STA & Panjang -->
-                                <td class="px-5 py-3.5 text-center">
-                                    <div class="flex flex-col items-center gap-0.5">
-                                        <span class="text-xs font-mono font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded" x-text="ruas.sta_awal_str + ' s/d ' + ruas.sta_akhir_str"></span>
-                                        <span class="text-[11px] font-bold text-emerald-700" x-text="formatNumber(ruas.panjang) + ' m (' + formatNumber(ruas.panjang / 1000) + ' km)'"></span>
-                                    </div>
-                                </td>
+                                    <!-- Action Buttons -->
+                                    <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                                        <div class="flex items-center justify-end gap-1.5">
+                                            <!-- Primary Action: Visual Stripmap -->
+                                            <a :href="ruas.url_stripmap"
+                                               class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                                               title="Buka Visualisasi Strip Map">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
+                                                </svg>
+                                                <span>Strip Map</span>
+                                            </a>
 
-                                <!-- Action Buttons -->
-                                <td class="px-5 py-3.5 text-right whitespace-nowrap">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <!-- Primary Action: Visual Stripmap -->
-                                        <a :href="ruas.url_stripmap"
-                                           class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-                                           title="Buka Visualisasi Strip Map">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z"/>
-                                            </svg>
-                                            <span>Strip Map</span>
-                                        </a>
+                                            <!-- Edit Icon Button -->
+                                            <a :href="ruas.url_edit"
+                                               class="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 rounded-lg transition-colors"
+                                               title="Edit Ruas Jalan">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </a>
 
-                                        <!-- Edit Icon Button -->
-                                        <a :href="ruas.url_edit"
-                                           class="p-1.5 text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200/60 rounded-lg transition-colors"
-                                           title="Edit Ruas Jalan">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </a>
-
-                                        <!-- Delete Icon Button -->
-                                        <a :href="ruas.url_delete"
-                                           @click="confirmDelete($event, ruas.url_delete, 'Yakin ingin menghapus ruas ini? Semua data strip map terkait juga akan dihapus.')"
-                                           class="p-1.5 text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/60 rounded-lg transition-colors"
-                                           title="Hapus Ruas Jalan">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </a>
+                                            <!-- Delete Icon Button -->
+                                            <a :href="ruas.url_delete"
+                                               @click="confirmDelete($event, ruas.url_delete, 'Yakin ingin menghapus ruas ini? Semua data strip map terkait juga akan dihapus.')"
+                                               class="p-1.5 text-red-700 bg-red-50 hover:bg-red-100 border border-red-200/60 rounded-lg transition-colors"
+                                               title="Hapus Ruas Jalan">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                            <!-- Bila Filter Tidak Menemukan Apapun -->
+                            <tr x-show="filteredRuas().length === 0">
+                                <td colspan="5" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center text-gray-400">
+                                        <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+                                        </svg>
+                                        <p class="text-sm font-medium">Tidak ada data ruas jalan yang cocok dengan pencarian/filter.</p>
+                                        <button type="button" @click="resetFilters()" class="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">Reset Filter & Pencarian</button>
                                     </div>
                                 </td>
                             </tr>
-                        </template>
-                        <!-- Bila Filter Tidak Menemukan Apapun -->
-                        <tr x-show="filteredRuas().length === 0">
-                            <td colspan="5" class="px-6 py-12 text-center">
-                                <div class="flex flex-col items-center justify-center text-gray-400">
-                                    <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
-                                    </svg>
-                                    <p class="text-sm font-medium">Tidak ada data ruas jalan yang cocok dengan pencarian/filter.</p>
-                                    <button type="button" @click="resetFilters()" class="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">Reset Filter & Pencarian</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination Controls -->
-            <div x-show="totalPages() > 1" 
-                 class="bg-white border-t border-gray-200 px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-export">
-                <!-- Info Text -->
-                <div class="text-xs text-gray-500 font-medium">
-                    Menampilkan <span class="font-bold text-gray-900" x-text="(currentPage - 1) * perPage + 1"></span> sampai 
-                    <span class="font-bold text-gray-900" x-text="Math.min(currentPage * perPage, filteredRuas().length)"></span> dari 
-                    <span class="font-bold text-gray-900" x-text="filteredRuas().length"></span> ruas jalan
+                        </tbody>
+                    </table>
                 </div>
-                
-                <!-- Page buttons -->
-                <div class="flex items-center gap-1.5 self-center sm:self-auto">
-                    <!-- Previous Button -->
-                    <button type="button" 
-                            @click="currentPage > 1 ? currentPage-- : null"
-                            :disabled="currentPage === 1"
-                            :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </button>
 
-                    <!-- Page numbers -->
-                    <template x-for="p in getPagesToShow()" :key="p">
-                        <div class="flex items-center">
-                            <template x-if="p === '...'">
-                                <span class="px-2 text-gray-400 text-xs font-semibold">...</span>
-                            </template>
-                            <template x-if="p !== '...'">
-                                <button type="button"
-                                        @click="currentPage = p"
-                                        :class="currentPage === p ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white'"
-                                        class="inline-flex items-center justify-center min-w-8 h-8 px-2.5 rounded-lg border text-xs font-semibold transition-colors"
-                                        x-text="p">
-                                </button>
-                            </template>
-                        </div>
-                    </template>
+                <!-- Pagination Controls -->
+                <div x-show="totalPages() > 1" 
+                     class="bg-white border-t border-gray-200 px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 no-export">
+                    <!-- Info Text -->
+                    <div class="text-xs text-gray-500 font-medium">
+                        Menampilkan <span class="font-bold text-gray-900" x-text="(currentPage - 1) * perPage + 1"></span> sampai 
+                        <span class="font-bold text-gray-900" x-text="Math.min(currentPage * perPage, filteredRuas().length)"></span> dari 
+                        <span class="font-bold text-gray-900" x-text="filteredRuas().length"></span> ruas jalan
+                    </div>
+                    
+                    <!-- Page buttons -->
+                    <div class="flex items-center gap-1.5 self-center sm:self-auto">
+                        <!-- Previous Button -->
+                        <button type="button" 
+                                @click="currentPage > 1 ? currentPage-- : null"
+                                :disabled="currentPage === 1"
+                                :class="currentPage === 1 ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+                            </svg>
+                        </button>
 
-                    <!-- Next Button -->
-                    <button type="button" 
-                            @click="currentPage < totalPages() ? currentPage++ : null"
-                            :disabled="currentPage === totalPages()"
-                            :class="currentPage === totalPages() ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
-                            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </button>
+                        <!-- Page numbers -->
+                        <template x-for="p in getPagesToShow()" :key="p">
+                            <div class="flex items-center">
+                                <template x-if="p === '...'">
+                                    <span class="px-2 text-gray-400 text-xs font-semibold">...</span>
+                                </template>
+                                <template x-if="p !== '...'">
+                                    <button type="button"
+                                            @click="currentPage = p"
+                                            :class="currentPage === p ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 bg-white'"
+                                            class="inline-flex items-center justify-center min-w-8 h-8 px-2.5 rounded-lg border text-xs font-semibold transition-colors"
+                                            x-text="p">
+                                    </button>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Next Button -->
+                        <button type="button" 
+                                @click="currentPage < totalPages() ? currentPage++ : null"
+                                :disabled="currentPage === totalPages()"
+                                :class="currentPage === totalPages() ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
+                                class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
