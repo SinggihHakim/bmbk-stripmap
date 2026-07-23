@@ -55,31 +55,104 @@ class DashboardController
         $pctAgregatTanah = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_agregat_tanah'] ?? 0) / $totalPerkerasanM) * 100 : 0;
         $pctBelumTembus  = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_belum_tembus'] ?? 0) / $totalPerkerasanM) * 100 : 0;
 
+        // 1. Chart Kabupaten
+        $summaryByKabupaten = $stripmapService->getSummaryByKabupaten();
+        $kabupatenChartData = [];
+        foreach ($summaryByKabupaten as $row) {
+            $totalP       = (float)$row['total_panjang'];
+            $mantapM      = (float)$row['total_mantap'];
+            $tidakMantapM = (float)$row['total_tidak_mantap'];
+            $kabupatenChartData[] = [
+                'label'            => $row['kabupaten_kota'],
+                'short_label'      => \App\Helpers\Uptd::getShortName($row['kabupaten_kota']),
+                'mantap_km'        => round($mantapM / 1000, 2),
+                'tidak_mantap_km'  => round($tidakMantapM / 1000, 2),
+                'pct_mantap'       => $totalP > 0 ? round(($mantapM / $totalP) * 100, 1) : 0,
+                'pct_tidak_mantap' => $totalP > 0 ? round(($tidakMantapM / $totalP) * 100, 1) : 0,
+            ];
+        }
+
+        // 2. Chart Koridor
+        $summaryByKoridor = $stripmapService->getSummaryByKoridor();
+        $koridorChartData = [];
+        foreach ($summaryByKoridor as $row) {
+            $totalP       = (float)$row['total_panjang'];
+            $mantapM      = (float)$row['total_mantap'];
+            $tidakMantapM = (float)$row['total_tidak_mantap'];
+            $label        = is_numeric($row['koridor']) ? 'Koridor ' . $row['koridor'] : $row['koridor'];
+            $koridorChartData[] = [
+                'label'            => $label,
+                'mantap_km'        => round($mantapM / 1000, 2),
+                'tidak_mantap_km'  => round($tidakMantapM / 1000, 2),
+                'pct_mantap'       => $totalP > 0 ? round(($mantapM / $totalP) * 100, 1) : 0,
+                'pct_tidak_mantap' => $totalP > 0 ? round(($tidakMantapM / $totalP) * 100, 1) : 0,
+            ];
+        }
+
+        // 3. Chart UPTD
+        $uptdMaster = \App\Helpers\Uptd::all();
+        $uptdStats  = [];
+        foreach ($uptdMaster as $uptdKey => $kabList) {
+            $uptdStats[$uptdKey] = ['panjang' => 0, 'mantap' => 0, 'tidak_mantap' => 0];
+        }
+
+        foreach ($summaryByKabupaten as $row) {
+            $totalP       = (float)$row['total_panjang'];
+            $mantapM      = (float)$row['total_mantap'];
+            $tidakMantapM = (float)$row['total_tidak_mantap'];
+            $matchedUptds = \App\Helpers\Uptd::getUptdByKabupaten($row['kabupaten_kota']);
+
+            foreach ($matchedUptds as $u) {
+                if (isset($uptdStats[$u])) {
+                    $uptdStats[$u]['panjang']      += $totalP;
+                    $uptdStats[$u]['mantap']       += $mantapM;
+                    $uptdStats[$u]['tidak_mantap'] += $tidakMantapM;
+                }
+            }
+        }
+
+        $uptdChartData = [];
+        foreach ($uptdStats as $uptdName => $stat) {
+            $totalP       = (float)$stat['panjang'];
+            $mantapM      = (float)$stat['mantap'];
+            $tidakMantapM = (float)$stat['tidak_mantap'];
+            $uptdChartData[] = [
+                'label'            => $uptdName,
+                'mantap_km'        => round($mantapM / 1000, 2),
+                'tidak_mantap_km'  => round($tidakMantapM / 1000, 2),
+                'pct_mantap'       => $totalP > 0 ? round(($mantapM / $totalP) * 100, 1) : 0,
+                'pct_tidak_mantap' => $totalP > 0 ? round(($tidakMantapM / $totalP) * 100, 1) : 0,
+            ];
+        }
+
         $data = [
-            'title'           => 'Dashboard',
-            'totalRuas'       => count($ruasList),
-            'ruasList'        => $ruasList,
-            'totalPanjang'    => $totalPanjangKm,
-            'baikKm'          => $baikKm,
-            'sedangKm'        => $sedangKm,
-            'rusakRinganKm'   => $rusakRinganKm,
-            'rusakBeratKm'    => $rusakBeratKm,
-            'mantapKm'        => $mantapKm,
-            'tidakMantapKm'   => $tidakMantapKm,
-            'rigidKm'         => $rigidKm,
-            'aspalKm'         => $aspalKm,
-            'agregatTanahKm'  => $agregatTanahKm,
-            'belumTembusKm'   => $belumTembusKm,
-            'pctBaik'         => $pctBaik,
-            'pctSedang'       => $pctSedang,
-            'pctRusakRingan'  => $pctRusakRingan,
-            'pctRusakBerat'   => $pctRusakBerat,
-            'pctMantap'       => $pctMantap,
-            'pctTidakMantap'  => $pctTidakMantap,
-            'pctRigid'        => $pctRigid,
-            'pctAspal'        => $pctAspal,
-            'pctAgregatTanah' => $pctAgregatTanah,
-            'pctBelumTembus'  => $pctBelumTembus,
+            'title'               => 'Dashboard',
+            'totalRuas'           => count($ruasList),
+            'ruasList'            => $ruasList,
+            'totalPanjang'        => $totalPanjangKm,
+            'baikKm'              => $baikKm,
+            'sedangKm'            => $sedangKm,
+            'rusakRinganKm'       => $rusakRinganKm,
+            'rusakBeratKm'        => $rusakBeratKm,
+            'mantapKm'            => $mantapKm,
+            'tidakMantapKm'       => $tidakMantapKm,
+            'rigidKm'             => $rigidKm,
+            'aspalKm'             => $aspalKm,
+            'agregatTanahKm'      => $agregatTanahKm,
+            'belumTembusKm'       => $belumTembusKm,
+            'pctBaik'             => $pctBaik,
+            'pctSedang'           => $pctSedang,
+            'pctRusakRingan'      => $pctRusakRingan,
+            'pctRusakBerat'       => $pctRusakBerat,
+            'pctMantap'           => $pctMantap,
+            'pctTidakMantap'      => $pctTidakMantap,
+            'pctRigid'            => $pctRigid,
+            'pctAspal'            => $pctAspal,
+            'pctAgregatTanah'     => $pctAgregatTanah,
+            'pctBelumTembus'      => $pctBelumTembus,
+            'kabupatenChartData'  => $kabupatenChartData,
+            'koridorChartData'    => $koridorChartData,
+            'uptdChartData'       => $uptdChartData,
         ];
 
         view('layouts.app', array_merge($data, ['content' => 'dashboard.index']));

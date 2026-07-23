@@ -182,6 +182,49 @@ class Stripmap
     }
 
     /**
+     * Ambil ringkasan kemantapan (mantap vs tidak mantap) per kabupaten/kota
+     * digunakan untuk line chart perbandingan di dashboard
+     */
+    public function getSummaryByKabupaten(): array
+    {
+        $sql = "SELECT
+                    r.kabupaten_kota,
+                    COALESCE(SUM(s.panjang), 0)                              AS total_panjang,
+                    COALESCE(SUM(s.baik + s.sedang), 0)                     AS total_mantap,
+                    COALESCE(SUM(s.rusak_ringan + s.rusak_berat), 0)        AS total_tidak_mantap,
+                    COALESCE(SUM(s.baik), 0)                                AS total_baik,
+                    COALESCE(SUM(s.sedang), 0)                              AS total_sedang,
+                    COALESCE(SUM(s.rusak_ringan), 0)                        AS total_rusak_ringan,
+                    COALESCE(SUM(s.rusak_berat), 0)                         AS total_rusak_berat
+                FROM ruas_jalan r
+                LEFT JOIN stripmap s ON r.id = s.ruas_id
+                WHERE r.kabupaten_kota IS NOT NULL AND r.kabupaten_kota != ''
+                GROUP BY r.kabupaten_kota
+                ORDER BY r.kabupaten_kota ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Ambil ringkasan kemantapan per koridor
+     */
+    public function getSummaryByKoridor(): array
+    {
+        $sql = "SELECT
+                    r.koridor,
+                    COALESCE(SUM(s.panjang), 0)                       AS total_panjang,
+                    COALESCE(SUM(s.baik + s.sedang), 0)              AS total_mantap,
+                    COALESCE(SUM(s.rusak_ringan + s.rusak_berat), 0) AS total_tidak_mantap
+                FROM ruas_jalan r
+                LEFT JOIN stripmap s ON r.id = s.ruas_id
+                WHERE r.koridor IS NOT NULL AND r.koridor != ''
+                GROUP BY r.koridor
+                ORDER BY r.koridor ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Ambil ringkasan kondisi (baik, sedang, rusak_ringan, rusak_berat) per ruas jalan
      */
     public function getConditionSummaryPerRuas(): array

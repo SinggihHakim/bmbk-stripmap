@@ -99,9 +99,9 @@ $curMeta = $kondisiMeta[$selectedKondisi] ?? $kondisiMeta['rusak_ringan'];
         <!-- Metric 2: Total Panjang Kondisi Terpilih -->
         <div class="p-5 rounded-2xl border bg-white shadow-sm flex items-center justify-between">
             <div>
-                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Total Panjang Kondisi</span>
-                <h3 class="text-2xl font-bold" :style="{ color: getKondisiAccent() }" x-text="formatNumber(getTotalPanjangKondisiKm()) + ' km'"></h3>
-                <p class="text-xs text-gray-500 mt-1" x-text="'Setara ' + formatNumber(getTotalPanjangKondisiM()) + ' meter'"></p>
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider block mb-1">Proporsi & Total Panjang</span>
+                <h3 class="text-2xl font-bold" :style="{ color: getKondisiAccent() }" x-text="getTotalPanjangKondisiPct() + '%'"></h3>
+                <p class="text-xs text-gray-500 mt-1" x-text="formatNumber(getTotalPanjangKondisiKm()) + ' km (' + formatNumber(getTotalPanjangKondisiM()) + ' m)'"></p>
             </div>
             <div class="w-12 h-12 rounded-xl flex items-center justify-center" :style="{ backgroundColor: getKondisiAccent() + '15', color: getKondisiAccent() }">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -273,48 +273,51 @@ $curMeta = $kondisiMeta[$selectedKondisi] ?? $kondisiMeta['rusak_ringan'];
                                 <td class="px-5 py-4 text-center">
                                     <div class="flex flex-col items-center gap-0.5">
                                         <span class="text-xs font-mono font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded" x-text="ruas.sta_awal_str + ' s/d ' + ruas.sta_akhir_str"></span>
-                                        <span class="text-[11px] font-medium text-gray-500" x-text="formatNumber(ruas.total_panjang / 1000) + ' km (' + formatNumber(ruas.total_panjang) + ' m)'"></span>
+                                        <span class="text-[10px] font-medium text-gray-400" x-text="formatNumber(ruas.total_panjang / 1000) + ' km (' + formatNumber(ruas.total_panjang) + ' m)'"></span>
                                     </div>
                                 </td>
 
                                 <!-- Panjang Kondisi Terpilih -->
                                 <td class="px-5 py-4 text-center bg-blue-50/20">
-                                    <div class="flex flex-col items-center gap-1">
-                                        <span class="text-sm font-extrabold" 
+                                    <div class="flex flex-col items-center gap-0.5">
+                                        <span class="text-base font-extrabold" 
                                               :style="{ color: getKondisiAccent() }"
-                                              x-text="formatNumber(getKondisiVal(ruas) / 1000) + ' km'">
+                                              x-text="getKondisiPctOfRuas(ruas) + '%'">
                                         </span>
-                                        <span class="text-[11px] font-semibold text-gray-600"
-                                              x-text="'(' + formatNumber(getKondisiVal(ruas)) + ' m)'">
+                                        <span class="text-[10px] font-medium text-gray-400"
+                                              x-text="formatNumber(getKondisiVal(ruas) / 1000) + ' km (' + formatNumber(getKondisiVal(ruas)) + ' m)'">
                                         </span>
                                         <!-- Proporsi terhadap panjang ruas -->
-                                        <div class="w-24 bg-gray-200 h-1.5 rounded-full overflow-hidden mt-0.5">
+                                        <div class="w-24 bg-gray-200 h-1.5 rounded-full overflow-hidden mt-1">
                                             <div class="h-1.5 rounded-full transition-all duration-300"
                                                  :style="{ width: getKondisiPctOfRuas(ruas) + '%', backgroundColor: getKondisiAccent() }">
                                             </div>
                                         </div>
-                                        <span class="text-[10px] text-gray-400 font-medium" x-text="getKondisiPctOfRuas(ruas) + '% dari ruas'"></span>
                                     </div>
                                 </td>
 
                                 <!-- Breakdown Kondisi (Desktop) -->
                                 <td class="px-5 py-4 hidden lg:table-cell">
                                     <div class="flex items-center justify-center gap-2 text-xs">
-                                        <div class="flex flex-col items-center p-1.5 bg-emerald-50 rounded-lg min-w-14 border border-emerald-100">
+                                        <div class="flex flex-col items-center p-1.5 bg-emerald-50 rounded-lg min-w-16 border border-emerald-100">
                                             <span class="text-[10px] text-emerald-800 font-semibold">Baik</span>
-                                            <span class="font-bold text-emerald-700" x-text="formatNumber(ruas.baik / 1000) + 'km'"></span>
+                                            <span class="font-extrabold text-emerald-700" x-text="getPct(ruas.baik, ruas.total_panjang) + '%'"></span>
+                                            <span class="text-[10px] text-emerald-600 font-medium" x-text="formatNumber(ruas.baik / 1000) + ' km'"></span>
                                         </div>
-                                        <div class="flex flex-col items-center p-1.5 bg-yellow-50 rounded-lg min-w-14 border border-yellow-100">
+                                        <div class="flex flex-col items-center p-1.5 bg-yellow-50 rounded-lg min-w-16 border border-yellow-100">
                                             <span class="text-[10px] text-yellow-800 font-semibold">Sedang</span>
-                                            <span class="font-bold text-yellow-700" x-text="formatNumber(ruas.sedang / 1000) + 'km'"></span>
+                                            <span class="font-extrabold text-yellow-700" x-text="getPct(ruas.sedang, ruas.total_panjang) + '%'"></span>
+                                            <span class="text-[10px] text-yellow-600 font-medium" x-text="formatNumber(ruas.sedang / 1000) + ' km'"></span>
                                         </div>
-                                        <div class="flex flex-col items-center p-1.5 bg-orange-50 rounded-lg min-w-14 border border-orange-100">
+                                        <div class="flex flex-col items-center p-1.5 bg-orange-50 rounded-lg min-w-16 border border-orange-100">
                                             <span class="text-[10px] text-orange-800 font-semibold">R.Ringan</span>
-                                            <span class="font-bold text-orange-700" x-text="formatNumber(ruas.rusak_ringan / 1000) + 'km'"></span>
+                                            <span class="font-extrabold text-orange-700" x-text="getPct(ruas.rusak_ringan, ruas.total_panjang) + '%'"></span>
+                                            <span class="text-[10px] text-orange-600 font-medium" x-text="formatNumber(ruas.rusak_ringan / 1000) + ' km'"></span>
                                         </div>
-                                        <div class="flex flex-col items-center p-1.5 bg-red-50 rounded-lg min-w-14 border border-red-100">
+                                        <div class="flex flex-col items-center p-1.5 bg-red-50 rounded-lg min-w-16 border border-red-100">
                                             <span class="text-[10px] text-red-800 font-semibold">R.Berat</span>
-                                            <span class="font-bold text-red-700" x-text="formatNumber(ruas.rusak_berat / 1000) + 'km'"></span>
+                                            <span class="font-extrabold text-red-700" x-text="getPct(ruas.rusak_berat, ruas.total_panjang) + '%'"></span>
+                                            <span class="text-[10px] text-red-600 font-medium" x-text="formatNumber(ruas.rusak_berat / 1000) + ' km'"></span>
                                         </div>
                                     </div>
                                 </td>
@@ -473,6 +476,19 @@ function dashboardDetailTable(initialData, initialKondisi) {
 
         getTotalPanjangKondisiKm() {
             return this.getTotalPanjangKondisiM() / 1000;
+        },
+
+        getTotalPanjangKondisiPct() {
+            const totalAll = this.filteredRuas().reduce((sum, r) => sum + (parseFloat(r.total_panjang) || 0), 0);
+            if (totalAll <= 0) return '0.0';
+            return ((this.getTotalPanjangKondisiM() / totalAll) * 100).toFixed(1);
+        },
+
+        getPct(val, total) {
+            const v = parseFloat(val) || 0;
+            const t = parseFloat(total) || 0;
+            if (t <= 0) return '0.0';
+            return ((v / t) * 100).toFixed(1);
         },
 
         toggleSortOrder() {

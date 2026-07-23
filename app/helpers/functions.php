@@ -134,3 +134,20 @@ function format_number(float $number, int $decimals = 0): string
 {
     return number_format($number, $decimals, ',', '.');
 }
+
+/**
+ * Dapatkan UPTD berdasarkan kabupaten/kota
+ */
+function get_uptd_string(string $kabupaten, string $default = '-'): string
+{
+    return \App\Helpers\Uptd::getUptdString($kabupaten, $default);
+}
+
+/**
+ * Dapatkan daftar UPTD master
+ */
+function get_uptd_list(): array
+{
+    return \App\Helpers\Uptd::all();
+}
+

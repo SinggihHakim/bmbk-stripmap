@@ -202,6 +202,14 @@ class StripmapService
     }
 
     /**
+     * Ambil ringkasan kemantapan per kabupaten/kota (untuk line chart dashboard)
+     */
+    public function getSummaryByKabupaten(): array
+    {
+        return $this->model->getSummaryByKabupaten();
+    }
+
+    /**
      * Validasi input stripmap
      */
     private function validate(array $input, int $ruasId, ?int $excludeId = null, bool $checkDbOverlap = true): array
@@ -268,5 +276,13 @@ class StripmapService
         }
 
         return $errors;
+    }
+
+    /**
+     * Ambil ringkasan kemantapan per koridor
+     */
+    public function getSummaryByKoridor(): array
+    {
+        return $this->model->getSummaryByKoridor();
     }
 }

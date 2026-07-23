@@ -344,10 +344,352 @@
     }
     ?>
 
+    <?php if (!empty($kabupatenChartData)): ?>
+    <!-- ============================================================ -->
+    <!-- 3 Grid Section: Kemantapan per Kab/Kota, Koridor, & UPTD    -->
+    <!-- ============================================================ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- 1. KIRI: Kemantapan per Kabupaten/Kota -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900">Kemantapan per Kab/Kota</h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Wilayah Kabupaten / Kota</p>
+                </div>
+                <div class="flex items-center gap-1.5" x-data="{ sortMode: 'desc', chartMode: 'pct' }">
+                    <!-- Sort -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 64px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[30px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="sortMode === 'asc' ? 'left: 2px;' : 'left: 32px;'"></span>
+                        <button type="button" @click="sortMode = 'asc'; window.chartKab && window.chartKab.sort('asc')" title="Terendah ke Tertinggi"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'asc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button type="button" @click="sortMode = 'desc'; window.chartKab && window.chartKab.sort('desc')" title="Tertinggi ke Terendah"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'desc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <!-- km / % -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
+                        <button type="button" @click="chartMode = 'km'; window.chartKab && window.chartKab.setMode('km')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
+                        <button type="button" @click="chartMode = 'pct'; window.chartKab && window.chartKab.setMode('pct')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3.5 flex-1 flex flex-col overflow-y-auto max-h-[250px]">
+                <div class="flex items-center gap-4 mb-2 text-[11px]">
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                </div>
+                <div class="relative w-full" style="height: <?= max(240, count($kabupatenChartData) * 20) ?>px;">
+                    <canvas id="kabupatenBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. TENGAH: Kemantapan per Koridor -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900">Kemantapan per Koridor</h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Rute Koridor Utama</p>
+                </div>
+                <div class="flex items-center gap-1.5" x-data="{ sortMode: 'desc', chartMode: 'pct' }">
+                    <!-- Sort -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 64px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[30px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="sortMode === 'asc' ? 'left: 2px;' : 'left: 32px;'"></span>
+                        <button type="button" @click="sortMode = 'asc'; window.chartKoridor && window.chartKoridor.sort('asc')" title="Terendah ke Tertinggi"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'asc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button type="button" @click="sortMode = 'desc'; window.chartKoridor && window.chartKoridor.sort('desc')" title="Tertinggi ke Terendah"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'desc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <!-- km / % -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
+                        <button type="button" @click="chartMode = 'km'; window.chartKoridor && window.chartKoridor.setMode('km')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
+                        <button type="button" @click="chartMode = 'pct'; window.chartKoridor && window.chartKoridor.setMode('pct')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3.5 flex-1 flex flex-col justify-between max-h-[250px]">
+                <div class="flex items-center gap-4 mb-2 text-[11px]">
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                </div>
+                <div class="relative w-full h-[200px]">
+                    <canvas id="koridorBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. KANAN: Kemantapan per UPTD -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div class="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900">Kemantapan per UPTD</h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Wilayah UPTD Dinas BMBK</p>
+                </div>
+                <div class="flex items-center gap-1.5" x-data="{ sortMode: 'desc', chartMode: 'pct' }">
+                    <!-- Sort -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 64px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[30px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="sortMode === 'asc' ? 'left: 2px;' : 'left: 32px;'"></span>
+                        <button type="button" @click="sortMode = 'asc'; window.chartUptd && window.chartUptd.sort('asc')" title="Terendah ke Tertinggi"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'asc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
+                        </button>
+                        <button type="button" @click="sortMode = 'desc'; window.chartUptd && window.chartUptd.sort('desc')" title="Tertinggi ke Terendah"
+                                class="relative z-10 flex-1 py-1 flex items-center justify-center rounded-md text-xs transition-colors duration-200"
+                                :class="sortMode === 'desc' ? 'text-gray-900 font-bold' : 'text-gray-400'">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                    </div>
+                    <!-- km / % -->
+                    <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
+                        <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
+                              :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
+                        <button type="button" @click="chartMode = 'km'; window.chartUptd && window.chartUptd.setMode('km')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
+                        <button type="button" @click="chartMode = 'pct'; window.chartUptd && window.chartUptd.setMode('pct')"
+                                class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
+                                :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-3.5 flex-1 flex flex-col justify-between max-h-[250px]">
+                <div class="flex items-center gap-4 mb-2 text-[11px]">
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                </div>
+                <div class="relative w-full h-[200px]">
+                    <canvas id="uptdBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+    // ================================================================
+    // Modular Builder untuk Stacked Bar Charts (Kab, Koridor, UPTD)
+    // ================================================================
+    function initStackedBarChart(canvasId, rawData, isVertical = false) {
+        if (!rawData || !rawData.length) return null;
+
+        let activeRaw       = [...rawData];
+        let activeLabels    = activeRaw.map(d => d.short_label || d.label);
+        let activeMantapKm  = activeRaw.map(d => d.mantap_km);
+        let activeTidakKm   = activeRaw.map(d => d.tidak_mantap_km);
+        let activeMantapPct = activeRaw.map(d => d.pct_mantap);
+        let activeTidakPct  = activeRaw.map(d => d.pct_tidak_mantap);
+
+        let currentMode = 'pct';
+        const fmt = v => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
+
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return null;
+
+        const ctx = canvas.getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: activeLabels,
+                datasets: [
+                    {
+                        label: 'Mantap',
+                        data: activeMantapPct,
+                        backgroundColor: '#6B7A52',
+                        hoverBackgroundColor: '#5B6A42',
+                        borderRadius: 3,
+                        borderSkipped: false,
+                        barPercentage: isVertical ? 0.7 : 0.85,
+                        categoryPercentage: isVertical ? 0.8 : 0.92,
+                    },
+                    {
+                        label: 'Tidak Mantap',
+                        data: activeTidakPct,
+                        backgroundColor: '#EF4444',
+                        hoverBackgroundColor: '#DC2626',
+                        borderRadius: 3,
+                        borderSkipped: false,
+                        barPercentage: isVertical ? 0.7 : 0.85,
+                        categoryPercentage: isVertical ? 0.8 : 0.92,
+                    }
+                ]
+            },
+            options: {
+                indexAxis: isVertical ? 'x' : 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', axis: isVertical ? 'x' : 'y', intersect: false },
+                animation: { duration: 600, easing: 'easeOutQuart' },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(17,24,39,0.95)',
+                        titleFont: { family: 'Inter, system-ui, sans-serif', size: 12, weight: '700' },
+                        bodyFont:  { family: 'Inter, system-ui, sans-serif', size: 11 },
+                        padding:   { top: 8, bottom: 8, left: 12, right: 12 },
+                        cornerRadius: 8,
+                        displayColors: true,
+                        boxWidth: 8, boxHeight: 8, boxPadding: 4,
+                        callbacks: {
+                            title: function(items) {
+                                const d = activeRaw[items[0].dataIndex];
+                                return d ? d.label : items[0].label;
+                            },
+                            label: function(ctx) {
+                                const d = activeRaw[ctx.dataIndex];
+                                if (!d) return '';
+                                if (currentMode === 'pct') {
+                                    if (ctx.dataset.label === 'Mantap')
+                                        return ` Mantap: ${d.pct_mantap}% (${fmt(d.mantap_km)} km)`;
+                                    return ` Tidak Mantap: ${d.pct_tidak_mantap}% (${fmt(d.tidak_mantap_km)} km)`;
+                                } else {
+                                    if (ctx.dataset.label === 'Mantap')
+                                        return ` Mantap: ${fmt(d.mantap_km)} km (${d.pct_mantap}%)`;
+                                    return ` Tidak Mantap: ${fmt(d.tidak_mantap_km)} km (${d.pct_tidak_mantap}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: isVertical ? {
+                        stacked: true,
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: {
+                            autoSkip: false,
+                            maxRotation: 45,
+                            minRotation: 0,
+                            font: { size: 9, family: 'Inter, system-ui, sans-serif', weight: '600' },
+                            color: '#374151',
+                        }
+                    } : {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: 'rgba(243,244,246,1)', lineWidth: 1 },
+                        border: { display: false },
+                        ticks: {
+                            font: { size: 10, family: 'Inter, system-ui, sans-serif' },
+                            color: '#9ca3af',
+                            callback: function(v) { return currentMode === 'pct' ? v + '%' : v + ' km'; }
+                        }
+                    },
+                    y: isVertical ? {
+                        stacked: true,
+                        beginAtZero: true,
+                        grid: { color: 'rgba(243,244,246,1)', lineWidth: 1 },
+                        border: { display: false },
+                        ticks: {
+                            font: { size: 10, family: 'Inter, system-ui, sans-serif' },
+                            color: '#9ca3af',
+                            callback: function(v) { return currentMode === 'pct' ? v + '%' : v + ' km'; }
+                        }
+                    } : {
+                        stacked: true,
+                        grid: { display: false },
+                        border: { display: false },
+                        ticks: {
+                            autoSkip: false,
+                            font: { size: 10, family: 'Inter, system-ui, sans-serif', weight: '600' },
+                            color: '#374151',
+                        }
+                    }
+                }
+            }
+        });
+
+        function applyData() {
+            chart.data.labels = activeLabels;
+            if (currentMode === 'pct') {
+                chart.data.datasets[0].data = activeMantapPct;
+                chart.data.datasets[1].data = activeTidakPct;
+                if (isVertical) {
+                    chart.options.scales.y.ticks.callback = v => v + '%';
+                } else {
+                    chart.options.scales.x.ticks.callback = v => v + '%';
+                }
+            } else {
+                chart.data.datasets[0].data = activeMantapKm;
+                chart.data.datasets[1].data = activeTidakKm;
+                if (isVertical) {
+                    chart.options.scales.y.ticks.callback = v => v + ' km';
+                } else {
+                    chart.options.scales.x.ticks.callback = v => v + ' km';
+                }
+            }
+            chart.update();
+        }
+
+        return {
+            sort: function(dir) {
+                const sorted = [...rawData].sort((a, b) =>
+                    dir === 'asc'
+                        ? a.pct_mantap - b.pct_mantap
+                        : b.pct_mantap - a.pct_mantap
+                );
+                activeRaw       = sorted;
+                activeLabels    = sorted.map(d => d.short_label || d.label);
+                activeMantapKm  = sorted.map(d => d.mantap_km);
+                activeTidakKm   = sorted.map(d => d.tidak_mantap_km);
+                activeMantapPct = sorted.map(d => d.pct_mantap);
+                activeTidakPct  = sorted.map(d => d.pct_tidak_mantap);
+                applyData();
+            },
+            setMode: function(mode) {
+                currentMode = mode;
+                applyData();
+            }
+        };
+    }
+
+    (function() {
+        const rawKab = <?= json_encode($kabupatenChartData ?? [], JSON_UNESCAPED_UNICODE) ?>;
+        const rawKor = <?= json_encode($koridorChartData ?? [], JSON_UNESCAPED_UNICODE) ?>;
+        const rawUpt = <?= json_encode($uptdChartData ?? [], JSON_UNESCAPED_UNICODE) ?>;
+
+        window.chartKab     = initStackedBarChart('kabupatenBarChart', rawKab, false);
+        window.chartKoridor = initStackedBarChart('koridorBarChart', rawKor, true);
+        window.chartUptd    = initStackedBarChart('uptdBarChart', rawUpt, true);
+
+        if (window.chartKab) window.chartKab.sort('desc');
+        if (window.chartKoridor) window.chartKoridor.sort('desc');
+        if (window.chartUptd) window.chartUptd.sort('desc');
+    })();
+    </script>
+    <?php endif; ?>
+
     <div x-data="dashboardRuasTable(<?= htmlspecialchars(json_encode($ruasJsonData), ENT_QUOTES, 'UTF-8') ?>)" class="space-y-6">
+
         
         <!-- Filters & Search Panel -->
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden no-export" x-data="{ isSearchOpen: true }">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden no-export" x-data="{ isSearchOpen: false }">
             <div class="px-5 py-4 border-b border-gray-200 bg-gray-50/70 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 cursor-pointer select-none" @click="isSearchOpen = !isSearchOpen">
                 <div>
                     <h2 class="text-lg font-semibold text-gray-900 whitespace-nowrap">Daftar Ruas Jalan</h2>
