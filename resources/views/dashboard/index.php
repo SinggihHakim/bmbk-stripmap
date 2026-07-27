@@ -64,16 +64,15 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800 group-hover:underline">Baik</span>
+                            <span class="text-xs font-semibold text-emerald-800">Baik</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                             <?= format_number($pctBaik ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-emerald-700"><?= format_number($baikKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-emerald-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-emerald-600 mt-0.5 flex items-center justify-between">
+                    <p class="text-[11px] font-medium text-emerald-600 mt-0.5">
                         <span>Kondisi Baik</span>
-                        <span class="text-[10px] font-semibold opacity-70 group-hover:opacity-100">Detail &rarr;</span>
                     </p>
                 </a>
 
@@ -85,16 +84,15 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-yellow-800 group-hover:underline">Sedang</span>
+                            <span class="text-xs font-semibold text-yellow-800">Sedang</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold">
                             <?= format_number($pctSedang ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-yellow-700"><?= format_number($sedangKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-yellow-600">km</span></h3>
-                    <p class="text-[11px] font-medium text-yellow-600 mt-0.5 flex items-center justify-between">
+                    <p class="text-[11px] font-medium text-yellow-600 mt-0.5">
                         <span>Kondisi Sedang</span>
-                        <span class="text-[10px] font-semibold opacity-70 group-hover:opacity-100">Detail &rarr;</span>
                     </p>
                 </a>
 
@@ -106,16 +104,15 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-bold text-orange-900 group-hover:underline">Rusak Ringan</span>
+                            <span class="text-xs font-bold text-orange-900">Rusak Ringan</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-bold">
                             <?= format_number($pctRusakRingan ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-orange-700"><?= format_number($rusakRinganKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-orange-600">km</span></h3>
-                    <p class="text-[11px] font-semibold text-orange-600 mt-0.5 flex items-center justify-between">
+                    <p class="text-[11px] font-semibold text-orange-600 mt-0.5">
                         <span>Rusak Ringan</span>
-                        <span class="text-[10px] font-bold underline opacity-80 group-hover:opacity-100">Detail &rarr;</span>
                     </p>
                 </a>
 
@@ -127,16 +124,15 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-bold text-red-900 group-hover:underline">Rusak Berat</span>
+                            <span class="text-xs font-bold text-red-900">Rusak Berat</span>
                         </div>
                         <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
                             <?= format_number($pctRusakBerat ?? 0.0, 1) ?>%
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-red-700"><?= format_number($rusakBeratKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-red-600">km</span></h3>
-                    <p class="text-[11px] font-semibold text-red-600 mt-0.5 flex items-center justify-between">
+                    <p class="text-[11px] font-semibold text-red-600 mt-0.5">
                         <span>Rusak Berat</span>
-                        <span class="text-[10px] font-bold underline opacity-80 group-hover:opacity-100">Detail &rarr;</span>
                     </p>
                 </a>
             </div>
@@ -151,11 +147,10 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800 group-hover:underline">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
+                            <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
-                            <span class="text-[10px] font-semibold text-emerald-600 group-hover:underline">Detail &rarr;</span>
                         </div>
                     </div>
                     <h3 class="text-2xl font-bold text-emerald-700"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-emerald-600">km</span></h3>
@@ -172,11 +167,10 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-rose-800 group-hover:underline">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
+                            <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
-                            <span class="text-[10px] font-semibold text-rose-600 group-hover:underline">Detail &rarr;</span>
                         </div>
                     </div>
                     <h3 class="text-2xl font-bold text-rose-700"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-rose-600">km</span></h3>
