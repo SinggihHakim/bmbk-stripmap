@@ -139,3 +139,20 @@ task: 23 juli 2026
 task : 24 juli 2026
 1. gabungkan atau kelompokkan kab/kota agar kita bisa kita gunakan kededepannya per uptd ✅
 
+
+task : 27 juli 2026
+1. audit kode proyek (bug, junk code, junk files) ✅
+2. perbaikan bug kabupaten mismatch di UPTD — data DB "Bandar Lampung" tidak cocok dengan MAP "Bandarlampung" sehingga chart UPTD 1 selalu 0 ✅
+3. perbaikan route orphan `stripmap/input/{id}` yang mengarah ke method `input()` yang tidak ada di StripmapController (dihapus dari routes) ✅
+
+task : 28 juli 2026
+1. perbaikan `install.php` — fresh install gagal karena tabel `perkerasan` tidak dibuat oleh installer, ditambahkan definisi tabel lengkap dengan foreign key ✅
+2. hapus junk file `scratch_test.php` — file debug sementara yang membocorkan koneksi database jika diakses langsung ✅
+3. hapus junk file `public/install.php` — installer sudah selesai (ada install.lock), file tidak perlu ada lagi ✅
+
+task : 29 juli 2026
+1. refactor duplikasi logika kalkulasi km antara DashboardController dan ExportController — dibuat fungsi bersama `build_road_summary_stats()` di `functions.php` ✅
+2. hapus wrapper function `get_uptd_string()` dan `get_uptd_list()` di `functions.php` yang tidak dipakai di mana pun ✅
+
+task : 30 juli 2026
+1. update `.gitignore` — tambahkan aturan `scratch_*.php` dan `public/install.php` agar file debug dan installer tidak ter-commit secara tidak sengaja di masa depan ✅

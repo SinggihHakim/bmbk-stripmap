@@ -19,39 +19,14 @@ class ExportController
         $perkerasanService = new PerkerasanService();
         $perkerasanSummary = $perkerasanService->getGlobalSummary();
 
-        // Hitung total panjang jalan (m -> km)
-        $totalPanjangM  = array_sum(array_column($ruasList, 'panjang'));
-        $totalPanjangKm = $totalPanjangM / 1000;
+        // Hitung semua statistik km & persentase via helper bersama
+        $stats = build_road_summary_stats($ruasList, $globalSummary, $perkerasanSummary);
 
-        $baikKm        = ($globalSummary['total_baik'] ?? 0) / 1000;
-        $sedangKm      = ($globalSummary['total_sedang'] ?? 0) / 1000;
-        $rusakRinganKm = ($globalSummary['total_rusak_ringan'] ?? 0) / 1000;
-        $rusakBeratKm  = ($globalSummary['total_rusak_berat'] ?? 0) / 1000;
-
-        $mantapKm      = $baikKm + $sedangKm;
-        $tidakMantapKm = $rusakRinganKm + $rusakBeratKm;
-
-        $rigidKm        = ($perkerasanSummary['total_rigid'] ?? 0) / 1000;
-        $aspalKm        = ($perkerasanSummary['total_aspal'] ?? 0) / 1000;
-        $agregatTanahKm = ($perkerasanSummary['total_agregat_tanah'] ?? 0) / 1000;
-        $belumTembusKm  = ($perkerasanSummary['total_belum_tembus'] ?? 0) / 1000;
-
-        $data = [
-            'title'             => 'Pusat Export & Cetak Laporan',
-            'ruasList'          => $ruasList,
-            'totalRuas'         => count($ruasList),
-            'totalPanjang'      => $totalPanjangKm,
-            'baikKm'            => $baikKm,
-            'sedangKm'          => $sedangKm,
-            'rusakRinganKm'     => $rusakRinganKm,
-            'rusakBeratKm'      => $rusakBeratKm,
-            'mantapKm'          => $mantapKm,
-            'tidakMantapKm'     => $tidakMantapKm,
-            'rigidKm'           => $rigidKm,
-            'aspalKm'           => $aspalKm,
-            'agregatTanahKm'    => $agregatTanahKm,
-            'belumTembusKm'     => $belumTembusKm,
-        ];
+        $data = array_merge($stats, [
+            'title'    => 'Pusat Export & Cetak Laporan',
+            'ruasList' => $ruasList,
+            'totalRuas' => count($ruasList),
+        ]);
 
         view('layouts.app', array_merge($data, ['content' => 'export.index']));
     }

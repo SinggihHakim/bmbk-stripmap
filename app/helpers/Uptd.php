@@ -14,7 +14,7 @@ class Uptd
      * Mapping Master UPTD ke Kabupaten / Kota
      */
     public const MAP = [
-        'UPTD 1' => ['Bandarlampung', 'Pesawaran', 'Pringsewu'],
+        'UPTD 1' => ['Bandar Lampung', 'Pesawaran', 'Pringsewu'],
         'UPTD 2' => ['Lampung Timur', 'Lampung Selatan'],
         'UPTD 3' => ['Metro', 'Lampung Tengah'],
         'UPTD 4' => ['Way Kanan', 'Lampung Utara'],
@@ -46,7 +46,6 @@ class Uptd
             'Lampung Utara'       => 'Lamut',
             'Lampung Barat'       => 'Lambar',
             'Bandar Lampung'      => 'B. Lampung',
-            'Bandarlampung'       => 'B. Lampung',
             'Way Kanan'           => 'Way Kanan',
             'Pesawaran'           => 'Pesawaran',
             'Pringsewu'           => 'Pringsewu',

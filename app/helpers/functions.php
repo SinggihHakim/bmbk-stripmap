@@ -136,18 +136,70 @@ function format_number(float $number, int $decimals = 0): string
 }
 
 /**
- * Dapatkan UPTD berdasarkan kabupaten/kota
+ * Hitung statistik ringkasan jalan (km) dari data ruas, stripmap, dan perkerasan.
+ * Digunakan bersama oleh DashboardController & ExportController untuk menghindari duplikasi.
+ *
+ * @param array $ruasList      Hasil RuasService::getAll()
+ * @param array $globalSummary Hasil StripmapService::getGlobalSummary()
+ * @param array $perkerasanSummary Hasil PerkerasanService::getGlobalSummary()
+ * @return array
  */
-function get_uptd_string(string $kabupaten, string $default = '-'): string
+function build_road_summary_stats(array $ruasList, array $globalSummary, array $perkerasanSummary): array
 {
-    return \App\Helpers\Uptd::getUptdString($kabupaten, $default);
-}
+    $totalPanjangM  = array_sum(array_column($ruasList, 'panjang'));
+    $totalPanjangKm = $totalPanjangM / 1000;
 
-/**
- * Dapatkan daftar UPTD master
- */
-function get_uptd_list(): array
-{
-    return \App\Helpers\Uptd::all();
+    $baikKm        = ($globalSummary['total_baik'] ?? 0) / 1000;
+    $sedangKm      = ($globalSummary['total_sedang'] ?? 0) / 1000;
+    $rusakRinganKm = ($globalSummary['total_rusak_ringan'] ?? 0) / 1000;
+    $rusakBeratKm  = ($globalSummary['total_rusak_berat'] ?? 0) / 1000;
+
+    $mantapKm      = $baikKm + $sedangKm;
+    $tidakMantapKm = $rusakRinganKm + $rusakBeratKm;
+
+    $rigidKm        = ($perkerasanSummary['total_rigid'] ?? 0) / 1000;
+    $aspalKm        = ($perkerasanSummary['total_aspal'] ?? 0) / 1000;
+    $agregatTanahKm = ($perkerasanSummary['total_agregat_tanah'] ?? 0) / 1000;
+    $belumTembusKm  = ($perkerasanSummary['total_belum_tembus'] ?? 0) / 1000;
+
+    // Persentase kondisi (basis: total panjang stripmap yang terisi)
+    $totalKondisiM  = $globalSummary['total_panjang'] ?? 0;
+    $pctBaik        = $totalKondisiM > 0 ? (($globalSummary['total_baik'] ?? 0) / $totalKondisiM) * 100 : 0;
+    $pctSedang      = $totalKondisiM > 0 ? (($globalSummary['total_sedang'] ?? 0) / $totalKondisiM) * 100 : 0;
+    $pctRusakRingan = $totalKondisiM > 0 ? (($globalSummary['total_rusak_ringan'] ?? 0) / $totalKondisiM) * 100 : 0;
+    $pctRusakBerat  = $totalKondisiM > 0 ? (($globalSummary['total_rusak_berat'] ?? 0) / $totalKondisiM) * 100 : 0;
+    $pctMantap      = $totalKondisiM > 0 ? ((($globalSummary['total_baik'] ?? 0) + ($globalSummary['total_sedang'] ?? 0)) / $totalKondisiM) * 100 : 0;
+    $pctTidakMantap = $totalKondisiM > 0 ? ((($globalSummary['total_rusak_ringan'] ?? 0) + ($globalSummary['total_rusak_berat'] ?? 0)) / $totalKondisiM) * 100 : 0;
+
+    // Persentase perkerasan (basis: total panjang perkerasan yang terisi)
+    $totalPerkerasanM = $perkerasanSummary['total_panjang'] ?? 0;
+    $pctRigid        = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_rigid'] ?? 0) / $totalPerkerasanM) * 100 : 0;
+    $pctAspal        = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_aspal'] ?? 0) / $totalPerkerasanM) * 100 : 0;
+    $pctAgregatTanah = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_agregat_tanah'] ?? 0) / $totalPerkerasanM) * 100 : 0;
+    $pctBelumTembus  = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_belum_tembus'] ?? 0) / $totalPerkerasanM) * 100 : 0;
+
+    return [
+        'totalPanjang'    => $totalPanjangKm,
+        'baikKm'          => $baikKm,
+        'sedangKm'        => $sedangKm,
+        'rusakRinganKm'   => $rusakRinganKm,
+        'rusakBeratKm'    => $rusakBeratKm,
+        'mantapKm'        => $mantapKm,
+        'tidakMantapKm'   => $tidakMantapKm,
+        'rigidKm'         => $rigidKm,
+        'aspalKm'         => $aspalKm,
+        'agregatTanahKm'  => $agregatTanahKm,
+        'belumTembusKm'   => $belumTembusKm,
+        'pctBaik'         => $pctBaik,
+        'pctSedang'       => $pctSedang,
+        'pctRusakRingan'  => $pctRusakRingan,
+        'pctRusakBerat'   => $pctRusakBerat,
+        'pctMantap'       => $pctMantap,
+        'pctTidakMantap'  => $pctTidakMantap,
+        'pctRigid'        => $pctRigid,
+        'pctAspal'        => $pctAspal,
+        'pctAgregatTanah' => $pctAgregatTanah,
+        'pctBelumTembus'  => $pctBelumTembus,
+    ];
 }
 

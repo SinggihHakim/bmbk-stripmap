@@ -34,7 +34,6 @@ $router->get('ruas/show/{id}',   'RuasController', 'show');
 $router->get('stripmap/{id}',              'StripmapController', 'index');
 $router->get('stripmap/create/{id}',      'StripmapController', 'create');
 $router->post('stripmap/store/{id}',      'StripmapController', 'store');
-$router->get('stripmap/input/{id}',       'StripmapController', 'input');
 $router->post('stripmap/batch/{id}',      'StripmapController', 'batch');
 $router->get('stripmap/edit/{id}',        'StripmapController', 'edit');
 $router->post('stripmap/update/{id}',     'StripmapController', 'update');

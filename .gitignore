@@ -10,3 +10,8 @@ config/database.php
 .idea/
 activities.md
 
+# Ignore debug/scratch files
+scratch_*.php
+
+# Ignore installer (sudah ada install.lock setelah setup)
+public/install.php
