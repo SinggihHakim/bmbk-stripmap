@@ -380,12 +380,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3.5 flex-1 flex flex-col overflow-y-auto min-h-[380px] max-h-[420px]">
+            <div class="p-3 flex-1 flex flex-col overflow-y-auto min-h-[310px] max-h-[350px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full" style="height: <?= max(320, count($kabupatenChartData) * 24) ?>px;">
+                <div class="relative w-full" style="height: <?= max(260, count($kabupatenChartData) * 20) ?>px;">
                     <canvas id="kabupatenBarChart"></canvas>
                 </div>
             </div>
@@ -427,12 +427,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
+            <div class="p-3 flex-1 flex flex-col overflow-y-auto min-h-[310px] max-h-[350px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full h-[320px]">
+                <div class="relative w-full" style="height: <?= max(260, count($koridorChartData) * 24) ?>px;">
                     <canvas id="koridorBarChart"></canvas>
                 </div>
             </div>
@@ -474,12 +474,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
+            <div class="p-3 flex-1 flex flex-col justify-between min-h-[310px] max-h-[350px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #6B7A52;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #EF4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full h-[320px]">
+                <div class="relative w-full h-[260px]">
                     <canvas id="uptdBarChart"></canvas>
                 </div>
             </div>
@@ -516,8 +516,8 @@
                     {
                         label: 'Mantap',
                         data: activeMantapPct,
-                        backgroundColor: '#6B7A52',
-                        hoverBackgroundColor: '#5B6A42',
+                        backgroundColor: '#3d9a49ff',
+                        hoverBackgroundColor: '#358740ff',
                         borderRadius: 3,
                         borderSkipped: false,
                         barPercentage: isVertical ? 0.7 : 0.85,
@@ -526,8 +526,8 @@
                     {
                         label: 'Tidak Mantap',
                         data: activeTidakPct,
-                        backgroundColor: '#EF4444',
-                        hoverBackgroundColor: '#DC2626',
+                        backgroundColor: '#9c2e2eff',
+                        hoverBackgroundColor: '#8e2a2aff',
                         borderRadius: 3,
                         borderSkipped: false,
                         barPercentage: isVertical ? 0.7 : 0.85,
@@ -669,7 +669,7 @@
         const rawUpt = <?= json_encode($uptdChartData ?? [], JSON_UNESCAPED_UNICODE) ?>;
 
         window.chartKab     = initStackedBarChart('kabupatenBarChart', rawKab, false);
-        window.chartKoridor = initStackedBarChart('koridorBarChart', rawKor, true);
+        window.chartKoridor = initStackedBarChart('koridorBarChart', rawKor, false);
         window.chartUptd    = initStackedBarChart('uptdBarChart', rawUpt, true);
 
         if (window.chartKab) window.chartKab.sort('desc');
