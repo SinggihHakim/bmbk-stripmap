@@ -213,18 +213,18 @@
                 </div>
 
                 <!-- Card 11: Agregat / Tanah -->
-                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fef3c7; border-color: #fde68a;">
+                <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f3e8dc; border-color: #d6bca8;">
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #92400e; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold" style="color: #78350f;">Agregat/Tanah</span>
+                            <span class="w-2.5 h-2.5 rounded-full" style="background-color: #7c461b; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
+                            <span class="text-xs font-semibold" style="color: #4a2810;">Agregat/Tanah</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: #fde68a; color: #78350f;">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: #d6bca8; color: #4a2810;">
                             <?= format_number($pctAgregatTanah ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold" style="color: #78350f;"><?= format_number($agregatTanahKm ?? 0.0, 2) ?> <span class="text-xs font-normal opacity-80" style="color: #92400e;">km</span></h3>
-                    <p class="text-[11px] font-medium mt-0.5" style="color: #92400e;">Kerikil / Tanah</p>
+                    <h3 class="text-xl font-bold" style="color: #4a2810;"><?= format_number($agregatTanahKm ?? 0.0, 2) ?> <span class="text-xs font-normal opacity-80" style="color: #7c461b;">km</span></h3>
+                    <p class="text-[11px] font-medium mt-0.5" style="color: #7c461b;">Kerikil / Tanah</p>
                 </div>
 
                 <!-- Card 12: Belum Tembus -->
@@ -380,12 +380,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3 flex-1 flex flex-col overflow-y-auto min-h-[310px] max-h-[350px]">
+            <div class="p-3.5 flex-1 flex flex-col overflow-y-auto min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full" style="height: <?= max(260, count($kabupatenChartData) * 20) ?>px;">
+                <div class="relative w-full" style="height: <?= max(320, count($kabupatenChartData) * 24) ?>px;">
                     <canvas id="kabupatenBarChart"></canvas>
                 </div>
             </div>
@@ -427,12 +427,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3 flex-1 flex flex-col overflow-y-auto min-h-[310px] max-h-[350px]">
+            <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full" style="height: <?= max(260, count($koridorChartData) * 24) ?>px;">
+                <div class="relative w-full h-[320px]">
                     <canvas id="koridorBarChart"></canvas>
                 </div>
             </div>
@@ -474,12 +474,12 @@
                     </div>
                 </div>
             </div>
-            <div class="p-3 flex-1 flex flex-col justify-between min-h-[310px] max-h-[350px]">
+            <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #0dae22ff;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #c52222ff;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
-                <div class="relative w-full h-[260px]">
+                <div class="relative w-full h-[320px]">
                     <canvas id="uptdBarChart"></canvas>
                 </div>
             </div>
@@ -516,8 +516,8 @@
                     {
                         label: 'Mantap',
                         data: activeMantapPct,
-                        backgroundColor: '#3d9a49ff',
-                        hoverBackgroundColor: '#358740ff',
+                        backgroundColor: '#16ad7aff',
+                        hoverBackgroundColor: '#059669',
                         borderRadius: 3,
                         borderSkipped: false,
                         barPercentage: isVertical ? 0.7 : 0.85,
@@ -526,8 +526,8 @@
                     {
                         label: 'Tidak Mantap',
                         data: activeTidakPct,
-                        backgroundColor: '#9c2e2eff',
-                        hoverBackgroundColor: '#8e2a2aff',
+                        backgroundColor: '#ff5151ff',
+                        hoverBackgroundColor: '#dc2626',
                         borderRadius: 3,
                         borderSkipped: false,
                         barPercentage: isVertical ? 0.7 : 0.85,

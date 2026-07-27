@@ -400,7 +400,7 @@
                             $pkLegendItems = [
                                 ['label' => 'Rigid',          'color' => '#6b7280', 'pct' => $pctRigid,        'val' => $totalRigid],
                                 ['label' => 'Aspal',          'color' => '#1f2937', 'pct' => $pctAspal,        'val' => $totalAspal],
-                                ['label' => 'Agregat / Tanah','color' => '#92400e', 'pct' => $pctAgregatTanah, 'val' => $totalAgregatTanah],
+                                ['label' => 'Agregat / Tanah','color' => '#7c461b', 'pct' => $pctAgregatTanah, 'val' => $totalAgregatTanah],
                                 ['label' => 'Belum Tembus',   'color' => '#7c3aed', 'pct' => $pctBelumTembus,  'val' => $totalBelumTembus],
                             ];
                         ?>
@@ -529,7 +529,7 @@
                                                     $paveTypes = [
                                                         ['label' => 'Rigid',           'value' => $pk['rigid'],         'color' => '#6b7280'],
                                                         ['label' => 'Aspal',           'value' => $pk['aspal'],         'color' => '#111827'],
-                                                        ['label' => 'Agregat / Tanah', 'value' => $pk['agregat_tanah'], 'color' => '#92400e'],
+                                                        ['label' => 'Agregat / Tanah', 'value' => $pk['agregat_tanah'], 'color' => '#7c461b'],
                                                         ['label' => 'Belum Tembus',    'value' => $pk['belum_tembus'],  'color' => '#7c3aed'],
                                                     ];
                                                     $activePave = array_values(array_filter($paveTypes, fn($c) => $c['value'] > 0));
@@ -722,20 +722,20 @@
                                 <p class="text-[11px] font-medium text-slate-300 mt-0.5">Flexible / Aspal</p>
                             </div>
 
-                            <!-- Agregat / Tanah -->
-                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #fef3c7; border-color: #fde68a;">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #92400e;"></span>
-                                        <span class="text-xs font-semibold" style="color: #78350f;">Agregat / Tanah</span>
-                                    </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-bold">
-                                        <?= number_format($pctAgregatTanah, 1) ?>%
-                                    </span>
-                                </div>
-                                <h3 class="text-xl font-bold" style="color: #78350f;"><?= format_number($totalAgregatTanah) ?> <span class="text-xs font-normal opacity-80">m</span></h3>
-                                <p class="text-[11px] font-medium mt-0.5" style="color: #92400e;">Kerikil / Tanah</p>
-                            </div>
+                             <!-- Agregat / Tanah -->
+                             <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f3e8dc; border-color: #d6bca8;">
+                                 <div class="flex items-center justify-between mb-2">
+                                     <div class="flex items-center gap-1.5">
+                                         <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #7c461b;"></span>
+                                         <span class="text-xs font-semibold" style="color: #4a2810;">Agregat / Tanah</span>
+                                     </div>
+                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: #d6bca8; color: #4a2810;">
+                                         <?= number_format($pctAgregatTanah, 1) ?>%
+                                     </span>
+                                 </div>
+                                 <h3 class="text-xl font-bold" style="color: #4a2810;"><?= format_number($totalAgregatTanah) ?> <span class="text-xs font-normal opacity-80" style="color: #7c461b;">m</span></h3>
+                                 <p class="text-[11px] font-medium mt-0.5" style="color: #7c461b;">Kerikil / Tanah</p>
+                             </div>
 
                             <!-- Belum Tembus -->
                             <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f3e8ff; border-color: #e9d5ff;">
