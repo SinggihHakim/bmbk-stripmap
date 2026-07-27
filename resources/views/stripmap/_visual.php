@@ -693,7 +693,7 @@
                     <div x-show="showPerkerasan">
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <!-- Rigid -->
-                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-gray-50 border-gray-200">
+                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-gray-100 border-gray-300">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-1.5">
                                         <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #6b7280;"></span>
@@ -704,7 +704,7 @@
                                     </span>
                                 </div>
                                 <h3 class="text-xl font-bold text-gray-800"><?= format_number($totalRigid) ?> <span class="text-xs font-normal text-gray-600">m</span></h3>
-                                <p class="text-[11px] font-medium text-gray-500 mt-0.5">Beton / Rigid</p>
+                                <p class="text-[11px] font-medium text-gray-600 mt-0.5">Beton / Rigid</p>
                             </div>
 
                             <!-- Aspal -->
