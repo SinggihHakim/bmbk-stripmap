@@ -693,28 +693,28 @@
                     <div x-show="showPerkerasan">
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <!-- Rigid -->
-                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-gray-100 border-gray-300">
+                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #475569; border-color: #334155;">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #6b7280;"></span>
-                                        <span class="text-xs font-semibold text-gray-800">Rigid</span>
+                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #cbd5e1;"></span>
+                                        <span class="text-xs font-semibold text-white">Rigid</span>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-gray-200 text-gray-800 text-[10px] font-bold">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                                         <?= number_format($pctRigid, 1) ?>%
                                     </span>
                                 </div>
-                                <h3 class="text-xl font-bold text-gray-800"><?= format_number($totalRigid) ?> <span class="text-xs font-normal text-gray-600">m</span></h3>
-                                <p class="text-[11px] font-medium text-gray-600 mt-0.5">Beton / Rigid</p>
+                                <h3 class="text-xl font-bold text-white"><?= format_number($totalRigid) ?> <span class="text-xs font-normal text-slate-200">m</span></h3>
+                                <p class="text-[11px] font-medium text-slate-200 mt-0.5">Beton / Rigid</p>
                             </div>
 
                             <!-- Aspal -->
-                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow bg-slate-900 border-slate-950 text-white">
+                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #0f172a; border-color: #020617;">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full inline-block bg-white"></span>
-                                        <span class="text-xs font-semibold text-slate-100">Aspal</span>
+                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #38bdf8;"></span>
+                                        <span class="text-xs font-semibold text-white">Aspal</span>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-slate-800 text-slate-100 text-[10px] font-bold">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
                                         <?= number_format($pctAspal, 1) ?>%
                                     </span>
                                 </div>
@@ -723,33 +723,33 @@
                             </div>
 
                              <!-- Agregat / Tanah -->
-                             <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f3e8dc; border-color: #d6bca8;">
+                             <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #7c461b; border-color: #5c3211;">
                                  <div class="flex items-center justify-between mb-2">
                                      <div class="flex items-center gap-1.5">
-                                         <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #7c461b;"></span>
-                                         <span class="text-xs font-semibold" style="color: #4a2810;">Agregat / Tanah</span>
+                                         <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #fde047;"></span>
+                                         <span class="text-xs font-semibold text-white">Agregat / Tanah</span>
                                      </div>
-                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: #d6bca8; color: #4a2810;">
+                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                                          <?= number_format($pctAgregatTanah, 1) ?>%
                                      </span>
                                  </div>
-                                 <h3 class="text-xl font-bold" style="color: #4a2810;"><?= format_number($totalAgregatTanah) ?> <span class="text-xs font-normal opacity-80" style="color: #7c461b;">m</span></h3>
-                                 <p class="text-[11px] font-medium mt-0.5" style="color: #7c461b;">Kerikil / Tanah</p>
+                                 <h3 class="text-xl font-bold text-white"><?= format_number($totalAgregatTanah) ?> <span class="text-xs font-normal text-amber-100">m</span></h3>
+                                 <p class="text-[11px] font-medium text-amber-100 mt-0.5">Kerikil / Tanah</p>
                              </div>
 
                             <!-- Belum Tembus -->
-                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #f3e8ff; border-color: #e9d5ff;">
+                            <div class="p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow" style="background-color: #7e22ce; border-color: #6b21a8;">
                                 <div class="flex items-center justify-between mb-2">
                                     <div class="flex items-center gap-1.5">
-                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #7c3aed;"></span>
-                                        <span class="text-xs font-semibold text-purple-900">Belum Tembus</span>
+                                        <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: #f0abfc;"></span>
+                                        <span class="text-xs font-semibold text-white">Belum Tembus</span>
                                     </div>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded bg-purple-200 text-purple-900 text-[10px] font-bold">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                                         <?= number_format($pctBelumTembus, 1) ?>%
                                     </span>
                                 </div>
-                                <h3 class="text-xl font-bold text-purple-800"><?= format_number($totalBelumTembus) ?> <span class="text-xs font-normal text-purple-600">m</span></h3>
-                                <p class="text-[11px] font-medium text-purple-600 mt-0.5">Belum Tembus</p>
+                                <h3 class="text-xl font-bold text-white"><?= format_number($totalBelumTembus) ?> <span class="text-xs font-normal text-purple-100">m</span></h3>
+                                <p class="text-[11px] font-medium text-purple-100 mt-0.5">Hutan / Belum Tembus</p>
                             </div>
                         </div>
                     </div>
