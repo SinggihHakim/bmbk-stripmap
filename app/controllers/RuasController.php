@@ -133,30 +133,28 @@ class RuasController
         $result = $this->service->update($id, $_POST);
 
         if ($result['success']) {
-            // 1. Update Data Strip Map
-            $stripmapService = new StripmapService();
-            $stripmapService->deleteByRuasId($id);
-
+            // 1. Update Data Strip Map HANYA JIKA form mengirimkan data rows yang valid
             if (isset($_POST['rows']) && is_array($_POST['rows'])) {
                 $rows = array_filter($_POST['rows'], function($row) {
                     return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
                 });
 
                 if (!empty($rows)) {
+                    $stripmapService = new StripmapService();
+                    $stripmapService->deleteByRuasId($id);
                     $stripmapService->batchCreate($id, array_values($rows));
                 }
             }
 
-            // 2. Update Data Jenis Perkerasan
-            $perkerasanService = new PerkerasanService();
-            $perkerasanService->deleteByRuasId($id);
-
+            // 2. Update Data Jenis Perkerasan HANYA JIKA form mengirimkan data perkerasan_rows yang valid
             if (isset($_POST['perkerasan_rows']) && is_array($_POST['perkerasan_rows'])) {
                 $pkRows = array_filter($_POST['perkerasan_rows'], function($row) {
                     return !empty(trim($row['sta_awal'] ?? '')) || !empty(trim($row['sta_akhir'] ?? ''));
                 });
 
                 if (!empty($pkRows)) {
+                    $perkerasanService = new PerkerasanService();
+                    $perkerasanService->deleteByRuasId($id);
                     $perkerasanService->batchCreate($id, array_values($pkRows));
                 }
             }

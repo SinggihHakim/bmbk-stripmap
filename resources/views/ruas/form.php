@@ -97,6 +97,70 @@
                                placeholder="Contoh: Lampung Selatan"
                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors">
                     </div>
+
+                    <!-- Koordinat Lokasi Peta -->
+                    <div x-data="ruasMapPicker()" class="pt-2">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-sm font-medium text-gray-700">Koordinat Lokasi (Titik Awal &amp; Akhir)</label>
+                            <span class="text-xs text-gray-400">Opsional &mdash; untuk peta &amp; street view</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">
+                            Klik peta untuk menaruh <span class="font-semibold text-emerald-600">Titik Awal</span> (klik pertama), lalu
+                            <span class="font-semibold text-red-600">Titik Akhir</span> (klik kedua). Marker bisa digeser. Atau isi manual di bawah.
+                        </p>
+
+                        <div id="ruas-map-picker" class="w-full h-72 rounded-xl border border-gray-300 z-0 mb-3"></div>
+
+                        <!-- Polyline hasil impor KML/KMZ (JSON) -->
+                        <input type="hidden" name="koordinat_json" x-model="koordinatJson">
+                        <p x-show="pointCount > 0" x-cloak class="mb-3 text-xs font-medium text-purple-700 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                            <span>Rute berhasil dimuat: <span x-text="pointCount"></span> titik koordinat dari file.</span>
+                        </p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="space-y-2 p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
+                                <p class="text-xs font-semibold text-emerald-700 flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Titik Awal
+                                </p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" name="lat_awal" x-model="latAwal" @input="syncFromInputs()" placeholder="Latitude"
+                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                    <input type="text" name="lng_awal" x-model="lngAwal" @input="syncFromInputs()" placeholder="Longitude"
+                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                                </div>
+                            </div>
+                            <div class="space-y-2 p-3 rounded-xl bg-red-50/60 border border-red-100">
+                                <p class="text-xs font-semibold text-red-700 flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Titik Akhir
+                                </p>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="text" name="lat_akhir" x-model="latAkhir" @input="syncFromInputs()" placeholder="Latitude"
+                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                    <input type="text" name="lng_akhir" x-model="lngAkhir" @input="syncFromInputs()" placeholder="Longitude"
+                                           class="w-full px-3 py-2 rounded-lg border border-gray-300 font-mono text-xs focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            <label class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors cursor-pointer">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                Import KML / KMZ
+                                <input type="file" accept=".kml,.kmz" class="hidden" @change="importKml($event)">
+                            </label>
+                            <button type="button" @click="useMyLocation()"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                Pakai Lokasi Saya (Titik Awal)
+                            </button>
+                            <button type="button" @click="clearPoints()"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                Reset Titik
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -319,6 +383,300 @@
     </div>
 
 </div>
+
+<!-- Leaflet (peta pemilih koordinat) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<!-- JSZip (untuk baca file KMZ) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+<script>
+function ruasMapPicker() {
+    const initial = <?= json_encode([
+        'lat_awal'  => $isEdit ? ($ruas['lat_awal']  ?? null) : (old('lat_awal')  ?: null),
+        'lng_awal'  => $isEdit ? ($ruas['lng_awal']  ?? null) : (old('lng_awal')  ?: null),
+        'lat_akhir' => $isEdit ? ($ruas['lat_akhir'] ?? null) : (old('lat_akhir') ?: null),
+        'lng_akhir' => $isEdit ? ($ruas['lng_akhir'] ?? null) : (old('lng_akhir') ?: null),
+        'koordinat_json' => $isEdit ? ($ruas['koordinat_json'] ?? '') : (old('koordinat_json') ?: ''),
+    ]) ?>;
+
+    return {
+        latAwal:  initial.lat_awal  ?? '',
+        lngAwal:  initial.lng_awal  ?? '',
+        latAkhir: initial.lat_akhir ?? '',
+        lngAkhir: initial.lng_akhir ?? '',
+        koordinatJson: initial.koordinat_json ?? '',
+        pointCount: 0,
+        map: null,
+        markerAwal: null,
+        markerAkhir: null,
+        line: null,
+        routeLine: null,
+
+        init() {
+            const googleHybrid = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+                maxZoom: 20, attribution: '&copy; Google Maps'
+            });
+            const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+                maxZoom: 20, attribution: '&copy; Google Maps'
+            });
+            const googleStreets = L.tileLayer('https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+                maxZoom: 20, attribution: '&copy; Google Maps'
+            });
+            const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19, attribution: '&copy; OpenStreetMap'
+            });
+
+            const defaultCenter = [-5.45, 105.26];
+            this.map = L.map('ruas-map-picker', {
+                center: defaultCenter,
+                zoom: 9,
+                layers: [googleHybrid]
+            });
+
+            L.control.layers({
+                "🛰️ Google Satelit Hybrid": googleHybrid,
+                "📷 Google Satelit Murni": googleSat,
+                "🗺️ Google Streets": googleStreets,
+                "🌐 OpenStreetMap": osm
+            }, null, { position: 'topright' }).addTo(this.map);
+
+            // Klik peta: isi titik awal dulu, lalu titik akhir
+            this.map.on('click', (e) => {
+                if (!this.latAwal || !this.lngAwal) {
+                    this.setAwal(e.latlng.lat, e.latlng.lng);
+                } else {
+                    this.setAkhir(e.latlng.lat, e.latlng.lng);
+                }
+            });
+
+            this.syncFromInputs();
+            this.drawRoute(); // gambar polyline jika sudah ada koordinat_json (mode edit)
+            // Perbaiki ukuran peta setelah section render
+            setTimeout(() => this.map.invalidateSize(), 200);
+        },
+
+        round(v) { return Math.round(v * 1e7) / 1e7; },
+
+        setAwal(lat, lng) {
+            this.latAwal = this.round(lat);
+            this.lngAwal = this.round(lng);
+            this.renderMarkers();
+        },
+        setAkhir(lat, lng) {
+            this.latAkhir = this.round(lat);
+            this.lngAkhir = this.round(lng);
+            this.renderMarkers();
+        },
+
+        // Dipanggil saat input teks diubah manual
+        syncFromInputs() {
+            this.renderMarkers();
+        },
+
+        makeIcon(color) {
+            return L.divIcon({
+                className: '',
+                html: `<div style="width:16px;height:16px;border-radius:50%;background:${color};border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)"></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+            });
+        },
+
+        renderMarkers() {
+            if (!this.map) return;
+            const a = this.parsePoint(this.latAwal, this.lngAwal);
+            const b = this.parsePoint(this.latAkhir, this.lngAkhir);
+
+            // Marker Awal
+            if (a) {
+                if (!this.markerAwal) {
+                    this.markerAwal = L.marker(a, { draggable: true, icon: this.makeIcon('#10b981') }).addTo(this.map);
+                    this.markerAwal.on('dragend', (e) => { const p = e.target.getLatLng(); this.setAwal(p.lat, p.lng); });
+                    this.markerAwal.bindPopup('Titik Awal');
+                } else {
+                    this.markerAwal.setLatLng(a);
+                }
+            } else if (this.markerAwal) {
+                this.map.removeLayer(this.markerAwal); this.markerAwal = null;
+            }
+
+            // Marker Akhir
+            if (b) {
+                if (!this.markerAkhir) {
+                    this.markerAkhir = L.marker(b, { draggable: true, icon: this.makeIcon('#ef4444') }).addTo(this.map);
+                    this.markerAkhir.on('dragend', (e) => { const p = e.target.getLatLng(); this.setAkhir(p.lat, p.lng); });
+                    this.markerAkhir.bindPopup('Titik Akhir');
+                } else {
+                    this.markerAkhir.setLatLng(b);
+                }
+            } else if (this.markerAkhir) {
+                this.map.removeLayer(this.markerAkhir); this.markerAkhir = null;
+            }
+
+            // Garis penghubung lurus (disembunyikan bila ada rute polyline dari KML)
+            if (this.line) { this.map.removeLayer(this.line); this.line = null; }
+            if (a && b && !this.koordinatJson) {
+                this.line = L.polyline([a, b], { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(this.map);
+                this.map.fitBounds(this.line.getBounds(), { padding: [40, 40] });
+            } else if (a && !b) {
+                this.map.setView(a, 14);
+            } else if (b && !a) {
+                this.map.setView(b, 14);
+            }
+        },
+
+        parsePoint(lat, lng) {
+            const la = parseFloat(String(lat).replace(',', '.'));
+            const ln = parseFloat(String(lng).replace(',', '.'));
+            if (isNaN(la) || isNaN(ln)) return null;
+            return [la, ln];
+        },
+
+        useMyLocation() {
+            if (!navigator.geolocation) {
+                showAlert('Browser tidak mendukung Geolocation.', 'warning');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => this.setAwal(pos.coords.latitude, pos.coords.longitude),
+                ()    => showAlert('Gagal mengambil lokasi. Pastikan izin lokasi aktif.', 'error')
+            );
+        },
+
+        clearPoints() {
+            this.latAwal = this.lngAwal = this.latAkhir = this.lngAkhir = '';
+            this.koordinatJson = '';
+            this.pointCount = 0;
+            if (this.routeLine) { this.map.removeLayer(this.routeLine); this.routeLine = null; }
+            this.renderMarkers();
+        },
+
+        // --- Impor KML / KMZ ---
+        async importKml(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const name = file.name.toLowerCase();
+            try {
+                let kmlText;
+                if (name.endsWith('.kmz')) {
+                    if (typeof JSZip === 'undefined') {
+                        showAlert('Pustaka JSZip belum termuat. Coba muat ulang halaman.', 'error');
+                        return;
+                    }
+                    const zip = await JSZip.loadAsync(await file.arrayBuffer());
+                    // Cari file .kml pertama di dalam arsip
+                    const kmlEntry = Object.keys(zip.files).find(f => f.toLowerCase().endsWith('.kml'));
+                    if (!kmlEntry) { showAlert('File KMZ tidak berisi .kml di dalamnya.', 'error'); return; }
+                    kmlText = await zip.files[kmlEntry].async('string');
+                } else if (name.endsWith('.kml')) {
+                    kmlText = await file.text();
+                } else {
+                    showAlert('Format file harus .kml atau .kmz', 'warning');
+                    return;
+                }
+
+                const coords = this.parseKmlText(kmlText); // array [[lat,lng], ...]
+                if (coords.length < 2) {
+                    showAlert('Tidak ditemukan garis rute (LineString) yang valid di dalam file.', 'error');
+                    return;
+                }
+
+                // Simpan sebagai JSON [lng,lat] (konsisten dgn urutan KML) & isi titik awal/akhir
+                this.koordinatJson = JSON.stringify(coords.map(p => [p[1], p[0]]));
+                this.pointCount = coords.length;
+                const first = coords[0], last = coords[coords.length - 1];
+                this.latAwal  = this.round(first[0]); this.lngAwal  = this.round(first[1]);
+                this.latAkhir = this.round(last[0]);  this.lngAkhir = this.round(last[1]);
+
+                this.renderMarkers();
+                this.drawRoute();
+                showAlert(`Rute berhasil diimpor: ${coords.length} titik koordinat.`, 'success', 'Impor Berhasil');
+            } catch (err) {
+                console.error('Import KML error:', err);
+                showAlert('Gagal membaca file. Pastikan file KML/KMZ valid.', 'error');
+            } finally {
+                e.target.value = ''; // reset agar file yang sama bisa dipilih lagi
+            }
+        },
+
+        // Ekstrak koordinat dari KML text (hanya ambil rute LineString/Track utama, abaikan Point marker)
+        parseKmlText(text) {
+            const doc = new DOMParser().parseFromString(text, 'application/xml');
+            const lines = [];
+
+            // 1. Cari elemen LineString coordinates
+            const lineNodes = doc.querySelectorAll('LineString coordinates, linestring coordinates');
+            lineNodes.forEach(node => {
+                const pts = this.parseCoordString(node.textContent);
+                if (pts.length >= 2) lines.push(pts);
+            });
+
+            // 2. Cari elemen gx:Track / Track jika tidak ada LineString
+            if (lines.length === 0) {
+                const trackNodes = doc.querySelectorAll('Track, gx\\:Track');
+                trackNodes.forEach(tnode => {
+                    const coordNodes = tnode.querySelectorAll('coord, gx\\:coord');
+                    let pts = [];
+                    coordNodes.forEach(c => {
+                        const parts = c.textContent.trim().split(/\s+/);
+                        const lng = parseFloat(parts[0]);
+                        const lat = parseFloat(parts[1]);
+                        if (!isNaN(lat) && !isNaN(lng)) pts.push([lat, lng]);
+                    });
+                    if (pts.length >= 2) lines.push(pts);
+                });
+            }
+
+            // 3. Fallback: cari tag coordinates mana saja yang memiliki minimal 2 titik (bukan 1 titik Point)
+            if (lines.length === 0) {
+                const allCoordNodes = doc.getElementsByTagName('coordinates');
+                for (let i = 0; i < allCoordNodes.length; i++) {
+                    const pts = this.parseCoordString(allCoordNodes[i].textContent);
+                    if (pts.length >= 2) lines.push(pts);
+                }
+            }
+
+            if (lines.length === 0) return [];
+
+            // Pilih garis rute dengan jumlah titik terbanyak (rute utama)
+            lines.sort((a, b) => b.length - a.length);
+            return lines[0];
+        },
+
+        parseCoordString(raw) {
+            if (!raw) return [];
+            let points = [];
+            raw.trim().split(/\s+/).forEach(tuple => {
+                const parts = tuple.split(',');
+                const lng = parseFloat(parts[0]);
+                const lat = parseFloat(parts[1]);
+                if (!isNaN(lat) && !isNaN(lng)) points.push([lat, lng]);
+            });
+            return points;
+        },
+
+        // Gambar polyline rute dari koordinatJson
+        drawRoute() {
+            if (!this.map) return;
+            if (this.routeLine) { this.map.removeLayer(this.routeLine); this.routeLine = null; }
+            if (!this.koordinatJson) return;
+            try {
+                const arr = JSON.parse(this.koordinatJson); // [[lng,lat], ...]
+                const latlngs = arr.map(p => [p[1], p[0]]);
+                if (latlngs.length < 2) return;
+                this.pointCount = latlngs.length;
+                this.routeLine = L.polyline(latlngs, { color: '#7c3aed', weight: 5, opacity: 0.85 }).addTo(this.map);
+                this.map.fitBounds(this.routeLine.getBounds(), { padding: [30, 30] });
+            } catch (err) {
+                console.error('drawRoute parse error:', err);
+            }
+        }
+    };
+}
+</script>
 
 <script>
 function ruasDanStripmapForm() {

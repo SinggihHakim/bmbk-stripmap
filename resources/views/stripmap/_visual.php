@@ -4,11 +4,25 @@
 <!-- ============================================================ -->
 
 <?php
-    $totalPanjang = $summary['total_panjang'] ?? 0;
-    $totalBaik    = $summary['total_baik'] ?? 0;
-    $totalSedang  = $summary['total_sedang'] ?? 0;
-    $totalRR      = $summary['total_rusak_ringan'] ?? 0;
-    $totalRB      = $summary['total_rusak_berat'] ?? 0;
+    $stripmaps = $stripmaps ?? [];
+    $summary   = $summary ?? [];
+
+    $totalPanjang = (float)($summary['total_panjang'] ?? 0);
+    $totalBaik    = (float)($summary['total_baik'] ?? 0);
+    $totalSedang  = (float)($summary['total_sedang'] ?? 0);
+    $totalRR      = (float)($summary['total_rusak_ringan'] ?? 0);
+    $totalRB      = (float)($summary['total_rusak_berat'] ?? 0);
+
+    // Fallback jika summary bernilai 0 tapi array stripmaps memiliki data
+    if ($totalPanjang <= 0 && !empty($stripmaps)) {
+        foreach ($stripmaps as $sm) {
+            $totalPanjang += (float)($sm['panjang'] ?? 0);
+            $totalBaik    += (float)($sm['baik'] ?? 0);
+            $totalSedang  += (float)($sm['sedang'] ?? 0);
+            $totalRR      += (float)($sm['rusak_ringan'] ?? 0);
+            $totalRB      += (float)($sm['rusak_berat'] ?? 0);
+        }
+    }
 
     $pctBaik   = $totalPanjang > 0 ? ($totalBaik / $totalPanjang) * 100 : 0;
     $pctSedang = $totalPanjang > 0 ? ($totalSedang / $totalPanjang) * 100 : 0;
@@ -22,13 +36,24 @@
     $pctTidakMantap = $totalPanjang > 0 ? ($totalTidakMantap / $totalPanjang) * 100 : 0;
 
     // Data Perkerasan
-    $perkerasans           = $perkerasans ?? [];
-    $summaryPerkerasan     = $summaryPerkerasan ?? [];
-    $totalRigid            = $summaryPerkerasan['total_rigid'] ?? 0;
-    $totalAspal            = $summaryPerkerasan['total_aspal'] ?? 0;
-    $totalAgregatTanah     = $summaryPerkerasan['total_agregat_tanah'] ?? 0;
-    $totalBelumTembus      = $summaryPerkerasan['total_belum_tembus'] ?? 0;
-    $totalPanjangPerkerasan= $summaryPerkerasan['total_panjang'] ?? 0;
+    $perkerasans            = $perkerasans ?? [];
+    $summaryPerkerasan      = $summaryPerkerasan ?? [];
+    $totalRigid             = (float)($summaryPerkerasan['total_rigid'] ?? 0);
+    $totalAspal             = (float)($summaryPerkerasan['total_aspal'] ?? 0);
+    $totalAgregatTanah      = (float)($summaryPerkerasan['total_agregat_tanah'] ?? 0);
+    $totalBelumTembus       = (float)($summaryPerkerasan['total_belum_tembus'] ?? 0);
+    $totalPanjangPerkerasan = (float)($summaryPerkerasan['total_panjang'] ?? 0);
+
+    // Fallback jika summary perkerasan bernilai 0 tapi array perkerasans memiliki data
+    if ($totalPanjangPerkerasan <= 0 && !empty($perkerasans)) {
+        foreach ($perkerasans as $pk) {
+            $totalPanjangPerkerasan += (float)($pk['panjang'] ?? 0);
+            $totalRigid             += (float)($pk['rigid'] ?? 0);
+            $totalAspal             += (float)($pk['aspal'] ?? 0);
+            $totalAgregatTanah      += (float)($pk['agregat_tanah'] ?? 0);
+            $totalBelumTembus       += (float)($pk['belum_tembus'] ?? 0);
+        }
+    }
 
     $pctRigid        = $totalPanjangPerkerasan > 0 ? ($totalRigid / $totalPanjangPerkerasan) * 100 : 0;
     $pctAspal        = $totalPanjangPerkerasan > 0 ? ($totalAspal / $totalPanjangPerkerasan) * 100 : 0;
@@ -38,8 +63,8 @@
     // -----------------------------------------------------------------
     // LOGIKA SLICING CHUNKS MAKSIMAL 5KM (5000 METER)
     // -----------------------------------------------------------------
-    $staBase = (float)$ruas['sta_awal'];
-    $staEnd  = (float)$ruas['sta_akhir'];
+    $staBase = (float)($ruas['sta_awal'] ?? 0);
+    $staEnd  = (float)($ruas['sta_akhir'] ?? 0);
     foreach ($stripmaps as $sm) {
         if ((float)$sm['sta_akhir'] > $staEnd) {
             $staEnd = (float)$sm['sta_akhir'];
@@ -49,6 +74,9 @@
         if ((float)$pk['sta_akhir'] > $staEnd) {
             $staEnd = (float)$pk['sta_akhir'];
         }
+    }
+    if ($staEnd <= $staBase) {
+        $staEnd = $staBase + max($totalPanjang, $totalPanjangPerkerasan, (float)($ruas['panjang'] ?? 0), 1000.0);
     }
     
     // 1. Ekstrak data stripmap (Kondisi)
@@ -215,7 +243,7 @@
 <!-- Load Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<?php if ($totalPanjang > 0 || $totalPanjangPerkerasan > 0): ?>
+<?php if (!empty($stripmaps) || !empty($perkerasans) || $totalPanjang > 0 || $totalPanjangPerkerasan > 0): ?>
 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden" style="background-color: #ffffff; border-color: #e5e7eb;"
      x-data="{ 
         activeLabel: null, 
@@ -764,7 +792,8 @@
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function() {
+(function initVisualCharts() {
+    function runChartInit() {
     const isPreview = window.location.pathname.includes('/preview/');
     
     // 1. Chart Kondisi Jalan
@@ -877,6 +906,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
-});
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', runChartInit);
+    } else {
+        setTimeout(runChartInit, 0);
+    }
+})();
 </script>
 <?php endif; ?>

@@ -53,17 +53,22 @@ class RuasJalan
     public function create(array $data): int
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO ruas_jalan (kode_ruas, nama_ruas, sta_awal, sta_akhir, panjang, koridor, kabupaten_kota)
-             VALUES (:kode_ruas, :nama_ruas, :sta_awal, :sta_akhir, :panjang, :koridor, :kabupaten_kota)'
+            'INSERT INTO ruas_jalan (kode_ruas, nama_ruas, sta_awal, sta_akhir, panjang, koridor, kabupaten_kota, lat_awal, lng_awal, lat_akhir, lng_akhir, koordinat_json)
+             VALUES (:kode_ruas, :nama_ruas, :sta_awal, :sta_akhir, :panjang, :koridor, :kabupaten_kota, :lat_awal, :lng_awal, :lat_akhir, :lng_akhir, :koordinat_json)'
         );
         $stmt->execute([
-            'kode_ruas' => $data['kode_ruas'],
-            'nama_ruas' => $data['nama_ruas'],
-            'sta_awal'  => $data['sta_awal'],
-            'sta_akhir' => $data['sta_akhir'],
-            'panjang'   => $data['panjang'],
-            'koridor'   => $data['koridor'] ?? null,
-            'kabupaten_kota' => $data['kabupaten_kota'] ?? null,
+            'kode_ruas'       => $data['kode_ruas'],
+            'nama_ruas'       => $data['nama_ruas'],
+            'sta_awal'        => $data['sta_awal'],
+            'sta_akhir'       => $data['sta_akhir'],
+            'panjang'         => $data['panjang'],
+            'koridor'         => $data['koridor'] ?? null,
+            'kabupaten_kota'  => $data['kabupaten_kota'] ?? null,
+            'lat_awal'        => $data['lat_awal'] ?? null,
+            'lng_awal'        => $data['lng_awal'] ?? null,
+            'lat_akhir'       => $data['lat_akhir'] ?? null,
+            'lng_akhir'       => $data['lng_akhir'] ?? null,
+            'koordinat_json'  => $data['koordinat_json'] ?? null,
         ]);
         return (int) $this->db->lastInsertId();
     }
@@ -76,7 +81,7 @@ class RuasJalan
     {
         $sets   = [];
         $params = ['id' => $id];
-        $allowedColumns = ['kode_ruas', 'nama_ruas', 'sta_awal', 'sta_akhir', 'panjang', 'koridor', 'kabupaten_kota'];
+        $allowedColumns = ['kode_ruas', 'nama_ruas', 'sta_awal', 'sta_akhir', 'panjang', 'koridor', 'kabupaten_kota', 'lat_awal', 'lng_awal', 'lat_akhir', 'lng_akhir', 'koordinat_json'];
 
         foreach ($data as $key => $value) {
             if (in_array($key, $allowedColumns, true)) {

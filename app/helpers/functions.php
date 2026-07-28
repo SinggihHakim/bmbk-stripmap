@@ -122,8 +122,9 @@ function sta_to_meter(string $sta): float
  */
 function meter_to_sta(float $meter): string
 {
-    $km = floor($meter / 1000);
-    $m  = $meter - ($km * 1000);
+    $totalM = (int) round($meter);
+    $km = intdiv($totalM, 1000);
+    $m  = $totalM % 1000;
     return sprintf('%d+%03d', $km, $m);
 }
 
@@ -172,7 +173,7 @@ function build_road_summary_stats(array $ruasList, array $globalSummary, array $
     $pctTidakMantap = $totalKondisiM > 0 ? ((($globalSummary['total_rusak_ringan'] ?? 0) + ($globalSummary['total_rusak_berat'] ?? 0)) / $totalKondisiM) * 100 : 0;
 
     // Persentase perkerasan (basis: total panjang perkerasan yang terisi)
-    $totalPerkerasanM = $perkerasanSummary['total_panjang'] ?? 0;
+    $totalPerkerasanM = (int) round($perkerasanSummary['total_panjang'] ?? 0);
     $pctRigid        = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_rigid'] ?? 0) / $totalPerkerasanM) * 100 : 0;
     $pctAspal        = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_aspal'] ?? 0) / $totalPerkerasanM) * 100 : 0;
     $pctAgregatTanah = $totalPerkerasanM > 0 ? (($perkerasanSummary['total_agregat_tanah'] ?? 0) / $totalPerkerasanM) * 100 : 0;

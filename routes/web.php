@@ -39,6 +39,7 @@ $router->get('stripmap/edit/{id}',        'StripmapController', 'edit');
 $router->post('stripmap/update/{id}',     'StripmapController', 'update');
 $router->get('stripmap/delete/{id}',      'StripmapController', 'delete');
 $router->get('stripmap/preview/{id}',     'StripmapController', 'preview');
+$router->post('stripmap/import-kml/{id}', 'StripmapController', 'importKml');
 
 // ──────────────────────────────────────────────
 // CRUD Perkerasan Jalan

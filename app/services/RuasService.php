@@ -65,6 +65,11 @@ class RuasService
             'panjang'   => $panjang,
             'koridor'   => !empty(trim($input['koridor'] ?? '')) ? trim($input['koridor']) : null,
             'kabupaten_kota' => !empty(trim($input['kabupaten_kota'] ?? '')) ? trim($input['kabupaten_kota']) : null,
+            'lat_awal'       => $this->normalizeCoord($input['lat_awal'] ?? null),
+            'lng_awal'       => $this->normalizeCoord($input['lng_awal'] ?? null),
+            'lat_akhir'      => $this->normalizeCoord($input['lat_akhir'] ?? null),
+            'lng_akhir'      => $this->normalizeCoord($input['lng_akhir'] ?? null),
+            'koordinat_json' => !empty($input['koordinat_json']) ? $input['koordinat_json'] : null,
         ]);
 
         return ['success' => true, 'message' => 'Ruas jalan berhasil ditambahkan.', 'id' => $id];
@@ -75,16 +80,29 @@ class RuasService
      */
     public function update(int $id, array $input): array
     {
-        $errors = $this->validate($input, $id);
+        $existing = $this->model->findById($id);
+        if (!$existing) {
+            return ['success' => false, 'message' => 'Ruas jalan tidak ditemukan.'];
+        }
+
+        // Merge input dengan data existing agar partial update (misal impor KML saja) tidak gagal validasi
+        $mergedInput = array_merge($existing, array_filter($input, fn($v) => $v !== null));
+
+        $errors = $this->validate($mergedInput, $id);
         if (!empty($errors)) {
             return ['success' => false, 'message' => implode('<br>', $errors)];
         }
 
         $updateData = [
-            'kode_ruas' => trim($input['kode_ruas']),
-            'nama_ruas' => trim($input['nama_ruas']),
-            'koridor'   => !empty(trim($input['koridor'] ?? '')) ? trim($input['koridor']) : null,
-            'kabupaten_kota' => !empty(trim($input['kabupaten_kota'] ?? '')) ? trim($input['kabupaten_kota']) : null,
+            'kode_ruas' => trim($mergedInput['kode_ruas']),
+            'nama_ruas' => trim($mergedInput['nama_ruas']),
+            'koridor'   => !empty(trim($mergedInput['koridor'] ?? '')) ? trim($mergedInput['koridor']) : null,
+            'kabupaten_kota' => !empty(trim($mergedInput['kabupaten_kota'] ?? '')) ? trim($mergedInput['kabupaten_kota']) : null,
+            'lat_awal'  => array_key_exists('lat_awal', $input) ? $this->normalizeCoord($input['lat_awal']) : $existing['lat_awal'],
+            'lng_awal'  => array_key_exists('lng_awal', $input) ? $this->normalizeCoord($input['lng_awal']) : $existing['lng_awal'],
+            'lat_akhir' => array_key_exists('lat_akhir', $input) ? $this->normalizeCoord($input['lat_akhir']) : $existing['lat_akhir'],
+            'lng_akhir' => array_key_exists('lng_akhir', $input) ? $this->normalizeCoord($input['lng_akhir']) : $existing['lng_akhir'],
+            'koordinat_json' => array_key_exists('koordinat_json', $input) ? (!empty($input['koordinat_json']) ? $input['koordinat_json'] : null) : $existing['koordinat_json'],
         ];
 
         if (isset($input['sta_awal']))  $updateData['sta_awal']  = (float)$input['sta_awal'];
@@ -124,6 +142,22 @@ class RuasService
     public function syncStaFromStripmap(int $ruasId): void
     {
         $this->model->updateStaFromStripmap($ruasId);
+    }
+
+    /**
+     * Normalisasi nilai koordinat: string kosong -> null, selainnya -> float.
+     * Menerima koma sebagai desimal (mis. "-5,45" -> -5.45).
+     */
+    private function normalizeCoord($value): ?float
+    {
+        if ($value === null) {
+            return null;
+        }
+        $value = trim(str_replace(',', '.', (string) $value));
+        if ($value === '' || !is_numeric($value)) {
+            return null;
+        }
+        return (float) $value;
     }
 
     /**

@@ -360,4 +360,44 @@ class StripmapController
             redirect(base_url('ruas'));
         }
     }
+
+    /**
+     * Import KML/KMZ route khusus untuk ruas jalan dari menu Strip Map
+     * (Memperbarui rute peta tanpa mengubah/menghapus data segmen stripmap & perkerasan)
+     */
+    public function importKml(int $ruasId): void
+    {
+        $ruas = $this->ruasService->findById($ruasId);
+        if (!$ruas) {
+            flash('error', 'Ruas jalan tidak ditemukan.');
+            redirect(base_url('ruas'));
+            return;
+        }
+
+        $koordinatJson = $_POST['koordinat_json'] ?? null;
+        if (empty($koordinatJson)) {
+            flash('error', 'Data rute KML / KMZ tidak ditemukan.');
+            redirect(base_url('stripmap/' . $ruasId));
+            return;
+        }
+
+        $updateData = [
+            'koordinat_json' => $koordinatJson,
+        ];
+
+        if (!empty($_POST['lat_awal']))  $updateData['lat_awal']  = (float) $_POST['lat_awal'];
+        if (!empty($_POST['lng_awal']))  $updateData['lng_awal']  = (float) $_POST['lng_awal'];
+        if (!empty($_POST['lat_akhir'])) $updateData['lat_akhir'] = (float) $_POST['lat_akhir'];
+        if (!empty($_POST['lng_akhir'])) $updateData['lng_akhir'] = (float) $_POST['lng_akhir'];
+
+        $res = $this->ruasService->update($ruasId, $updateData);
+
+        if ($res['success']) {
+            flash('success', 'Rute KML / KMZ berhasil diimpor dan diperbarui pada peta.');
+        } else {
+            flash('error', 'Gagal menyimpan rute KML: ' . $res['message']);
+        }
+
+        redirect(base_url('stripmap/' . $ruasId));
+    }
 }

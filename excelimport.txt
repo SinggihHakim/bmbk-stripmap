@@ -36,30 +36,14 @@ class ExcelImporter
                 $aspalSheet = null;
                 $betonSheet = null;
                 $nonAspalSheet = null;
-
                 foreach ($sheetMapping as $sheetName => $xmlPath) {
-                    $trimmedName = trim($sheetName);
-                    // Abaikan sheet yang ditandai non-aktif / silang (diakhiri dengan huruf X)
-                    if (preg_match('/\bX\s*$/i', $trimmedName)) {
-                        continue;
-                    }
-
-                    $lowerName = strtolower($trimmedName);
-                    if (str_contains($lowerName, 'aspal') && !str_contains($lowerName, 'non')) {
-                        if ($aspalSheet === null || (!str_contains($lowerName, 'rekap') && str_contains(strtolower($aspalSheetName ?? ''), 'rekap'))) {
-                            $aspalSheet = $xmlPath;
-                            $aspalSheetName = $sheetName;
-                        }
-                    } elseif (str_contains($lowerName, 'beton')) {
-                        if ($betonSheet === null || (!str_contains($lowerName, 'rekap') && str_contains(strtolower($betonSheetName ?? ''), 'rekap'))) {
-                            $betonSheet = $xmlPath;
-                            $betonSheetName = $sheetName;
-                        }
-                    } elseif (str_contains($lowerName, 'non') || str_contains($lowerName, 'agregat') || str_contains($lowerName, 'tanah')) {
-                        if ($nonAspalSheet === null || (!str_contains($lowerName, 'rekap') && str_contains(strtolower($nonAspalSheetName ?? ''), 'rekap'))) {
-                            $nonAspalSheet = $xmlPath;
-                            $nonAspalSheetName = $sheetName;
-                        }
+                    $lowerName = strtolower($sheetName);
+                    if (str_contains($lowerName, 'rekap') && str_contains($lowerName, 'aspal') && !str_contains($lowerName, 'non')) {
+                        $aspalSheet = $xmlPath;
+                    } elseif (str_contains($lowerName, 'rekap') && str_contains($lowerName, 'beton')) {
+                        $betonSheet = $xmlPath;
+                    } elseif (str_contains($lowerName, 'rekap') && str_contains($lowerName, 'non') && str_contains($lowerName, 'aspal')) {
+                        $nonAspalSheet = $xmlPath;
                     }
                 }
                 
@@ -239,8 +223,8 @@ class ExcelImporter
         $processedCount = 0;
         $errors = [];
 
-        // Deteksi header dari 30 baris pertama untuk mengakomodasi file Excel dengan judul/logo panjang di atas
-        $maxHeaderRows = min(30, count($rows));
+        // Deteksi header HANYA dari 10 baris pertama untuk menghindari baris ringkasan/total di bawah me-overwrite colMap
+        $maxHeaderRows = min(10, count($rows));
         for ($i = 0; $i < $maxHeaderRows; $i++) {
             if ($this->isHeaderRow($rows[$i])) {
                 $foundMap = $this->detectColumnIndices($rows[$i]);
@@ -309,8 +293,8 @@ class ExcelImporter
             $kodeRuas = $this->formatKodeRuas($kodeRuasFull);
 
             // Parsing Panjang (SK)
-            $panjangVal = isset($colMap['panjang']) ? $this->parseFloatVal($row[$colMap['panjang']] ?? '0') : 0;
-            $panjangMeter = round(($panjangVal > 500 ? $panjangVal : $panjangVal * 1000), 2);
+            $panjangKm = isset($colMap['panjang']) ? $this->parseFloatVal($row[$colMap['panjang']] ?? '0') : 0;
+            $panjangMeter = round($panjangKm * 1000, 2);
 
             // Extract lokasi / kabupaten_kota (dari kolom terdeteksi atau teks dalam tanda kurung pada nama_ruas)
             $kabupatenKota = isset($colMap['kabupaten_kota']) 
@@ -318,35 +302,17 @@ class ExcelImporter
                 : $this->extractKabupatenKota($namaRuas);
 
             // Parsing Perkerasan (Km -> meter)
-            $rigidVal   = isset($colMap['rigid']) ? $this->parseFloatVal($row[$colMap['rigid']] ?? '0') : 0;
-            $aspalVal   = isset($colMap['aspal']) ? $this->parseFloatVal($row[$colMap['aspal']] ?? '0') : 0;
-            $telfordVal = isset($colMap['telford']) ? $this->parseFloatVal($row[$colMap['telford']] ?? '0') : 0;
-            $tanahVal   = isset($colMap['tanah']) ? $this->parseFloatVal($row[$colMap['tanah']] ?? '0') : 0;
-
-            $sumPk = $rigidVal + $aspalVal + $telfordVal + $tanahVal;
-            $multPk = ($sumPk > 500) ? 1.0 : 1000.0;
-
-            $rigidM   = round($rigidVal * $multPk, 2);
-            $aspalM   = round($aspalVal * $multPk, 2);
-            $agregatM = round(($telfordVal + $tanahVal) * $multPk, 2);
-            $totalPerkerasanM = $rigidM + $aspalM + $agregatM;
+            $rigidKm   = isset($colMap['rigid']) ? $this->parseFloatVal($row[$colMap['rigid']] ?? '0') : 0;
+            $aspalKm   = isset($colMap['aspal']) ? $this->parseFloatVal($row[$colMap['aspal']] ?? '0') : 0;
+            $telfordKm = isset($colMap['telford']) ? $this->parseFloatVal($row[$colMap['telford']] ?? '0') : 0;
+            $tanahKm   = isset($colMap['tanah']) ? $this->parseFloatVal($row[$colMap['tanah']] ?? '0') : 0;
+            $agregatTanahKm = $telfordKm + $tanahKm;
 
             // Parsing Kondisi (Km -> meter)
-            $baikVal        = isset($colMap['baik']) ? $this->parseFloatVal($row[$colMap['baik']] ?? '0') : 0;
-            $sedangVal      = isset($colMap['sedang']) ? $this->parseFloatVal($row[$colMap['sedang']] ?? '0') : 0;
-            $rusakRinganVal = isset($colMap['rusak_ringan']) ? $this->parseFloatVal($row[$colMap['rusak_ringan']] ?? '0') : 0;
-            $rusakBeratVal  = isset($colMap['rusak_berat']) ? $this->parseFloatVal($row[$colMap['rusak_berat']] ?? '0') : 0;
-
-            $sumCond = $baikVal + $sedangVal + $rusakRinganVal + $rusakBeratVal;
-            $multCond = ($sumCond > 500) ? 1.0 : 1000.0;
-
-            $baikM   = round($baikVal * $multCond, 2);
-            $sedangM = round($sedangVal * $multCond, 2);
-            $rrM     = round($rusakRinganVal * $multCond, 2);
-            $rbM     = round($rusakBeratVal * $multCond, 2);
-            $totalKondisiM = $baikM + $sedangM + $rrM + $rbM;
-
-            $finalPanjangMeter = max($panjangMeter, $totalKondisiM, $totalPerkerasanM);
+            $baikKm        = isset($colMap['baik']) ? $this->parseFloatVal($row[$colMap['baik']] ?? '0') : 0;
+            $sedangKm      = isset($colMap['sedang']) ? $this->parseFloatVal($row[$colMap['sedang']] ?? '0') : 0;
+            $rusakRinganKm = isset($colMap['rusak_ringan']) ? $this->parseFloatVal($row[$colMap['rusak_ringan']] ?? '0') : 0;
+            $rusakBeratKm  = isset($colMap['rusak_berat']) ? $this->parseFloatVal($row[$colMap['rusak_berat']] ?? '0') : 0;
 
             // Upsert Ruas Jalan
             $existingRuas = $ruasService->findByKode($kodeRuas);
@@ -354,8 +320,8 @@ class ExcelImporter
                 'kode_ruas' => $kodeRuas,
                 'nama_ruas' => $namaRuas,
                 'sta_awal'  => 0,
-                'sta_akhir' => $finalPanjangMeter,
-                'panjang'   => $finalPanjangMeter,
+                'sta_akhir' => $panjangMeter,
+                'panjang'   => $panjangMeter,
                 'koridor'   => $currentKoridor ?? ($existingRuas['koridor'] ?? null),
                 'kabupaten_kota' => !empty($kabupatenKota) ? $kabupatenKota : ($currentKabupaten ?? ($existingRuas['kabupaten_kota'] ?? null)),
             ];
@@ -375,6 +341,18 @@ class ExcelImporter
             // Hapus data stripmap & perkerasan lama untuk ruas ini jika merekap ulang
             $stripmapService->deleteByRuasId($ruasId);
             $perkerasanService->deleteByRuasId($ruasId);
+
+            // Total Meter Kondisi & Perkerasan
+            $baikM   = round($baikKm * 1000, 2);
+            $sedangM = round($sedangKm * 1000, 2);
+            $rrM     = round($rusakRinganKm * 1000, 2);
+            $rbM     = round($rusakBeratKm * 1000, 2);
+            $totalKondisiM = $baikM + $sedangM + $rrM + $rbM;
+
+            $rigidM    = round($rigidKm * 1000, 2);
+            $aspalM    = round($aspalKm * 1000, 2);
+            $agregatM  = round($telfordKm * 1000 + $tanahKm * 1000, 2);
+            $totalPerkerasanM = $rigidM + $aspalM + $agregatM;
 
             // Simpan Data Strip Map Baru (1 Rekap Segmen Utuh)
             if ($totalKondisiM > 0) {
@@ -645,9 +623,9 @@ class ExcelImporter
                 $map['baik'] = $index;
             } elseif (str_contains($clean, 'sedang') && ($index >= 8 || !isset($map['sedang']))) {
                 $map['sedang'] = $index;
-            } elseif ((str_contains($clean, 'rusak ringan') || str_contains($clean, 'r.ringan') || str_contains($clean, 'rr')) && ($index >= 8 || !isset($map['rusak_ringan']))) {
+            } elseif ((str_contains($clean, 'rusak ringan') || str_contains($clean, 'r.ringan')) && ($index >= 8 || !isset($map['rusak_ringan']))) {
                 $map['rusak_ringan'] = $index;
-            } elseif ((str_contains($clean, 'rusak berat') || str_contains($clean, 'r.berat') || str_contains($clean, 'rb')) && ($index >= 8 || !isset($map['rusak_berat']))) {
+            } elseif ((str_contains($clean, 'rusak berat') || str_contains($clean, 'r.berat')) && ($index >= 8 || !isset($map['rusak_berat']))) {
                 $map['rusak_berat'] = $index;
             } elseif (str_contains($clean, 'kabupaten') || str_contains($clean, 'kota') || str_contains($clean, 'wilayah')) {
                 $map['kabupaten_kota'] = $index;
@@ -909,93 +887,54 @@ class ExcelImporter
             if (empty($rows)) continue;
 
             $colMap = [];
-            // Pindai baris 15-25 (mengabaikan baris judul di atas seperti "BACK - UP DATA SURVEY...")
-            for ($i = 15; $i <= 25; $i++) {
+            for ($i = 1; $i <= 25; $i++) {
                 if (!isset($rows[$i])) continue;
                 foreach ($rows[$i] as $idx => $val) {
-                    $clean = strtolower(trim((string)$val));
-                    if ($clean === '') continue;
-
+                    $clean = strtolower(trim($val));
                     if ($clean === 'dari' || $clean === 'dari (m)' || $clean === 'dari ( m )' || str_contains($clean, 'sta awal') || str_contains($clean, 'sta. awal')) {
-                        if (!isset($colMap['sta_awal'])) $colMap['sta_awal'] = $idx;
+                        $colMap['sta_awal'] = $idx;
                     } elseif ($clean === 'ke' || $clean === 'ke (m)' || $clean === 'ke ( m )' || str_contains($clean, 'sta akhir') || str_contains($clean, 'sta. akhir')) {
-                        if (!isset($colMap['sta_akhir'])) $colMap['sta_akhir'] = $idx;
-                    } elseif (str_contains($clean, 'lebar')) {
-                        if (!isset($colMap['lebar'])) $colMap['lebar'] = $idx;
-                    } elseif (preg_match('/^kondisi(\s+\d{4}|\s+jalan|\s+2[0-9]{3})?$/i', $clean) || $clean === 'status' || $clean === 'mutu' || $clean === 'b/s/rr/rb') {
-                        // Selalu update sehingga kolom tahun terbaru (misal "KONDISI 2025") yang menang
+                        $colMap['sta_akhir'] = $idx;
+                    } elseif ($clean === 'lebar' || $clean === 'lebar (m)' || $clean === 'lebar ( m )') {
+                        $colMap['lebar'] = $idx;
+                    } elseif ($clean === 'kondisi') {
                         $colMap['kondisi'] = $idx;
                     }
                 }
             }
 
-            $hasPerColKondisi = isset($colMap['col_baik']) || isset($colMap['col_sedang']) || isset($colMap['col_rr']) || isset($colMap['col_rb']);
-            $hasSingleKondisi = isset($colMap['kondisi']);
-
-            if (!isset($colMap['sta_awal']) || !isset($colMap['sta_akhir'])) {
+            if (!isset($colMap['sta_awal']) || !isset($colMap['sta_akhir']) || !isset($colMap['kondisi'])) {
                 continue;
             }
 
             foreach ($rows as $rData) {
-                $staAwalVal  = isset($rData[$colMap['sta_awal']]) ? trim((string)$rData[$colMap['sta_awal']]) : '';
-                $staAkhirVal = isset($rData[$colMap['sta_akhir']]) ? trim((string)$rData[$colMap['sta_akhir']]) : '';
+                $staAwalVal = isset($rData[$colMap['sta_awal']]) ? trim($rData[$colMap['sta_awal']]) : '';
+                $staAkhirVal = isset($rData[$colMap['sta_akhir']]) ? trim($rData[$colMap['sta_akhir']]) : '';
+                $kondisiVal = isset($rData[$colMap['kondisi']]) ? trim($rData[$colMap['kondisi']]) : '';
 
-                if ($staAwalVal === '' || $staAkhirVal === '') continue;
+                if ($staAwalVal === '' || $staAkhirVal === '' || $kondisiVal === '') continue;
                 if (!is_numeric($staAwalVal) || !is_numeric($staAkhirVal)) continue;
 
-                $staAwal  = $this->parseFloatVal($staAwalVal);
+                $staAwal = $this->parseFloatVal($staAwalVal);
                 $staAkhir = $this->parseFloatVal($staAkhirVal);
-                $panjang  = $staAkhir - $staAwal;
+                $panjang = $staAkhir - $staAwal;
 
                 if ($panjang <= 0) continue;
 
                 $baik = $sedang = $rr = $rb = 0;
-
-                if ($hasPerColKondisi) {
-                    $baikVal   = isset($colMap['col_baik'])   ? $this->parseFloatVal($rData[$colMap['col_baik']]   ?? '0') : 0;
-                    $sedangVal = isset($colMap['col_sedang']) ? $this->parseFloatVal($rData[$colMap['col_sedang']] ?? '0') : 0;
-                    $rrVal     = isset($colMap['col_rr'])     ? $this->parseFloatVal($rData[$colMap['col_rr']]     ?? '0') : 0;
-                    $rbVal     = isset($colMap['col_rb'])     ? $this->parseFloatVal($rData[$colMap['col_rb']]     ?? '0') : 0;
-                    $sumCond   = $baikVal + $sedangVal + $rrVal + $rbVal;
-                    if ($sumCond > 0) {
-                        $baik   = $baikVal;
-                        $sedang = $sedangVal;
-                        $rr     = $rrVal;
-                        $rb     = $rbVal;
-                    } else {
-                        if ($type === 'rigid') $baik = $panjang;
-                        elseif ($type === 'aspal') $sedang = $panjang;
-                        else $rr = $panjang;
-                    }
-                } elseif ($hasSingleKondisi) {
-                    $kondisiVal = isset($rData[$colMap['kondisi']]) ? trim((string)$rData[$colMap['kondisi']]) : '';
-                    $cond = strtoupper($kondisiVal);
-                    if ($cond === 'B' || $cond === '1' || str_contains($cond, 'BAIK')) {
-                        $baik = $panjang;
-                    } elseif ($cond === 'S' || $cond === '2' || str_contains($cond, 'SEDANG')) {
-                        $sedang = $panjang;
-                    } elseif ($cond === 'RR' || $cond === 'R' || $cond === '3' || str_contains($cond, 'RINGAN')) {
-                        $rr = $panjang;
-                    } elseif ($cond === 'RB' || $cond === '4' || str_contains($cond, 'BERAT')) {
-                        $rb = $panjang;
-                    } else {
-                        if ($type === 'rigid') $baik = $panjang;
-                        elseif ($type === 'aspal') $sedang = $panjang;
-                        else $rr = $panjang;
-                    }
-                } else {
-                    if ($type === 'rigid') $baik = $panjang;
-                    elseif ($type === 'aspal') $sedang = $panjang;
-                    else $rr = $panjang;
-                }
+                $cond = strtoupper(trim($kondisiVal));
+                if ($cond === 'B') $baik = $panjang;
+                elseif ($cond === 'S') $sedang = $panjang;
+                elseif ($cond === 'RR' || $cond === 'R') $rr = $panjang;
+                elseif ($cond === 'RB') $rb = $panjang;
 
                 // Simpan ke stripmap
                 $stmtStripmap->execute([$ruasId, $staAwal, $staAkhir, $panjang, $baik, $sedang, $rr, $rb]);
 
                 // Simpan ke perkerasan
-                $rigidVal    = ($type === 'rigid') ? $panjang : 0;
-                $aspalVal    = ($type === 'aspal') ? $panjang : 0;
-                $agregatVal  = ($type === 'agregat_tanah') ? $panjang : 0;
+                $rigidVal = ($type === 'rigid') ? $panjang : 0;
+                $aspalVal = ($type === 'aspal') ? $panjang : 0;
+                $agregatVal = ($type === 'agregat_tanah') ? $panjang : 0;
                 $stmtPerkerasan->execute([$ruasId, $staAwal, $staAkhir, $panjang, $rigidVal, $aspalVal, $agregatVal, 0]);
 
                 $insertedCount++;

@@ -21,6 +21,11 @@ CREATE TABLE IF NOT EXISTS `ruas_jalan` (
     `panjang`    DECIMAL(10,2)   NOT NULL DEFAULT 0.00 COMMENT 'Panjang total dalam meter',
     `koridor`    VARCHAR(100)    NULL COMMENT 'Koridor jalan',
     `kabupaten_kota` VARCHAR(100) NULL COMMENT 'Kabupaten / Kota lokasi ruas',
+    `lat_awal`   DECIMAL(10,7)   NULL COMMENT 'Latitude titik awal ruas',
+    `lng_awal`   DECIMAL(10,7)   NULL COMMENT 'Longitude titik awal ruas',
+    `lat_akhir`  DECIMAL(10,7)   NULL COMMENT 'Latitude titik akhir ruas',
+    `lng_akhir`  DECIMAL(10,7)   NULL COMMENT 'Longitude titik akhir ruas',
+    `koordinat_json` LONGTEXT    NULL COMMENT 'Polyline rute jalan (array [lng,lat]) hasil impor KML/KMZ, format JSON',
     `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
@@ -89,23 +94,33 @@ CREATE TABLE IF NOT EXISTS `perkerasan` (
 -- Copas query di bawah ini ke tab SQL database `stripmap_db` Anda:
 
 -- 1. Tambah kolom baru di ruas_jalan (jika belum):
--- ALTER TABLE `ruas_jalan` ADD COLUMN `koridor` VARCHAR(100) NULL AFTER `panjang`;
--- ALTER TABLE `ruas_jalan` ADD COLUMN `kabupaten_kota` VARCHAR(100) NULL AFTER `koridor`;
+ALTER TABLE `ruas_jalan` ADD COLUMN `koridor` VARCHAR(100) NULL AFTER `panjang`;
+ALTER TABLE `ruas_jalan` ADD COLUMN `kabupaten_kota` VARCHAR(100) NULL AFTER `koridor`;
+
+-- 1b. Tambah kolom koordinat peta di ruas_jalan (jika belum):
+ALTER TABLE `ruas_jalan`
+    ADD COLUMN `lat_awal`  DECIMAL(10,7) NULL AFTER `kabupaten_kota`,
+    ADD COLUMN `lng_awal`  DECIMAL(10,7) NULL AFTER `lat_awal`,
+    ADD COLUMN `lat_akhir` DECIMAL(10,7) NULL AFTER `lng_awal`,
+    ADD COLUMN `lng_akhir` DECIMAL(10,7) NULL AFTER `lat_akhir`;
+
+-- 1c. Tambah kolom polyline rute hasil impor KML/KMZ (jika belum):
+ALTER TABLE `ruas_jalan` ADD COLUMN `koordinat_json` LONGTEXT NULL AFTER `lng_akhir`;
 
 -- 2. Buat tabel perkerasan:
--- CREATE TABLE IF NOT EXISTS `perkerasan` (
---     `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
---     `ruas_id`       INT UNSIGNED    NOT NULL,
---     `sta_awal`      DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `sta_akhir`     DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `panjang`       DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `rigid`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `aspal`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `agregat_tanah` DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `belum_tembus`  DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
---     `created_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     `updated_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     PRIMARY KEY (`id`),
---     KEY `idx_ruas_id` (`ruas_id`),
---     CONSTRAINT `fk_perkerasan_ruas` FOREIGN KEY (`ruas_id`) REFERENCES `ruas_jalan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE IF NOT EXISTS `perkerasan` (
+    `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
+    `ruas_id`       INT UNSIGNED    NOT NULL,
+    `sta_awal`      DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `sta_akhir`     DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `panjang`       DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `rigid`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `aspal`         DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `agregat_tanah` DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `belum_tembus`  DECIMAL(10,2)   NOT NULL DEFAULT 0.00,
+    `created_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_ruas_id` (`ruas_id`),
+    CONSTRAINT `fk_perkerasan_ruas` FOREIGN KEY (`ruas_id`) REFERENCES `ruas_jalan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

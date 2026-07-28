@@ -156,3 +156,10 @@ task : 29 juli 2026
 
 task : 30 juli 2026
 1. update `.gitignore` — tambahkan aturan `scratch_*.php` dan `public/install.php` agar file debug dan installer tidak ter-commit secara tidak sengaja di masa depan ✅
+2. Membuat Peta Lokasi Ruas Jalan ✅
+3. Perbaikan Parser Excel Importer (File 064 & Sejenisnya) ✅
+
+
+task : 31 juli 2026
+1. Penyempurnaan Bar Linier Rute (Strip Map) ✅
+2. Fitur & Keamanan Impor KML/KMZ ✅
