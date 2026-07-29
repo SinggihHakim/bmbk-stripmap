@@ -31,7 +31,7 @@ class DashboardController
             $tidakMantapM = (float)$row['total_tidak_mantap'];
             $kabupatenChartData[] = [
                 'label'            => $row['kabupaten_kota'],
-                'short_label'      => \App\Helpers\Uptd::getShortName($row['kabupaten_kota']),
+                'short_label'      => Uptd::getShortName($row['kabupaten_kota']),
                 'mantap_km'        => round($mantapM / 1000, 2),
                 'tidak_mantap_km'  => round($tidakMantapM / 1000, 2),
                 'pct_mantap'       => $totalP > 0 ? round(($mantapM / $totalP) * 100, 1) : 0,
@@ -57,7 +57,7 @@ class DashboardController
         }
 
         // 3. Chart UPTD
-        $uptdMaster = \App\Helpers\Uptd::all();
+        $uptdMaster = Uptd::all();
         $uptdStats  = [];
         foreach ($uptdMaster as $uptdKey => $kabList) {
             $uptdStats[$uptdKey] = ['panjang' => 0, 'mantap' => 0, 'tidak_mantap' => 0];
@@ -67,7 +67,7 @@ class DashboardController
             $totalP       = (float)$row['total_panjang'];
             $mantapM      = (float)$row['total_mantap'];
             $tidakMantapM = (float)$row['total_tidak_mantap'];
-            $matchedUptds = \App\Helpers\Uptd::getUptdByKabupaten($row['kabupaten_kota']);
+            $matchedUptds = Uptd::getUptdByKabupaten($row['kabupaten_kota']);
 
             foreach ($matchedUptds as $u) {
                 if (isset($uptdStats[$u])) {

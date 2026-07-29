@@ -15,13 +15,13 @@ class Perkerasan
     public function __construct()
     {
         $this->db = Database::getInstance()->getConnection();
-        $this->autoCreateTable();
     }
 
     /**
-     * Pastikan tabel perkerasan otomatis dibuat jika belum ada
+     * Buat tabel perkerasan jika belum ada.
+     * Dipanggil sekali dari migration/installer — BUKAN dari constructor.
      */
-    private function autoCreateTable(): void
+    public static function autoCreateTable(): void
     {
         $sql = "CREATE TABLE IF NOT EXISTS `perkerasan` (
             `id`            INT UNSIGNED    NOT NULL AUTO_INCREMENT,
@@ -46,10 +46,13 @@ class Perkerasan
                 ON UPDATE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
+        $db = Database::getInstance()->getConnection();
         try {
-            $this->db->exec($sql);
-        } catch (Exception $e) {
-            // Silently ignore if table exists or permission issue
+            $db->exec($sql);
+        } catch (\PDOException $e) {
+            // CREATE TABLE IF NOT EXISTS tidak throw jika sudah ada,
+            // jadi log error lain yang mungkin serius.
+            error_log('[Perkerasan::autoCreateTable] ' . $e->getMessage());
         }
     }
 

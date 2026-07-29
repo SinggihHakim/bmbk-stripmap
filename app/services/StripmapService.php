@@ -9,13 +9,11 @@
 
 class StripmapService
 {
-    private Stripmap  $model;
-    private RuasJalan $ruasModel;
+    private Stripmap $model;
 
     public function __construct()
     {
-        $this->model     = new Stripmap();
-        $this->ruasModel = new RuasJalan();
+        $this->model = new Stripmap();
     }
 
     /**
@@ -49,7 +47,7 @@ class StripmapService
     {
         $errors = $this->validate($input, $ruasId);
         if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+            return ['success' => false, 'message' => implode('<br>', $errors), 'errors' => $errors];
         }
 
         $staAwal  = sta_to_meter($input['sta_awal']);
@@ -105,19 +103,15 @@ class StripmapService
         }
 
         if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+            return ['success' => false, 'message' => implode('<br>', $errors), 'errors' => $errors];
         }
 
         // Validasi Overlap & Duplikasi Segmen
         usort($clean, fn($a, $b) => $a['sta_awal'] <=> $b['sta_awal']);
-        for ($i = 1; $i < count($clean); $i++) {
-            if ($clean[$i]['sta_awal'] < $clean[$i-1]['sta_akhir']) {
-                $errors[] = "Tumpang tindih terdeteksi antara Baris " . $clean[$i-1]['original_index'] . " (" . $clean[$i-1]['sta_awal_str'] . " s/d " . $clean[$i-1]['sta_akhir_str'] . ") dan Baris " . $clean[$i]['original_index'] . " (" . $clean[$i]['sta_awal_str'] . " s/d " . $clean[$i]['sta_akhir_str'] . ").";
-            }
-        }
+        $overlapErrors = SegmentValidator::detectOverlaps($clean);
 
-        if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+        if (!empty($overlapErrors)) {
+            return ['success' => false, 'message' => implode('<br>', $overlapErrors), 'errors' => $overlapErrors];
         }
 
         foreach ($clean as $data) {
@@ -143,7 +137,7 @@ class StripmapService
 
         $errors = $this->validate($input, $existing['ruas_id'], $id, true);
         if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+            return ['success' => false, 'message' => implode('<br>', $errors), 'errors' => $errors];
         }
 
         $staAwal  = sta_to_meter($input['sta_awal']);

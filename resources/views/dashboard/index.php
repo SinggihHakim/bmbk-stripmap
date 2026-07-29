@@ -239,7 +239,7 @@
                         </span>
                     </div>
                     <h3 class="text-xl font-bold text-white"><?= format_number($belumTembusKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-purple-100">km</span></h3>
-                    <p class="text-[11px] font-medium text-purple-100 mt-0.5">Hutan / Belum Tembus</p>
+                    <p class="text-[11px] font-medium text-purple-100 mt-0.5">Belum Tembus</p>
                 </div>
             </div>
 

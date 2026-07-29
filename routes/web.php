@@ -25,7 +25,7 @@ $router->get('ruas/import',      'RuasController', 'importForm');
 $router->post('ruas/import',     'RuasController', 'importProcess');
 $router->get('ruas/edit/{id}',   'RuasController', 'edit');
 $router->post('ruas/update/{id}','RuasController', 'update');
-$router->get('ruas/delete/{id}', 'RuasController', 'delete');
+$router->post('ruas/delete/{id}', 'RuasController', 'delete');
 $router->get('ruas/show/{id}',   'RuasController', 'show');
 
 // ──────────────────────────────────────────────
@@ -37,7 +37,7 @@ $router->post('stripmap/store/{id}',      'StripmapController', 'store');
 $router->post('stripmap/batch/{id}',      'StripmapController', 'batch');
 $router->get('stripmap/edit/{id}',        'StripmapController', 'edit');
 $router->post('stripmap/update/{id}',     'StripmapController', 'update');
-$router->get('stripmap/delete/{id}',      'StripmapController', 'delete');
+$router->post('stripmap/delete/{id}',  'StripmapController', 'delete');
 $router->get('stripmap/preview/{id}',     'StripmapController', 'preview');
 $router->post('stripmap/import-kml/{id}', 'StripmapController', 'importKml');
 
@@ -47,8 +47,14 @@ $router->post('stripmap/import-kml/{id}', 'StripmapController', 'importKml');
 $router->post('perkerasan/store/{id}',    'StripmapController', 'perkerasanStore');
 $router->get('perkerasan/edit/{id}',      'StripmapController', 'perkerasanEdit');
 $router->post('perkerasan/update/{id}',   'StripmapController', 'perkerasanUpdate');
-$router->get('perkerasan/delete/{id}',    'StripmapController', 'perkerasanDelete');
+$router->post('perkerasan/delete/{id}',    'StripmapController', 'perkerasanDelete');
 
+
+// ──────────────────────────────────────────────
+// Rekapitulasi Eksekutif
+// ──────────────────────────────────────────────
+$router->get('rekap/kemantapan', 'RekapController', 'kemantapan');
+$router->get('rekap/perkerasan', 'RekapController', 'perkerasan');
 
 // ──────────────────────────────────────────────
 // Pusat Export & Cetak

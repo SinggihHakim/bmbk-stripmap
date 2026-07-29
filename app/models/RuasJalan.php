@@ -48,6 +48,23 @@ class RuasJalan
     }
 
     /**
+     * Cari ruas berdasarkan kode_ruas, kecualikan ID tertentu (digunakan untuk cek duplikat saat edit).
+     */
+    public function findByKodeExcluding(string $kodeRuas, ?int $excludeId = null): ?array
+    {
+        if ($excludeId === null) {
+            return $this->findByKode($kodeRuas);
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT * FROM ruas_jalan WHERE kode_ruas = :kode_ruas AND id != :exclude_id'
+        );
+        $stmt->execute(['kode_ruas' => $kodeRuas, 'exclude_id' => $excludeId]);
+        $result = $stmt->fetch();
+        return $result ?: null;
+    }
+
+    /**
      * Simpan ruas baru
      */
     public function create(array $data): int

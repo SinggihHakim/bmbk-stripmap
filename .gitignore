@@ -12,8 +12,6 @@
 # Debug/scratch files
 scratch_*.php
 activities.md
-excelimport.txt
-*.xlsx
 
 # Installer (sudah ada install.lock setelah setup)
 public/install.php

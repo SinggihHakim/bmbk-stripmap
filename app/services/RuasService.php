@@ -49,7 +49,7 @@ class RuasService
     {
         $errors = $this->validate($input);
         if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+            return ['success' => false, 'message' => implode('<br>', $errors), 'errors' => $errors];
         }
 
         // Kita biarkan 0 untuk awal, ini akan diperbarui dari summary stripmap
@@ -90,7 +90,7 @@ class RuasService
 
         $errors = $this->validate($mergedInput, $id);
         if (!empty($errors)) {
-            return ['success' => false, 'message' => implode('<br>', $errors)];
+            return ['success' => false, 'message' => implode('<br>', $errors), 'errors' => $errors];
         }
 
         $updateData = [
@@ -161,17 +161,30 @@ class RuasService
     }
 
     /**
-     * Validasi input ruas
+     * Validasi input ruas.
+     * $excludeId digunakan untuk validasi uniqueness kode_ruas saat edit
+     * (mengecualikan ruas yang sedang diedit dari pengecekan duplikat).
      */
     private function validate(array $input, ?int $excludeId = null): array
     {
         $errors = [];
 
-        if (empty(trim($input['kode_ruas'] ?? ''))) {
+        $kodeRuas = trim($input['kode_ruas'] ?? '');
+        $namaRuas = trim($input['nama_ruas'] ?? '');
+
+        if (empty($kodeRuas)) {
             $errors[] = 'Kode ruas wajib diisi.';
         }
-        if (empty(trim($input['nama_ruas'] ?? ''))) {
+        if (empty($namaRuas)) {
             $errors[] = 'Nama ruas wajib diisi.';
+        }
+
+        // Validasi uniqueness kode_ruas (skip baris sendiri saat edit)
+        if (!empty($kodeRuas)) {
+            $existing = $this->model->findByKodeExcluding($kodeRuas, $excludeId);
+            if ($existing) {
+                $errors[] = "Kode ruas '{$kodeRuas}' sudah digunakan oleh ruas lain.";
+            }
         }
 
         return $errors;

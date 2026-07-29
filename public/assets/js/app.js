@@ -45,10 +45,12 @@ function formatNumber(num, decimals = 0) {
 }
 
 /**
- * Konfirmasi hapus dengan SweetAlert2
- * Menggunakan async karena SweetAlert2 berbasis Promise
- * @param {Event} event - Click event
- * @param {string} url - URL tujuan jika dikonfirmasi
+ * Konfirmasi hapus dengan SweetAlert2, kemudian submit via POST form.
+ * Menggunakan POST (bukan GET) agar operasi destructive tidak bisa di-trigger
+ * hanya lewat sebuah link (CSRF prevention).
+ *
+ * @param {Event}  event   - Click event yang di-intercept
+ * @param {string} url     - Action URL untuk form POST
  * @param {string} message - Pesan konfirmasi
  */
 function confirmDelete(event, url, message) {
@@ -65,7 +67,13 @@ function confirmDelete(event, url, message) {
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {
-            window.location.href = url;
+            // Buat form POST secara programatik dan submit
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+            form.style.display = 'none';
+            document.body.appendChild(form);
+            form.submit();
         }
     });
 }

@@ -7,11 +7,32 @@
  * Semua request masuk melalui file ini.
  */
 
-// Mulai session
-session_start();
-
 // Definisikan base path aplikasi
 define('BASE_PATH', dirname(__DIR__));
+
+// ── Load file .env ke $_ENV ──────────────────────────────────
+$envFile = BASE_PATH . '/.env';
+if (file_exists($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $line = trim($line);
+        // Lewati komentar dan baris tanpa '='
+        if ($line === '' || $line[0] === '#' || strpos($line, '=') === false) {
+            continue;
+        }
+        [$key, $value] = explode('=', $line, 2);
+        $key   = trim($key);
+        $value = trim($value, " \t\"'"); // hapus spasi & quote opsional
+        if ($key !== '' && !array_key_exists($key, $_ENV)) {
+            $_ENV[$key]    = $value;
+            $_SERVER[$key] = $value;
+            putenv("$key=$value");
+        }
+    }
+}
+
+// Mulai session
+session_start();
 
 // Muat konfigurasi
 $appConfig = require BASE_PATH . '/config/app.php';
@@ -38,5 +59,18 @@ require_once BASE_PATH . '/app/helpers/Router.php';
 // Muat Database class
 require_once BASE_PATH . '/app/helpers/Database.php';
 
+// ── Validasi koneksi database saat startup ───────────────────
+// Database::getInstance() akan throw RuntimeException jika koneksi gagal.
+// Kita tangkap di sini dan render view error yang bersih.
+try {
+    Database::getInstance();
+} catch (\RuntimeException $e) {
+    http_response_code(500);
+    $errorMessage = $appConfig['debug'] ? $e->getMessage() : null;
+    require BASE_PATH . '/resources/views/errors/db_error.php';
+    exit;
+}
+
 // Muat dan jalankan router
 require_once BASE_PATH . '/routes/web.php';
+
