@@ -1,17 +1,19 @@
-# Ignore database configuration file
-config/app.php
-config/database.php
-
-
-# Ignore other environment/temporary files
+# Environment file (berisi kredensial, JANGAN commit)
 .env
+
+
+# Log files
 *.log
+
+# IDE/Editor
 .vscode/
 .idea/
-activities.md
 
-# Ignore debug/scratch files
+# Debug/scratch files
 scratch_*.php
+activities.md
+excelimport.txt
+*.xlsx
 
-# Ignore installer (sudah ada install.lock setelah setup)
+# Installer (sudah ada install.lock setelah setup)
 public/install.php
