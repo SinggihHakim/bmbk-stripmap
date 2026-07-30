@@ -75,7 +75,8 @@
             </header>
 
             <!-- Main Content Container -->
-            <main class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main <?= ($content ?? '') === 'dashboard.index' ? 'id="dashboard-export"' : '' ?>
+                  class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
                 <!-- Flash Messages (SweetAlert2 Toast) -->
                 <?php $flash = get_flash(); ?>

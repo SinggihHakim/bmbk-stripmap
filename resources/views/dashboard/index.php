@@ -2,7 +2,7 @@
 <!-- Dashboard -->
 <!-- ============================================================ -->
 
-<div class="space-y-8">
+<div id="dashboard-page" class="space-y-8">
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -33,7 +33,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                             </svg>
                         </div>
-                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">General</span>
+                        <span data-dashboard-export-center-text class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">General</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900"><?= $totalRuas ?? 0 ?> <span class="text-xs font-semibold text-gray-400">Ruas</span></h3>
                     <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Ruas Jalan</p>
@@ -47,7 +47,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                             </svg>
                         </div>
-                        <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Panjang</span>
+                        <span data-dashboard-export-center-text class="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md">Panjang</span>
                     </div>
                     <h3 class="text-2xl font-bold text-gray-900"><?= format_number($totalPanjang ?? 0.0, 2) ?> <span class="text-xs font-semibold text-gray-400">km</span></h3>
                     <p class="text-[13px] font-semibold text-gray-500 mt-1">Total Panjang Jalan</p>
@@ -64,9 +64,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800">Baik</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-emerald-800">Baik</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
                             <?= format_number($pctBaik ?? 0.0, 1) ?>%
                         </span>
                     </div>
@@ -84,9 +84,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #facc15; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-yellow-800">Sedang</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-yellow-800">Sedang</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded bg-yellow-100 text-yellow-800 text-[10px] font-bold">
                             <?= format_number($pctSedang ?? 0.0, 1) ?>%
                         </span>
                     </div>
@@ -104,9 +104,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f97316; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-bold text-orange-900">Rusak Ringan</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-bold text-orange-900">Rusak Ringan</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-bold">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded bg-orange-100 text-orange-800 text-[10px] font-bold">
                             <?= format_number($pctRusakRingan ?? 0.0, 1) ?>%
                         </span>
                     </div>
@@ -124,9 +124,9 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-bold text-red-900">Rusak Berat</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-bold text-red-900">Rusak Berat</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded bg-red-100 text-red-800 text-[10px] font-bold">
                             <?= format_number($pctRusakBerat ?? 0.0, 1) ?>%
                         </span>
                     </div>
@@ -147,13 +147,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-emerald-800">Mantap <span class="font-normal text-emerald-600">(Baik + Sedang)</span></span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
+                            <span data-dashboard-export-center-text class="text-xs font-bold text-emerald-700"><?= format_number($pctMantap ?? 0.0, 1) ?>%</span>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold text-emerald-700"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-emerald-600">km</span></h3>
+                    <h3 data-dashboard-export-stability-value class="text-2xl font-bold text-emerald-700"><?= format_number($mantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-emerald-600">km</span></h3>
                     <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(16, 185, 129, 0.2);">
                         <div class="h-2 rounded-full" style="width: <?= number_format($pctMantap ?? 0.0, 4, '.', '') ?>%; background-color: #10b981;"></div>
                     </div>
@@ -167,13 +167,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-2">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-rose-800">Tidak Mantap <span class="font-normal text-rose-600">(R. Ringan + R. Berat)</span></span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
+                            <span data-dashboard-export-center-text class="text-xs font-bold text-rose-700"><?= format_number($pctTidakMantap ?? 0.0, 1) ?>%</span>
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold text-rose-700"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-rose-600">km</span></h3>
+                    <h3 data-dashboard-export-stability-value class="text-2xl font-bold text-rose-700"><?= format_number($tidakMantapKm ?? 0.0, 2) ?> <span class="text-xs font-semibold text-rose-600">km</span></h3>
                     <div class="mt-2.5 w-full rounded-full h-2" style="background-color: rgba(239, 68, 68, 0.2);">
                         <div class="h-2 rounded-full" style="width: <?= number_format($pctTidakMantap ?? 0.0, 4, '.', '') ?>%; background-color: #ef4444;"></div>
                     </div>
@@ -187,13 +187,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #cbd5e1; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-white">Rigid</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-white">Rigid</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                             <?= format_number($pctRigid ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold text-white"><?= format_number($rigidKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-slate-200">km</span></h3>
+                    <h3 data-dashboard-export-pavement-value class="text-xl font-bold text-white"><?= format_number($rigidKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-slate-200">km</span></h3>
                     <p class="text-[11px] font-medium text-slate-200 mt-0.5">Rigid / Beton</p>
                 </div>
 
@@ -202,13 +202,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #38bdf8; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-white">Aspal</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-white">Aspal</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
                             <?= format_number($pctAspal ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold text-white"><?= format_number($aspalKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-slate-300">km</span></h3>
+                    <h3 data-dashboard-export-pavement-value class="text-xl font-bold text-white"><?= format_number($aspalKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-slate-300">km</span></h3>
                     <p class="text-[11px] font-medium text-slate-300 mt-0.5">Flexible / Aspal</p>
                 </div>
 
@@ -217,13 +217,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #fde047; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-white">Agregat/Tanah</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-white">Agregat/Tanah</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                             <?= format_number($pctAgregatTanah ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold text-white"><?= format_number($agregatTanahKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-amber-100">km</span></h3>
+                    <h3 data-dashboard-export-pavement-value class="text-xl font-bold text-white"><?= format_number($agregatTanahKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-amber-100">km</span></h3>
                     <p class="text-[11px] font-medium text-amber-100 mt-0.5">Kerikil / Tanah</p>
                 </div>
 
@@ -232,13 +232,13 @@
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex items-center gap-1.5">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: #f0abfc; display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;"></span>
-                            <span class="text-xs font-semibold text-white">Belum Tembus</span>
+                            <span data-dashboard-export-dot-label class="text-xs font-semibold text-white">Belum Tembus</span>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
+                        <span data-dashboard-export-percent-badge class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold" style="background-color: rgba(0, 0, 0, 0.25); color: #ffffff;">
                             <?= format_number($pctBelumTembus ?? 0.0, 1) ?>%
                         </span>
                     </div>
-                    <h3 class="text-xl font-bold text-white"><?= format_number($belumTembusKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-purple-100">km</span></h3>
+                    <h3 data-dashboard-export-pavement-value class="text-xl font-bold text-white"><?= format_number($belumTembusKm ?? 0.0, 2) ?> <span class="text-xs font-normal text-purple-100">km</span></h3>
                     <p class="text-[11px] font-medium text-purple-100 mt-0.5">Belum Tembus</p>
                 </div>
             </div>
@@ -278,7 +278,7 @@
                     ?>
                     <?php foreach ($legendItems as $li): ?>
                         <?php if ($li['val'] > 0): ?>
-                        <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                        <div data-dashboard-export-legend-item class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
                             <span class="w-2.5 h-2.5 rounded-full" style="background-color: <?= $li['color'] ?>; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
                             <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;"><?= $li['label'] ?></span>
                             <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($li['pct'], 1) ?>%</span>
@@ -296,12 +296,12 @@
                 </div>
                 <!-- Legend -->
                 <div class="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mt-5">
-                    <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                    <div data-dashboard-export-legend-item class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
                         <span class="w-2.5 h-2.5 rounded-full" style="background-color: #10b981; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
                         <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Mantap</span>
                         <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctMantap, 1) ?>%</span>
                     </div>
-                    <div class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
+                    <div data-dashboard-export-legend-item class="flex items-center gap-1.5" style="display: flex; align-items: center; gap: 6px; line-height: 16px;">
                         <span class="w-2.5 h-2.5 rounded-full" style="background-color: #ef4444; display: inline-block; width: 10px; height: 10px; min-width: 10px; min-height: 10px; border-radius: 50%; flex-shrink: 0; vertical-align: middle; align-self: center;"></span>
                         <span class="text-[11px] font-medium text-gray-600" style="display: inline-block; vertical-align: middle;">Tidak Mantap</span>
                         <span class="text-[10px] text-gray-400" style="display: inline-block; vertical-align: middle;"><?= number_format($pctTidakMantap, 1) ?>%</span>
@@ -371,10 +371,10 @@
                     <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
                         <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
                               :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
-                        <button type="button" @click="chartMode = 'km'; window.chartKab && window.chartKab.setMode('km')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'km'; window.chartKab && window.chartKab.setMode('km')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
-                        <button type="button" @click="chartMode = 'pct'; window.chartKab && window.chartKab.setMode('pct')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'pct'; window.chartKab && window.chartKab.setMode('pct')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
                     </div>
@@ -382,8 +382,8 @@
             </div>
             <div class="p-3.5 flex-1 flex flex-col overflow-y-auto min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
                 <div class="relative w-full" style="height: <?= max(320, count($kabupatenChartData) * 24) ?>px;">
                     <canvas id="kabupatenBarChart"></canvas>
@@ -418,10 +418,10 @@
                     <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
                         <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
                               :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
-                        <button type="button" @click="chartMode = 'km'; window.chartKoridor && window.chartKoridor.setMode('km')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'km'; window.chartKoridor && window.chartKoridor.setMode('km')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
-                        <button type="button" @click="chartMode = 'pct'; window.chartKoridor && window.chartKoridor.setMode('pct')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'pct'; window.chartKoridor && window.chartKoridor.setMode('pct')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
                     </div>
@@ -429,8 +429,8 @@
             </div>
             <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
                 <div class="relative w-full h-[320px]">
                     <canvas id="koridorBarChart"></canvas>
@@ -465,10 +465,10 @@
                     <div class="relative flex items-center bg-gray-100 rounded-lg p-0.5" style="width: 72px;">
                         <span class="absolute top-0.5 bottom-0.5 w-[34px] rounded-md bg-white shadow-sm transition-all duration-200 ease-in-out"
                               :style="chartMode === 'km' ? 'left: 2px;' : 'left: 36px;'"></span>
-                        <button type="button" @click="chartMode = 'km'; window.chartUptd && window.chartUptd.setMode('km')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'km'; window.chartUptd && window.chartUptd.setMode('km')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'km' ? 'text-gray-900' : 'text-gray-400'">km</button>
-                        <button type="button" @click="chartMode = 'pct'; window.chartUptd && window.chartUptd.setMode('pct')"
+                        <button data-dashboard-export-center-text type="button" @click="chartMode = 'pct'; window.chartUptd && window.chartUptd.setMode('pct')"
                                 class="relative z-10 flex-1 py-1 text-[11px] font-semibold rounded-md transition-colors duration-200"
                                 :class="chartMode === 'pct' ? 'text-gray-900' : 'text-gray-400'">%</button>
                     </div>
@@ -476,8 +476,8 @@
             </div>
             <div class="p-3.5 flex-1 flex flex-col justify-between min-h-[380px] max-h-[420px]">
                 <div class="flex items-center gap-4 mb-2 text-[11px]">
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
-                    <div class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #10b981;"></span><span class="font-medium text-gray-600">Mantap</span></div>
+                    <div data-dashboard-export-bar-legend-item class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm" style="background-color: #ef4444;"></span><span class="font-medium text-gray-600">Tidak Mantap</span></div>
                 </div>
                 <div class="relative w-full h-[320px]">
                     <canvas id="uptdBarChart"></canvas>
@@ -679,7 +679,9 @@
     </script>
     <?php endif; ?>
 
-    <div x-data="dashboardRuasTable(<?= htmlspecialchars(json_encode($ruasJsonData), ENT_QUOTES, 'UTF-8') ?>)" class="space-y-6">
+    <div data-dashboard-export-ignore
+         x-data="dashboardRuasTable(<?= htmlspecialchars(json_encode($ruasJsonData), ENT_QUOTES, 'UTF-8') ?>)"
+         class="space-y-6">
 
         
         <!-- Filters & Search Panel -->
@@ -1325,220 +1327,5 @@
     });
     </script>
 
-    <!-- html2canvas & jsPDF CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-    <script>
-    function convertCanvasesToImages(container) {
-        const canvases = Array.from(container.querySelectorAll('canvas'));
-        const replacements = [];
-
-        canvases.forEach(canvas => {
-            const dataUrl = canvas.toDataURL('image/png');
-            const img = document.createElement('img');
-            img.src = dataUrl;
-            img.width  = canvas.offsetWidth;
-            img.height = canvas.offsetHeight;
-            img.style.cssText = `
-                display: block;
-                width: ${canvas.offsetWidth}px;
-                height: ${canvas.offsetHeight}px;
-            `;
-            canvas.parentNode.insertBefore(img, canvas);
-            canvas.style.display = 'none';
-            replacements.push({ canvas, img });
-        });
-
-        return function restore() {
-            replacements.forEach(({ canvas, img }) => {
-                canvas.style.display = '';
-                img.remove();
-            });
-        };
-    }
-
-    function exportDocument(type) {
-        if (typeof Swal !== 'undefined') {
-            Swal.fire({
-                title: 'Mempersiapkan dokumen...',
-                text: 'Mohon tunggu sebentar.',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
-        }
-
-        const element = document.getElementById('capture-area');
-        const restoreCanvases = convertCanvasesToImages(element);
-
-        setTimeout(() => {
-            const fileName = 'Dashboard_' + new Date().toISOString().slice(0, 10);
-
-            html2canvas(element, {
-                scale: 2, // Menggunakan scale 2 untuk dashboard agar performa terjaga
-                useCORS: true,
-                allowTaint: false,
-                backgroundColor: '#f9fafb',
-                logging: false,
-                width: element.scrollWidth,
-                height: element.scrollHeight,
-                windowWidth: document.documentElement.scrollWidth,
-                windowHeight: document.documentElement.scrollHeight,
-                scrollX: -window.scrollX,
-                scrollY: -window.scrollY,
-                imageTimeout: 15000,
-                onclone: (clonedDoc) => {
-                    const clonedEl = clonedDoc.getElementById('capture-area');
-                    if (!clonedEl) return;
-
-                    clonedEl.querySelectorAll('.no-export, template, script').forEach(el => {
-                        el.remove();
-                    });
-
-                    clonedEl.style.borderRadius = '0';
-                    clonedEl.style.overflow    = 'visible';
-
-                    clonedEl.querySelectorAll('.flex').forEach(el => {
-                        el.style.display = 'flex';
-                    });
-                    clonedEl.querySelectorAll('.flex-col').forEach(el => {
-                        el.style.flexDirection = 'column';
-                    });
-                    clonedEl.querySelectorAll('.flex-wrap').forEach(el => {
-                        el.style.flexWrap = 'wrap';
-                    });
-                    clonedEl.querySelectorAll('.items-center').forEach(el => {
-                        el.style.alignItems = 'center';
-                    });
-                    clonedEl.querySelectorAll('.items-start').forEach(el => {
-                        el.style.alignItems = 'flex-start';
-                    });
-                    clonedEl.querySelectorAll('.justify-between').forEach(el => {
-                        el.style.justifyContent = 'space-between';
-                    });
-                    clonedEl.querySelectorAll('.justify-center').forEach(el => {
-                        el.style.justifyContent = 'center';
-                    });
-
-                    clonedEl.querySelectorAll('[class]').forEach(el => {
-                        const cls = typeof el.className === 'string' ? el.className : (el.getAttribute('class') || '');
-                        const gapMatch = cls.match(/\bgap-(\d+(?:\.\d+)?)\b/);
-                        if (gapMatch) {
-                            const val = parseFloat(gapMatch[1]) * 4;
-                            el.style.gap = val + 'px';
-                        }
-                        const gapXMatch = cls.match(/\bgap-x-(\d+(?:\.\d+)?)\b/);
-                        if (gapXMatch) {
-                            const val = parseFloat(gapXMatch[1]) * 4;
-                            el.style.columnGap = val + 'px';
-                        }
-                        const gapYMatch = cls.match(/\bgap-y-(\d+(?:\.\d+)?)\b/);
-                        if (gapYMatch) {
-                            const val = parseFloat(gapYMatch[1]) * 4;
-                            el.style.rowGap = val + 'px';
-                        }
-                    });
-
-                    clonedEl.querySelectorAll('span.rounded-full').forEach(dot => {
-                        dot.style.display    = 'inline-block';
-                        dot.style.flexShrink = '0';
-                        dot.style.alignSelf  = 'center';
-                        dot.style.borderRadius = '50%';
-
-                        const cls = dot.className || '';
-                        if (cls.includes('w-2.5') || cls.includes('h-2.5')) {
-                            dot.style.width     = '10px';
-                            dot.style.height    = '10px';
-                            dot.style.minWidth  = '10px';
-                            dot.style.minHeight = '10px';
-                        } else if (cls.includes('w-3') || cls.includes('h-3')) {
-                            dot.style.width     = '12px';
-                            dot.style.height    = '12px';
-                            dot.style.minWidth  = '12px';
-                            dot.style.minHeight = '12px';
-                        }
-
-                        dot.style.position = 'relative';
-                        dot.style.top      = '6px';
-                    });
-                }
-            }).then(canvas => {
-                restoreCanvases();
-
-                const mimeType = type === 'jpeg' ? 'image/jpeg' : 'image/png';
-                const quality  = type === 'jpeg' ? 0.95 : 1.0;
-                const imgData  = canvas.toDataURL(mimeType, quality);
-
-                if (type === 'pdf') {
-                    const { jsPDF } = window.jspdf;
-                    const PX_PER_MM = 3.7795275591;
-                    const pdfW_mm   = canvas.width  / (2 * PX_PER_MM);
-                    const pdfH_mm   = canvas.height / (2 * PX_PER_MM);
-                    const orientation = pdfW_mm > pdfH_mm ? 'l' : 'p';
-
-                    const pdf = new jsPDF({
-                        orientation: orientation,
-                        unit: 'mm',
-                        format: [pdfW_mm, pdfH_mm]
-                    });
-
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfW_mm, pdfH_mm, '', 'FAST');
-                    pdf.save(fileName + '.pdf');
-
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Export Berhasil!',
-                            text: 'Dokumen PDF telah diunduh.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                } else {
-                    const link = document.createElement('a');
-                    link.href = imgData;
-                    link.download = fileName + '.' + (type === 'jpeg' ? 'jpg' : 'png');
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Export Berhasil!',
-                            text: 'Gambar telah diunduh.',
-                            timer: 2000,
-                            showConfirmButton: false
-                        });
-                    }
-                }
-            }).catch(err => {
-                restoreCanvases();
-                console.error('html2canvas error:', err);
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Export Gagal',
-                        text: 'Terjadi kesalahan saat memproses ekspor. Silakan coba lagi. Error: ' + (err.message || err)
-                    });
-                }
-            });
-        }, 300);
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const exportParam = urlParams.get('export');
-        if (exportParam && ['pdf', 'jpeg', 'png'].includes(exportParam)) {
-            const cleanUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, cleanUrl);
-            setTimeout(function() {
-                exportDocument(exportParam);
-            }, 400);
-        }
-    });
-    </script>
-
+    <?php view('export.dashboard'); ?>
 </div>

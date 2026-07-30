@@ -273,7 +273,7 @@ class StripmapController
             'perkerasans'       => $this->perkerasanService->getByRuasId($ruasId),
             'summaryPerkerasan' => $this->perkerasanService->getSummary($ruasId),
         ];
-        view('layouts.app', array_merge($data, ['content' => 'stripmap.preview']));
+        view('layouts.app', array_merge($data, ['content' => 'export.ruas_jalan']));
     }
 
     // ──────────────────────────────────────────────

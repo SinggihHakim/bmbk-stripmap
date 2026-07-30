@@ -1,6 +1,6 @@
 <!-- ============================================================ -->
 <!-- Komponen Strip Map Visual & Perkerasan (Reusable Partial)    -->
-<!-- Digunakan di: stripmap/index, stripmap/preview, ruas/show    -->
+<!-- Digunakan di: stripmap/index, export/ruas_jalan, ruas/show -->
 <!-- ============================================================ -->
 
 <?php
