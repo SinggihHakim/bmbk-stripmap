@@ -42,9 +42,10 @@ $curMeta = $kondisiMeta[$selectedKondisi] ?? $kondisiMeta['rusak_ringan'];
                 <span class="text-xs font-semibold text-blue-600">Detail Kondisi Ruas</span>
             </div>
             <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-3">
-                <span><?= $curMeta['title'] ?></span>
-                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold <?= $curMeta['badge_bg'] ?> <?= $curMeta['badge_text'] ?> border border-current/20">
-                    <?= $curMeta['label'] ?>
+                <span x-text="'Detail Kondisi ' + getKondisiLabel()"></span>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border border-current/20"
+                      :style="{ backgroundColor: getKondisiAccent() + '20', color: getKondisiAccent() }"
+                      x-text="getKondisiLabel()">
                 </span>
             </h1>
             <p class="mt-1 text-sm text-gray-500">Daftar ruas jalan yang dikelompokkan berdasarkan kondisi, diurutkan dari yang terpanjang hingga terpendek.</p>
@@ -395,7 +396,7 @@ $curMeta = $kondisiMeta[$selectedKondisi] ?? $kondisiMeta['rusak_ringan'];
 
                     <!-- Next Button -->
                     <button type="button" 
-                            @click="currentPage < totalPages() ? currentPage-- : null"
+                            @click="currentPage < totalPages() ? currentPage++ : null"
                             :disabled="currentPage === totalPages()"
                             :class="currentPage === totalPages() ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 hover:text-gray-900'"
                             class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 text-gray-500 bg-white transition-colors text-sm font-semibold">
