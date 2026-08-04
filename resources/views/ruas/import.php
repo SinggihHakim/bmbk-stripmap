@@ -20,48 +20,31 @@
 
     <!-- Upload Card -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden p-8"
-         x-data="{ 
-            isDragging: false, 
+         x-data="{
+            isDragging: false,
             selectedFile: null,
             isProcessing: false,
             progress: 0,
-            async handleSubmit(e) {
+            progressInterval: null,
+            handleSubmit(e) {
+                if (!this.selectedFile) return;
                 this.isProcessing = true;
                 this.progress = 0;
-                
-                const interval = setInterval(() => {
+
+                // Simulate progress while server processes the file
+                this.progressInterval = setInterval(() => {
                     if (this.progress < 30) {
                         this.progress += Math.floor(Math.random() * 8) + 4;
                     } else if (this.progress < 70) {
                         this.progress += Math.floor(Math.random() * 4) + 2;
-                    } else if (this.progress < 92) {
+                    } else if (this.progress < 90) {
                         this.progress += Math.floor(Math.random() * 2) + 1;
                     }
+                    if (this.progress > 90) this.progress = 90;
                 }, 200);
-                
-                const formData = new FormData(e.target);
-                try {
-                    const response = await fetch(e.target.action, {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    clearInterval(interval);
-                    
-                    if (response.ok) {
-                        this.progress = 100;
-                        setTimeout(() => {
-                            window.location.href = response.url;
-                        }, 800);
-                    } else {
-                        alert('Terjadi kesalahan pada server saat memproses data.');
-                        this.isProcessing = false;
-                    }
-                } catch (error) {
-                    clearInterval(interval);
-                    alert('Gagal mengirim data. Silakan periksa koneksi internet Anda.');
-                    this.isProcessing = false;
-                }
+
+                // Let the browser handle the form naturally (most reliable)
+                e.target.submit();
             },
             handleFileSelect(e) {
                 const files = e.target.files || e.dataTransfer.files;
@@ -70,7 +53,7 @@
                 }
             }
          }">
-        
+
         <form action="<?= base_url('ruas/import') ?>" method="POST" enctype="multipart/form-data" class="space-y-6" @submit.prevent="handleSubmit($event)">
 
             <!-- Drag & Drop Zone -->
