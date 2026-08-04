@@ -502,6 +502,7 @@
         let activeTidakPct  = activeRaw.map(d => d.pct_tidak_mantap);
 
         let currentMode = 'pct';
+        let currentDir  = 'desc';
         const fmt = v => new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(v);
 
         const canvas = document.getElementById(canvasId);
@@ -641,24 +642,30 @@
             chart.update();
         }
 
+        function doSort(dir) {
+            currentDir = dir;
+            const sortKey = currentMode === 'km' ? 'mantap_km' : 'pct_mantap';
+            const sorted = [...rawData].sort((a, b) =>
+                dir === 'asc'
+                    ? a[sortKey] - b[sortKey]
+                    : b[sortKey] - a[sortKey]
+            );
+            activeRaw       = sorted;
+            activeLabels    = sorted.map(d => d.short_label || d.label);
+            activeMantapKm  = sorted.map(d => d.mantap_km);
+            activeTidakKm   = sorted.map(d => d.tidak_mantap_km);
+            activeMantapPct = sorted.map(d => d.pct_mantap);
+            activeTidakPct  = sorted.map(d => d.pct_tidak_mantap);
+            applyData();
+        }
+
         return {
             sort: function(dir) {
-                const sorted = [...rawData].sort((a, b) =>
-                    dir === 'asc'
-                        ? a.pct_mantap - b.pct_mantap
-                        : b.pct_mantap - a.pct_mantap
-                );
-                activeRaw       = sorted;
-                activeLabels    = sorted.map(d => d.short_label || d.label);
-                activeMantapKm  = sorted.map(d => d.mantap_km);
-                activeTidakKm   = sorted.map(d => d.tidak_mantap_km);
-                activeMantapPct = sorted.map(d => d.pct_mantap);
-                activeTidakPct  = sorted.map(d => d.pct_tidak_mantap);
-                applyData();
+                doSort(dir);
             },
             setMode: function(mode) {
                 currentMode = mode;
-                applyData();
+                doSort(currentDir); // auto re-sort sesuai mode baru
             }
         };
     }
